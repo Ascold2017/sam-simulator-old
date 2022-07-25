@@ -103,6 +103,7 @@ export default class Radar {
       2 * Math.PI,
     );
     this._canvasContext!.stroke();
+    
 
     // Draw radial lines and degrees
     for (let deg = 0; deg < 360; deg += 5) {
@@ -153,7 +154,8 @@ export default class Radar {
           centerOfCanvas.y - point.y,
           centerOfCanvas.x - point.x,
         );
-        this._canvasContext!.strokeStyle = "darkorange";
+        const k = (distanceToCenter / this._scale) / 150;
+        this._canvasContext!.strokeStyle = `rgba(184, 134, 11,${1 - k})`;
         this._canvasContext!.beginPath();
         this._canvasContext!.arc(
           centerOfCanvas.x,

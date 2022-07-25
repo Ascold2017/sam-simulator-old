@@ -28,13 +28,13 @@ export default {
       identifier: 'Test1',
       velocity: 3000,
       wayPoints: [{ x: 516, y: 524, z: 0 }, { x: 544, y: 586, z: 9 }, { x: 716, y: 796, z: 13 }, { x: 780, y: 831, z: 0 }],
-      visibilityCoefficient: 0.5
+      visibilityCoefficient: 0.3
     });
     const rocket2 = new Rocket({
       identifier: 'Test2',
-      velocity: 900,
+      velocity: 1200,
       wayPoints: [{ x: 768, y: 688, z: 0 }, { x: 722, y: 648, z: 21 }, { x: 506, y: 598, z: 35 }, { x: 468, y: 605, z: 0 }],
-      visibilityCoefficient: 0.5
+      visibilityCoefficient: 0.01
     })
     bip.addRocket(rocket1);
     bip.addRocket(rocket2);
