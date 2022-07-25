@@ -2,7 +2,7 @@ import type Rocket from "./Rocket";
 interface IRadar {
   scale: number;
   canvasRadar: any;
-  rayWidth?: number
+  rayWidth?: number;
 }
 export default class Radar {
   _rockets: Rocket[] = [];
@@ -12,8 +12,9 @@ export default class Radar {
   _wayPoints: Record<string, { x: number; y: number }[]> = {};
   _rayWidth = 0;
   _offsetOfBip = 175;
+  radarHeight = 0.05;
   constructor({
-    scale = 1,
+    scale = 2,
     canvasRadar,
     rayWidth = 2, // in degrees
   }: IRadar) {
@@ -53,12 +54,12 @@ export default class Radar {
 
     this._canvasContext!.beginPath();
     this._canvasContext!.arc(
-        centerOfCanvas.x,
-        centerOfCanvas.y,
-        2,
-        1,
-        0,
-      );
+      centerOfCanvas.x,
+      centerOfCanvas.y,
+      2,
+      1,
+      0,
+    );
     this._canvasContext!.stroke();
 
     // Draw 25 km circle killzone
@@ -103,7 +104,6 @@ export default class Radar {
       2 * Math.PI,
     );
     this._canvasContext!.stroke();
-    
 
     // Draw radial lines and degrees
     for (let deg = 0; deg < 360; deg += 5) {
@@ -128,6 +128,12 @@ export default class Radar {
     }
   }
 
+  _getVisibleDistance(rocket: Rocket) {
+    const height = rocket.currentPoint.z;
+    return Math.sqrt(2 * 6371.009 * this.radarHeight) +
+      Math.sqrt(2 * 6371.009 * height);
+  }
+
   _redrawWayPoints(rocket: Rocket) {
     const centerOfCanvas = {
       x: this._canvasContext!.canvas.width / 2,
@@ -149,7 +155,8 @@ export default class Radar {
         point.x - centerOfCanvas.x,
         point.y - centerOfCanvas.y,
       );
-      if (distanceToCenter / this._scale < 150) {
+      const distance = distanceToCenter / this._scale;
+      if (distance < 150 && this._getVisibleDistance(rocket) > distance) {
         let angleToCenterRad = Math.atan2(
           centerOfCanvas.y - point.y,
           centerOfCanvas.x - point.x,

@@ -6,13 +6,25 @@
       <div class="tab" :class="{ active: activeTab === 'snr' }" @click="activeTab = 'snr'">СНР</div>
       <div class="tab" :class="{ active: activeTab === 'editor' }" @click="activeTab = 'editor'">Редактор</div>
     </div>
-    <canvas v-show="activeTab === 'bip'" ref="bip" width="1000" height="1000"
-      style="background-image: url(/snazzy-image.png); background-size: contain;"></canvas>
-    <canvas v-show="activeTab === 'soc'" ref="radar" width=650 height=650></canvas>
-    <div class="editor">
-      <canvas v-show="activeTab === 'editor'" ref="editor" width="1000" height="1000"
+
+    <div v-show="activeTab === 'bip'">
+      <canvas ref="bip" width="1000" height="1000"
+        style="background-image: url(/snazzy-image.png); background-size: contain;"></canvas>
+    </div>
+    <div v-show="activeTab === 'soc'">
+      <canvas v-show="activeTab === 'soc'" ref="radar" width=650 height=650></canvas>
+    </div>
+    <div v-show="activeTab === 'snr'">
+      <div>
+        <label>150 km <input type="radio" value="2" v-model.number="scale" /></label>
+        <label>100 km <input type="radio" value="3" v-model.number="scale" /></label>
+        <label>50 km <input type="radio" value="4" v-model.number="scale" /></label>
+      </div>
+    </div>
+    <div class="editor" v-show="activeTab === 'editor'">
+      <canvas ref="editor" width="1000" height="1000"
         style="background-image: url(/snazzy-image.png); background-size: contain;" @click="exportCoordinates"></canvas>
-      <div class="editor-form" v-show="activeTab === 'editor'">
+      <div class="editor-form">
         <label><input type="number" placeholder="Высота полета на марше, km" v-model="altitude" /><span>Высота полета на
             марше, km</span></label>
         <label><input type="number" placeholder="Скорость полета, м/с" v-model="velocity" /><span>Скорость полета,
@@ -48,6 +60,7 @@ interface IData {
   radar: Radar | null;
   bip: Bip | null;
   visibilityCoefficient: number;
+  scale: number;
 }
 export default defineComponent({
   $refs: {
@@ -64,13 +77,14 @@ export default defineComponent({
       radar: null,
       visibilityCoefficient: 0.5,
       bip: null,
+      scale: 2
     }
   },
   mounted() {
     this.radar = new Radar({
       // ts-lint-disable-next-line
       canvasRadar: this.$refs.radar,
-      scale: 2,
+      scale: this.scale,
       rayWidth: 8
     });
 
@@ -116,7 +130,7 @@ export default defineComponent({
       this.radar?.addRocket(rocket);
       rocket.launch();
       this.resetPoints();
-    }
+    },
   }
 })
 </script>
