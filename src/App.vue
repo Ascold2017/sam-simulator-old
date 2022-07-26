@@ -11,8 +11,8 @@
       <v-card v-show="activeScreen === 'BIP'" theme="dark" :transition="false">
         <v-row>
           <v-col>
-            <canvas ref="bip" width="1000" height="1000"
-              style="background-image: url(/snazzy-image.png); background-size: contain; width: 100%; height: auto; display: block;"></canvas>
+            <canvas ref="bip" width="1000" height="1000" class="responsive-canvas"
+              style="background-image: url(/snazzy-image.png); background-size: contain;"></canvas>
           </v-col>
           <v-divider vertical />
           <v-col>
@@ -28,7 +28,7 @@
       <v-card v-show="activeScreen === 'SOC'">
         <v-row>
           <v-col>
-            <canvas ref="radar" width=650 height=650 style=" width: 100%; height: auto; display: block;"></canvas>
+            <canvas ref="radar" width=650 height=650 class="responsive-canvas"></canvas>
           </v-col>
           <v-divider vertical />
           <v-col>
@@ -203,3 +203,11 @@ export default defineComponent({
   }
 })
 </script>
+
+<style>
+.responsive-canvas {
+  display: block;
+  max-width: 100%;
+  height: calc(100vh - 48px);
+}
+</style>
