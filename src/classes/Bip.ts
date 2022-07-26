@@ -1,22 +1,28 @@
-import type Rocket from "./Rocket";
-
+import type FlightObject from "./FlightObject";
+interface IBip {
+  canvasBip: HTMLCanvasElement;
+}
 export default class Bip {
-  _rockets: Rocket[] = [];
+  _flightObjects: FlightObject[] = [];
   _scale = 2;
   _canvasContext: CanvasRenderingContext2D | null = null;
-  _canvasWidth = 0;
+  _canvasCenter = { x: 0, y: 0 };
   _wayPoints: Record<string, { x: number; y: number }[]> = {};
-  constructor({ canvasBip }: { canvasBip: any }) {
+  _messages: string[] = [];
+  constructor({ canvasBip }: IBip) {
     this._canvasContext = canvasBip.getContext("2d");
-    this._canvasWidth = canvasBip.width;
+    this._canvasCenter = {
+      x: this._canvasContext!.canvas.width / 2,
+      y: this._canvasContext!.canvas.height / 2,
+    };
     this._draw();
   }
 
   _draw() {
     this._drawSite();
-    this._rockets.map((rocket) => this._drawRocketWay(rocket));
+    this._flightObjects.map((flightObject) => this._drawFlightObjectWay(flightObject));
     setInterval(() => {
-      this._rockets.map((rocket) => this._drawRocketWay(rocket));
+      this._flightObjects.map((flightObject) => this._drawFlightObjectWay(flightObject));
     }, 5000);
   }
 
@@ -96,85 +102,88 @@ export default class Bip {
     }
   }
 
-  _drawRocketWay(rocket: Rocket) {
-    if (!rocket.isLaunched) return;
+  _getCanvasCoordinates(point: any) {
+    return {
+      x: point.x * this._scale + this._canvasCenter.x,
+      y: point.y * this._scale + this._canvasCenter.y
+    }
+  }
 
-    const wayPoints = this._wayPoints[rocket.identifier!];
+  _drawFlightObjectWay(flightObject: FlightObject) {
+    if (!flightObject.isLaunched) return;
+
+    const wayPoints = this._wayPoints[flightObject.identifier!];
     const prevPoint = wayPoints.length >= 1
       ? wayPoints[wayPoints.length - 1]
-      : rocket.currentPoint;
-    const heightText = rocket.currentPoint.z < 10
-      ? `0${Number(rocket.currentPoint.z * 10).toFixed(0)}`
-      : Number(rocket.currentPoint.z * 10).toFixed(0);
+      : flightObject.currentPoint;
+    const heightText = flightObject.currentPoint.z < 10
+      ? `0${Number(flightObject.currentPoint.z * 10).toFixed(0)}`
+      : Number(flightObject.currentPoint.z * 10).toFixed(0);
 
     if (
-      rocket.isDestroyed && prevPoint.x === rocket.currentPoint.x &&
-      prevPoint.y === rocket.currentPoint.y
+      flightObject.isDestroyed && prevPoint.x === flightObject.currentPoint.x &&
+      prevPoint.y === flightObject.currentPoint.y
     ) {
       return;
     }
 
+    const prevCanvasPoint = this._getCanvasCoordinates(prevPoint);
+    const currentCanvasPoint = this._getCanvasCoordinates(flightObject.currentPoint);
     if (wayPoints.length === 0) {
       this._canvasContext!.fillStyle = "white";
       this._canvasContext!.strokeStyle = "white";
 
       this._canvasContext!.beginPath();
       this._canvasContext!.moveTo(
-        rocket.currentPoint.x,
-        rocket.currentPoint.y - 20,
+        currentCanvasPoint.x,
+        currentCanvasPoint.y - 20,
       );
       this._canvasContext!.lineTo(
-        rocket.currentPoint.x,
-        rocket.currentPoint.y + 20,
+        currentCanvasPoint.x,
+        currentCanvasPoint.y + 20,
       );
 
       this._canvasContext!.stroke();
-      this._canvasContext!.moveTo(rocket.currentPoint.x, rocket.currentPoint.y);
+      this._canvasContext!.moveTo(currentCanvasPoint.x, currentCanvasPoint.y);
       this._canvasContext!.lineTo(
-        rocket.currentPoint.x + 50,
-        rocket.currentPoint.y,
+        currentCanvasPoint.x + 50,
+        currentCanvasPoint.y,
       );
       this._canvasContext!.stroke();
       this._canvasContext!.font = "16px Arial";
       this._canvasContext!.fillText(
         "2401",
-        rocket.currentPoint.x - 40,
-        rocket.currentPoint.y,
+        currentCanvasPoint.x - 40,
+        currentCanvasPoint.y,
       );
       this._canvasContext!.font = "14px Arial";
 
       this._canvasContext!.fillText(
         String(heightText),
-        rocket.currentPoint.x + 10,
-        rocket.currentPoint.y - 10,
+        currentCanvasPoint.x + 10,
+        currentCanvasPoint.y - 10,
       );
       this._canvasContext!.fillText(
         "81",
-        rocket.currentPoint.x + 10,
-        rocket.currentPoint.y + 15,
+        currentCanvasPoint.x + 10,
+        currentCanvasPoint.y + 15,
       );
     } else {
       this._canvasContext!.beginPath();
-      this._canvasContext!.moveTo(prevPoint.x, prevPoint.y);
+      this._canvasContext!.moveTo(prevCanvasPoint.x, prevCanvasPoint.y);
       this._canvasContext!.lineJoin = "miter";
       this._canvasContext!.strokeStyle = "white";
       this._canvasContext!.fillStyle = "white";
       this._canvasContext!.font = "12px Arial";
-      this._canvasContext!.lineTo(rocket.currentPoint.x, rocket.currentPoint.y);
-
-      if (!rocket.isDestroyed) {
-        this._canvasContext!.fillText(
-          String(wayPoints.length + 1),
-          rocket.currentPoint.x,
-          rocket.currentPoint.y - 2,
-        );
-        this._canvasContext!.stroke();
-        const firstPoint = wayPoints[0];
+      this._canvasContext!.lineTo(currentCanvasPoint.x, currentCanvasPoint.y);
+      this._canvasContext!.stroke();
+      if (!flightObject.isDestroyed) {
+        const firstPoint = this._getCanvasCoordinates(wayPoints[0]);
         this._canvasContext!.beginPath();
         this._canvasContext!.clearRect(
           firstPoint.x + 10,
           firstPoint.y - 25,
-          50,
+          30,
           15,
         );
         this._canvasContext!.font = "14px Arial";
@@ -187,31 +196,39 @@ export default class Bip {
         this._canvasContext!.beginPath();
 
         this._canvasContext!.moveTo(
-          rocket.currentPoint.x - 10,
-          rocket.currentPoint.y - 10,
+          currentCanvasPoint.x - 10,
+          currentCanvasPoint.y - 10,
         );
         this._canvasContext!.lineTo(
-          rocket.currentPoint.x + 10,
-          rocket.currentPoint.y + 10,
+          currentCanvasPoint.x + 10,
+          currentCanvasPoint.y + 10,
         );
 
         this._canvasContext!.moveTo(
-          rocket.currentPoint.x + 10,
-          rocket.currentPoint.y - 10,
+          currentCanvasPoint.x + 10,
+          currentCanvasPoint.y - 10,
         );
         this._canvasContext!.lineTo(
-          rocket.currentPoint.x - 10,
-          rocket.currentPoint.y + 10,
+          currentCanvasPoint.x - 10,
+          currentCanvasPoint.y + 10,
         );
         this._canvasContext!.stroke();
       }
     }
 
-    this._wayPoints[rocket.identifier!].push(rocket.currentPoint);
+    this._wayPoints[flightObject.identifier!].push(flightObject.currentPoint);
   }
 
-  addRocket(rocket: Rocket) {
-    this._wayPoints[rocket.identifier!] = [];
-    this._rockets.push(rocket);
+  addFlightObject(flightObject: FlightObject) {
+    this._wayPoints[flightObject.identifier!] = [];
+    this._flightObjects.push(flightObject);
+  }
+
+  get messages() {
+    return this._messages;
+  }
+
+  listener(message: string) {
+    this._messages.push(message);
   }
 }

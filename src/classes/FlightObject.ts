@@ -1,4 +1,4 @@
-export default class Rocket {
+export default class FlightObject {
     identifier: string | null = null
     _wayPoints: { x: number, y: number, z: number }[] = []
     _velocity = 0;
@@ -20,16 +20,19 @@ export default class Rocket {
         console.log(`Flight range: ${flightRange} km. Flight time: ${Math.round(flightTime / 60)} min. Velocity: ${velocity} m/s`)
     }
 
-    launch() {
+    launch(listener: ((arg0: string) => void)) {
         this.isLaunched = true;
         this._launchTime = +new Date();
-        console.log(`Rocket launched at ${new Date(this._launchTime)}`)
+        
+        console.log(`Flight object launched at ${new Date(this._launchTime)}`)
+        listener(`Flight object launched at ${new Date(this._launchTime).toLocaleTimeString()}`)
         const interval = setInterval(() => {
             this._timeInAir = +new Date() - this._launchTime;
             const partOfFlyWay = this._timeInAir / this._flightTime;
             this.currentPoint = this._getCubicBezierXYZatT(this._wayPoints[0], this._wayPoints[1], this._wayPoints[2], this._wayPoints[3], partOfFlyWay);
             if (this._timeInAir >= this._flightTime) {
-                console.log('Rocket hit!')
+                console.log('Flight object hit!')
+                listener(`Flight object hit at ${new Date(this._launchTime).toLocaleTimeString()}!`)
                 this.isDestroyed = true;
                 clearInterval(interval)
             }

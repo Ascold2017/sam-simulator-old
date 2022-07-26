@@ -1,17 +1,17 @@
-import type Rocket from "./Rocket";
+import type FlightObject from "./FlightObject";
 interface IRadar {
-  scale: number;
+  scale?: number;
   canvasRadar: any;
   rayWidth?: number;
 }
 export default class Radar {
-  _rockets: Rocket[] = [];
+  _flightObjects: FlightObject[] = [];
   _scale = 1;
   _canvasContext: CanvasRenderingContext2D | null = null;
-  _canvasWidth = 0;
+  _canvasCenter = { x: 0, y: 0 };
   _wayPoints: Record<string, { x: number; y: number }[]> = {};
   _rayWidth = 0;
-  _offsetOfBip = 175;
+  _maxLocateDistance = 150;
   radarHeight = 0.05;
   constructor({
     scale = 2,
@@ -19,12 +19,23 @@ export default class Radar {
     rayWidth = 2, // in degrees
   }: IRadar) {
     this._canvasContext = canvasRadar.getContext("2d");
-    this._canvasWidth = canvasRadar.width;
+    this._canvasCenter = {
+      x: this._canvasContext!.canvas.width / 2,
+      y: this._canvasContext!.canvas.height / 2,
+    };
     this._scale = scale;
     this._rayWidth = rayWidth;
 
     this._draw();
     this._cleanupWaypoints();
+  }
+
+  get scale() {
+    return this._scale;
+  }
+
+  set scale(v: number) {
+    this._scale = v;
   }
 
   _cleanupWaypoints() {
@@ -40,9 +51,14 @@ export default class Radar {
 
   _draw() {
     requestAnimationFrame(this._draw.bind(this));
-    this._canvasContext!.clearRect(0, 0, this._canvasWidth, this._canvasWidth);
+    this._canvasContext!.clearRect(
+      0,
+      0,
+      this._canvasContext!.canvas.width,
+      this._canvasContext!.canvas.height,
+    );
     this._drawRadarSite();
-    this.locateRockets();
+    this.locateFlightObjects();
   }
 
   _drawRadarSite() {
@@ -50,19 +66,20 @@ export default class Radar {
       x: this._canvasContext!.canvas.width / 2,
       y: this._canvasContext!.canvas.height / 2,
     };
-    this._canvasContext!.strokeStyle = "red";
+    this._canvasContext!.fillStyle = "red";
 
     this._canvasContext!.beginPath();
     this._canvasContext!.arc(
       centerOfCanvas.x,
       centerOfCanvas.y,
       2,
-      1,
       0,
+      Math.PI*2,
     );
-    this._canvasContext!.stroke();
+    this._canvasContext!.fill();
 
     // Draw 25 km circle killzone
+    this._canvasContext!.strokeStyle = "red";
     this._canvasContext!.beginPath();
     this._canvasContext!.arc(
       centerOfCanvas.x,
@@ -84,34 +101,44 @@ export default class Radar {
       2 * Math.PI,
     );
     this._canvasContext!.stroke();
-    // Draw 100 km circle
-    this._canvasContext!.beginPath();
-    this._canvasContext!.arc(
-      centerOfCanvas.x,
-      centerOfCanvas.y,
-      100 * this._scale,
-      0,
-      2 * Math.PI,
-    );
-    this._canvasContext!.stroke();
-    // Draw 100 km circle
-    this._canvasContext!.beginPath();
-    this._canvasContext!.arc(
-      centerOfCanvas.x,
-      centerOfCanvas.y,
-      150 * this._scale,
-      0,
-      2 * Math.PI,
-    );
-    this._canvasContext!.stroke();
+    if (this._scale <= 3) {
+      // Draw 100 km circle
+      this._canvasContext!.beginPath();
+      this._canvasContext!.arc(
+        centerOfCanvas.x,
+        centerOfCanvas.y,
+        100 * this._scale,
+        0,
+        2 * Math.PI,
+      );
+      this._canvasContext!.stroke();
+    }
+    if (this._scale <= 2) {
+      // Draw 100 km circle
+      this._canvasContext!.beginPath();
+      this._canvasContext!.arc(
+        centerOfCanvas.x,
+        centerOfCanvas.y,
+        150 * this._scale,
+        0,
+        2 * Math.PI,
+      );
+      this._canvasContext!.stroke();
+    }
 
     // Draw radial lines and degrees
     for (let deg = 0; deg < 360; deg += 5) {
       const radians = deg * Math.PI / 180 - Math.PI / 2;
-      const innerX = centerOfCanvas.x + (50 * this._scale) * Math.cos(radians);
-      const innerY = centerOfCanvas.y + (50 * this._scale) * Math.sin(radians);
-      const outerX = centerOfCanvas.x + (150 * this._scale) * Math.cos(radians);
-      const outerY = centerOfCanvas.y + (150 * this._scale) * Math.sin(radians);
+      const map: Record<number, { start: number; end: number }> = {
+        2: { start: 50, end: 150 },
+        3: { start: 50, end: 100 },
+        6: { start: 5, end: 50 }
+      }
+      const linesDistances = map[this._scale];
+      const innerX = centerOfCanvas.x + (linesDistances.start * this._scale) * Math.cos(radians);
+      const innerY = centerOfCanvas.y + (linesDistances.start * this._scale) * Math.sin(radians);
+      const outerX = centerOfCanvas.x + (linesDistances.end * this._scale) * Math.cos(radians);
+      const outerY = centerOfCanvas.y + (linesDistances.end * this._scale) * Math.sin(radians);
 
       this._canvasContext!.beginPath();
       this._canvasContext!.moveTo(innerX, innerY);
@@ -128,46 +155,58 @@ export default class Radar {
     }
   }
 
-  _getVisibleDistance(rocket: Rocket) {
-    const height = rocket.currentPoint.z;
+  _getVisibleDistance(flightObject: FlightObject) {
+    const height = flightObject.currentPoint.z;
     return Math.sqrt(2 * 6371.009 * this.radarHeight) +
       Math.sqrt(2 * 6371.009 * height);
   }
 
-  _redrawWayPoints(rocket: Rocket) {
+  _getCanvasCoordinates(point: any) {
+    return {
+      x: point.x * this._scale + this._canvasCenter.x,
+      y: point.y * this._scale + this._canvasCenter.y,
+    };
+  }
+
+  _redrawWayPoints(flightObject: FlightObject) {
     const centerOfCanvas = {
       x: this._canvasContext!.canvas.width / 2,
       y: this._canvasContext!.canvas.height / 2,
     };
-    const wayPoints = this._wayPoints[rocket.identifier!];
+    const wayPoints = this._wayPoints[flightObject.identifier!];
     const currentPoint = {
-      x: rocket.currentPoint.x - this._offsetOfBip,
-      y: rocket.currentPoint.y - this._offsetOfBip,
+      x: flightObject.currentPoint.x,
+      y: flightObject.currentPoint.y,
     };
     const rayWidthRad = this._rayWidth * Math.PI / 180;
-    const spotWidth = rayWidthRad * rocket.visibilityCoefficient;
-    if (!wayPoints || rocket.isDestroyed || !rocket.isLaunched) return;
-    this._wayPoints[rocket.identifier!].push(currentPoint);
+    const spotWidth = rayWidthRad * flightObject.visibilityCoefficient;
+    if (!wayPoints || flightObject.isDestroyed || !flightObject.isLaunched) {
+      return;
+    }
+    this._wayPoints[flightObject.identifier!].push(currentPoint);
 
     const pointsToDraw = wayPoints.slice(-100);
     pointsToDraw.forEach((point) => {
+      const canvasPoint = this._getCanvasCoordinates(point);
       const distanceToCenter = Math.hypot(
-        point.x - centerOfCanvas.x,
-        point.y - centerOfCanvas.y,
-      );
-      const distance = distanceToCenter / this._scale;
-      if (distance < 150 && this._getVisibleDistance(rocket) > distance) {
+        canvasPoint.x - centerOfCanvas.x,
+        canvasPoint.y - centerOfCanvas.y,
+      ) / this._scale;
+      if (
+        distanceToCenter < this._maxLocateDistance &&
+        this._getVisibleDistance(flightObject) > distanceToCenter
+      ) {
         let angleToCenterRad = Math.atan2(
-          centerOfCanvas.y - point.y,
-          centerOfCanvas.x - point.x,
+          centerOfCanvas.y - canvasPoint.y,
+          centerOfCanvas.x - canvasPoint.x,
         );
-        const k = (distanceToCenter / this._scale) / 150;
+        const k = (distanceToCenter) / 150;
         this._canvasContext!.strokeStyle = `rgba(184, 134, 11,${1 - k})`;
         this._canvasContext!.beginPath();
         this._canvasContext!.arc(
           centerOfCanvas.x,
           centerOfCanvas.y,
-          distanceToCenter,
+          distanceToCenter * this._scale,
           angleToCenterRad - Math.PI - spotWidth / 2,
           angleToCenterRad - Math.PI + spotWidth / 2,
         );
@@ -176,12 +215,14 @@ export default class Radar {
     });
   }
 
-  addRocket(rocket: Rocket) {
-    this._wayPoints[rocket.identifier!] = [];
-    this._rockets.push(rocket);
+  addFlightObject(flightObject: FlightObject) {
+    this._wayPoints[flightObject.identifier!] = [];
+    this._flightObjects.push(flightObject);
   }
 
-  locateRockets() {
-    this._rockets.map((rocket) => this._redrawWayPoints(rocket));
+  locateFlightObjects() {
+    this._flightObjects.map((flightObject) =>
+      this._redrawWayPoints(flightObject)
+    );
   }
 }
