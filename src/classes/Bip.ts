@@ -20,9 +20,13 @@ export default class Bip {
 
   _draw() {
     this._drawSite();
-    this._flightObjects.map((flightObject) => this._drawFlightObjectWay(flightObject));
+    this._flightObjects.map((flightObject) =>
+      this._drawFlightObjectWay(flightObject)
+    );
     setInterval(() => {
-      this._flightObjects.map((flightObject) => this._drawFlightObjectWay(flightObject));
+      this._flightObjects.map((flightObject) =>
+        this._drawFlightObjectWay(flightObject)
+      );
     }, 5000);
   }
 
@@ -105,8 +109,8 @@ export default class Bip {
   _getCanvasCoordinates(point: any) {
     return {
       x: point.x * this._scale + this._canvasCenter.x,
-      y: point.y * this._scale + this._canvasCenter.y
-    }
+      y: point.y * this._scale + this._canvasCenter.y,
+    };
   }
 
   _drawFlightObjectWay(flightObject: FlightObject) {
@@ -116,9 +120,8 @@ export default class Bip {
     const prevPoint = wayPoints.length >= 1
       ? wayPoints[wayPoints.length - 1]
       : flightObject.currentPoint;
-    const heightText = flightObject.currentPoint.z < 10
-      ? `0${Number(flightObject.currentPoint.z * 10).toFixed(0)}`
-      : Number(flightObject.currentPoint.z * 10).toFixed(0);
+    const heightText = (new Array(3).join("0") +
+      Number(flightObject.currentPoint.z * 10).toFixed(0)).slice(-3);
 
     if (
       flightObject.isDestroyed && prevPoint.x === flightObject.currentPoint.x &&
@@ -128,11 +131,13 @@ export default class Bip {
     }
 
     const prevCanvasPoint = this._getCanvasCoordinates(prevPoint);
-    const currentCanvasPoint = this._getCanvasCoordinates(flightObject.currentPoint);
+    const currentCanvasPoint = this._getCanvasCoordinates(
+      flightObject.currentPoint,
+    );
     if (wayPoints.length === 0) {
       this._canvasContext!.fillStyle = "white";
-      this._canvasContext!.strokeStyle = "white";
-
+      this._canvasContext!.strokeStyle = "red";
+      // draw legend
       this._canvasContext!.beginPath();
       this._canvasContext!.moveTo(
         currentCanvasPoint.x,
@@ -169,14 +174,24 @@ export default class Bip {
         currentCanvasPoint.y + 15,
       );
     } else {
+      // draw way
       this._canvasContext!.beginPath();
       this._canvasContext!.moveTo(prevCanvasPoint.x, prevCanvasPoint.y);
       this._canvasContext!.lineJoin = "miter";
-      this._canvasContext!.strokeStyle = "white";
-      this._canvasContext!.fillStyle = "white";
+      this._canvasContext!.strokeStyle = "red";
+      this._canvasContext!.fillStyle = "red";
       this._canvasContext!.font = "12px Arial";
       this._canvasContext!.lineTo(currentCanvasPoint.x, currentCanvasPoint.y);
       this._canvasContext!.stroke();
+      this._canvasContext!.beginPath();
+      this._canvasContext?.arc(
+        currentCanvasPoint.x,
+        currentCanvasPoint.y,
+        1,
+        0,
+        Math.PI * 2,
+      );
+      this._canvasContext?.fill();
       if (!flightObject.isDestroyed) {
         const firstPoint = this._getCanvasCoordinates(wayPoints[0]);
         this._canvasContext!.beginPath();
@@ -186,6 +201,7 @@ export default class Bip {
           30,
           15,
         );
+        this._canvasContext!.fillStyle = "white";
         this._canvasContext!.font = "14px Arial";
         this._canvasContext!.fillText(
           String(heightText),
@@ -193,6 +209,7 @@ export default class Bip {
           firstPoint.y - 10,
         );
       } else {
+        this._canvasContext!.strokeStyle = 'white'
         this._canvasContext!.beginPath();
 
         this._canvasContext!.moveTo(
