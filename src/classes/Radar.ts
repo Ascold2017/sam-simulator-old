@@ -59,6 +59,7 @@ export default class Radar {
     );
     this._drawRadarSite();
     this.locateFlightObjects();
+    this.drawShow();
   }
 
   _drawRadarSite() {
@@ -74,7 +75,7 @@ export default class Radar {
       centerOfCanvas.y,
       2,
       0,
-      Math.PI*2,
+      Math.PI * 2,
     );
     this._canvasContext!.fill();
 
@@ -132,13 +133,17 @@ export default class Radar {
       const map: Record<number, { start: number; end: number }> = {
         2: { start: 50, end: 150 },
         3: { start: 50, end: 100 },
-        6: { start: 5, end: 50 }
-      }
+        6: { start: 5, end: 50 },
+      };
       const linesDistances = map[this._scale];
-      const innerX = centerOfCanvas.x + (linesDistances.start * this._scale) * Math.cos(radians);
-      const innerY = centerOfCanvas.y + (linesDistances.start * this._scale) * Math.sin(radians);
-      const outerX = centerOfCanvas.x + (linesDistances.end * this._scale) * Math.cos(radians);
-      const outerY = centerOfCanvas.y + (linesDistances.end * this._scale) * Math.sin(radians);
+      const innerX = centerOfCanvas.x +
+        (linesDistances.start * this._scale) * Math.cos(radians);
+      const innerY = centerOfCanvas.y +
+        (linesDistances.start * this._scale) * Math.sin(radians);
+      const outerX = centerOfCanvas.x +
+        (linesDistances.end * this._scale) * Math.cos(radians);
+      const outerY = centerOfCanvas.y +
+        (linesDistances.end * this._scale) * Math.sin(radians);
 
       this._canvasContext!.beginPath();
       this._canvasContext!.moveTo(innerX, innerY);
@@ -224,5 +229,26 @@ export default class Radar {
     this._flightObjects.map((flightObject) =>
       this._redrawWayPoints(flightObject)
     );
+  }
+
+  drawShow() {
+    for (let i = 0; i < 1000; i++) {
+      const distanceFromCenter = 150 * this._scale * Math.random();
+      const angle = Math.PI * 2 * Math.random();
+      const showWidth = 1 * Math.PI / 180;
+      this._canvasContext!.beginPath();
+      this._canvasContext!.arc(
+        this._canvasCenter.x,
+        this._canvasCenter.y,
+        distanceFromCenter,
+        angle,
+        angle + showWidth,
+      );
+      const k = (distanceFromCenter) / (150 * this._scale);
+      this._canvasContext!.strokeStyle = `rgba(184, 134, 11,${1 - k})`;
+      this._canvasContext!.lineWidth = 3;
+      this._canvasContext!.stroke();
+      this._canvasContext!.lineWidth = 1;
+    }
   }
 }
