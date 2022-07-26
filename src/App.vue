@@ -12,7 +12,7 @@
         <v-row>
           <v-col>
             <canvas ref="bip" width="1000" height="1000"
-              style="background-image: url(/snazzy-image.png); background-size: contain;"></canvas>
+              style="background-image: url(/snazzy-image.png); background-size: contain; width: 100%; height: auto; display: block;"></canvas>
           </v-col>
           <v-divider vertical />
           <v-col>
@@ -28,7 +28,7 @@
       <v-card v-show="activeScreen === 'SOC'">
         <v-row>
           <v-col>
-            <canvas ref="radar" width=650 height=650></canvas>
+            <canvas ref="radar" width=650 height=650 style=" width: 100%; height: auto; display: block;"></canvas>
           </v-col>
           <v-divider vertical />
           <v-col>
@@ -44,12 +44,14 @@
       </v-card>
       <v-card v-show="activeScreen === 'Editor'">
         <v-row>
-          <v-col>
-            <canvas ref="editor" width="1000" height="1000"
-              style="background-image: url(/snazzy-image.png); background-size: contain;"
-              @click="exportCoordinates"></canvas>
+          <v-col cols="6">
+            <div style="overflow: auto; height: 768px;">
+              <canvas ref="editor" width="1000" height="1000"
+                style="background-image: url(/snazzy-image.png); background-size: contain;"
+                @click="exportCoordinates"></canvas>
+            </div>
           </v-col>
-          <v-col>
+          <v-col cols="6">
             <v-card>
               <v-card-text>
                 <h3 class="mb-3">Нанесите 4 точки полета и задайте параметры ракеты</h3>
