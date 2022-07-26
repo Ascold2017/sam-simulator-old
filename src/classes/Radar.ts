@@ -242,8 +242,8 @@ export default class Radar {
   }
 
   _drawShow() {
-    for (let i = 0; i < 1000; i++) {
-      const distanceFromCenter = 150 * this._scale * Math.random();
+    for (let i = 0; i < 500; i++) {
+      const distanceFromCenter = (150) * this._scale * Math.random();
       const angle = Math.PI * 2 * Math.random();
       const showWidth = 1 * Math.PI / 180;
       this._canvasContext!.beginPath();
