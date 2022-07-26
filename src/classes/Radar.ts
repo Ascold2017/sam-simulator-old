@@ -13,6 +13,7 @@ export default class Radar {
   _rayWidth = 0;
   _maxLocateDistance = 150;
   radarHeight = 0.05;
+  _targetRayAngle = 0;
   constructor({
     scale = 2,
     canvasRadar,
@@ -38,6 +39,14 @@ export default class Radar {
     this._scale = v;
   }
 
+  get targetRayAngle() {
+    return this._targetRayAngle * (180 / Math.PI);
+  }
+
+  set targetRayAngle(v: number) {
+    this._targetRayAngle = v * Math.PI/180;
+  }
+
   _cleanupWaypoints() {
     setInterval(() => {
       Object.keys(this._wayPoints).map((key) => {
@@ -58,8 +67,9 @@ export default class Radar {
       this._canvasContext!.canvas.height,
     );
     this._drawRadarSite();
-    this.locateFlightObjects();
-    this.drawShow();
+    this._locateFlightObjects();
+    this._drawShow();
+    this._drawTargetRay();
   }
 
   _drawRadarSite() {
@@ -225,13 +235,13 @@ export default class Radar {
     this._flightObjects.push(flightObject);
   }
 
-  locateFlightObjects() {
+  _locateFlightObjects() {
     this._flightObjects.map((flightObject) =>
       this._redrawWayPoints(flightObject)
     );
   }
 
-  drawShow() {
+  _drawShow() {
     for (let i = 0; i < 1000; i++) {
       const distanceFromCenter = 150 * this._scale * Math.random();
       const angle = Math.PI * 2 * Math.random();
@@ -250,5 +260,28 @@ export default class Radar {
       this._canvasContext!.stroke();
       this._canvasContext!.lineWidth = 1;
     }
+  }
+
+  _drawTargetRay() {
+    const angleWidth = 4 * (Math.PI / 180);
+    this._canvasContext!.strokeStyle = 'rgba(255,0,0,0.1)'
+    this._canvasContext!.fillStyle = 'rgba(255,0,0,0.1)'
+    this._canvasContext!.beginPath();
+    this._canvasContext!.arc(
+      this._canvasCenter.x,
+      this._canvasCenter.y,
+      150 * this._scale,
+      this._targetRayAngle - Math.PI / 2 - angleWidth / 2,
+      this._targetRayAngle - Math.PI / 2 + angleWidth / 2,
+    );
+    this._canvasContext!.arc(
+      this._canvasCenter.x,
+      this._canvasCenter.y,
+      0,
+      this._targetRayAngle - Math.PI / 2 - angleWidth / 2,
+      this._targetRayAngle - Math.PI / 2 + angleWidth / 2,
+    );
+    this._canvasContext!.stroke();
+    this._canvasContext!.fill();
   }
 }

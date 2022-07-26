@@ -26,19 +26,19 @@
 
       </v-card>
       <v-card v-show="activeScreen === 'SOC'">
-        <v-row>
-          <v-col>
-            <canvas ref="radar" width=650 height=650 class="responsive-canvas"></canvas>
-          </v-col>
-          <v-divider vertical />
-          <v-col>
-            <v-radio-group v-model="socScale">
-              <v-radio label="150 km" :value="2" />
-              <v-radio label="100 km" :value="3" />
-              <v-radio label="50 km" :value="6" />
-            </v-radio-group>
-          </v-col>
-        </v-row>
+        <v-card-text>
+          <v-row>
+            <v-col>
+              <canvas ref="radar" width=650 height=650 style="display: block; margin: 0 auto;"></canvas>
+              <v-radio-group v-model="socScale" inline label="Масштаб">
+                <v-radio label="150 km" :value="2" />
+                <v-radio label="100 km" :value="3" />
+                <v-radio label="50 km" :value="6" />
+              </v-radio-group>
+              <v-slider min="0" max="360" v-model="targetRayAngle" thumb-label label="Азимут"/>
+            </v-col>
+          </v-row>
+        </v-card-text>
       </v-card>
       <v-card v-show="activeScreen === 'SNR'">
       </v-card>
@@ -182,6 +182,14 @@ export default defineComponent({
       },
       set(v: number) {
         this.radar!.scale = v;
+      }
+    },
+    targetRayAngle: {
+      get() {
+        return this.radar?.targetRayAngle
+      },
+      set(v: number) {
+        this.radar!.targetRayAngle = v;
       }
     }
   },
