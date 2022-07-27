@@ -4,8 +4,10 @@
       <v-card>
         <canvas ref="targetScreenRef" width="600" height="600" class="border"></canvas>
         <div class="d-flex justify-center pb-2">
-
-          <v-btn color="warning" @click="captureTargetByDirection">AC-1</v-btn>
+          <v-btn-group>
+            <v-btn color="warning" @click="captureTargetByDirection">AC-1</v-btn>
+            <v-btn color="error" @click="resetCaptureTargetByDirection">Сброс AC-1</v-btn>
+          </v-btn-group>
         </div>
       </v-card>
       <div class="flex-1">
@@ -14,7 +16,7 @@
           <v-radio :value="20" label="Широкий луч (20*)"></v-radio>
           <v-radio :value="4" label="Узкий луч (4*)"></v-radio>
           <v-radio :value="1.7" label="Подсвет (1.7*)"></v-radio>
-          </v-radio-group>
+        </v-radio-group>
       </div>
       <v-card>
         <canvas ref="distanceScreenRef" width="400" height="600" class="border"></canvas>
@@ -34,11 +36,12 @@ const snrIndicatorsRef = ref<HTMLCanvasElement | null>(null);
 const snr = ref<SNR | null>(null);
 
 const rayWidth = computed(() => {
-   return snr.value?.rayWidth;
+  return snr.value?.rayWidth;
 })
 
 const setRayWidth = (v: number) => snr.value!.setRayWidth(v);
 const captureTargetByDirection = () => snr.value?.captureTargetByDirection();
+const resetCaptureTargetByDirection = () => snr.value?.resetCaptureTargetByDirection();
 
 onMounted(() => {
   snr.value = new SNR(targetScreenRef.value!, snrIndicatorsRef.value!);

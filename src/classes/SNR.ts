@@ -12,6 +12,8 @@ export default class SNR {
   _targetRadarCanvasCenter = { x: 0, y: 0 };
   _scale = 1;
   _radarHeight = 36; /// m
+  _trackTargetInterval: number | null = null;
+  _trackedFlightObject: FlightObject | null = null;
   constructor(
     targetRadarCanvas: HTMLCanvasElement,
     indicatorCanvas: HTMLCanvasElement,
@@ -316,6 +318,39 @@ export default class SNR {
     }
   }
 
+  _trackTargetByDirection(flightObject: FlightObject) {
+    this._trackTargetInterval && clearInterval(this._trackTargetInterval);
+    this._trackTargetInterval = setInterval(() => {
+      // Azimut from SNR to target
+      const targetAzimutAngle = Math.atan2(
+        flightObject.currentPoint.y,
+        flightObject.currentPoint.x,
+      );
+
+      // Difference from SNR and target heights
+      const targetHeightOffset = flightObject.currentPoint.z -
+        this._radarHeight / 1000;
+
+      // Distance from SNR to target
+      const targetDistance = Math.hypot(
+        flightObject.currentPoint.x,
+        flightObject.currentPoint.y,
+      );
+      // Vertical angle from SNR to target
+      const targetVerticalAngle = (targetHeightOffset / targetDistance);
+
+      if (
+        targetVerticalAngle < this._minVerticalAngle * Math.PI / 180 ||
+        targetVerticalAngle > this._maxVerticalAngle * Math.PI / 180 
+      ) {
+        this.resetCaptureTargetByDirection();
+      }
+
+      this._azimut = targetAzimutAngle;
+      this._verticalAngle = targetVerticalAngle;
+    }, 0);
+  }
+
   captureTargetByDirection() {
     this._flightObjects.find((flightObject) => {
       // Azimut from SNR to target
@@ -332,17 +367,30 @@ export default class SNR {
       const rayWidthRad = this._rayWidth * Math.PI / 180;
       const rayWidth = ((Math.PI * rayWidthRad * targetDistance) / 180);
       // Azimut of target spot
-      const targetSpotAzimut = ((2 * Math.sqrt(flightObject.rcs / Math.PI) /
+      const targetSpotAngle = ((2 * Math.sqrt(flightObject.rcs / Math.PI) /
         1000) /
         targetDistance) / rayWidth;
 
-      const isCapturedByAzimut =
-        Math.abs(this._azimut - targetAzimutAngle) <
-          Math.abs(targetSpotAzimut) * 1.5;
+      const isCapturedByAzimut = Math.abs(this._azimut - targetAzimutAngle) <
+        Math.abs(targetSpotAngle) * 2;
 
-      if (isCapturedByAzimut) {
-        console.log("target capture!");
+      // Difference from SNR and target heights
+      const targetHeightOffset = flightObject.currentPoint.z -
+        this._radarHeight / 1000;
+      // Vertical angle from SNR to target
+      const targetVerticalAngle = (targetHeightOffset / targetDistance);
+      const isCapturedByVerticalAngle =
+        Math.abs(this._verticalAngle - targetVerticalAngle) <
+          Math.abs(targetSpotAngle);
+      if (isCapturedByAzimut && isCapturedByVerticalAngle) {
+        console.log("target captured!");
+        this._trackTargetByDirection(flightObject);
       }
     });
+  }
+
+  resetCaptureTargetByDirection() {
+    this._trackTargetInterval && clearInterval(this._trackTargetInterval);
+    this._trackTargetInterval = null;
   }
 }
