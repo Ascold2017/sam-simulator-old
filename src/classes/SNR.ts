@@ -15,7 +15,7 @@ export default class SNR {
       x: targetRadarCanvas.width / 2,
       y: targetRadarCanvas.height / 2,
     };
-    setInterval(() => this._drawTargetScreen(), 500);
+    this._drawTargetScreen();
   }
 
   get azimut() {
@@ -102,6 +102,7 @@ export default class SNR {
   }
 
   _drawTargetScreen() {
+    requestAnimationFrame(this._drawTargetScreen.bind(this))
     this._targetRadarCanvasContext!.clearRect(
       0,
       0,

@@ -1,14 +1,34 @@
 <template>
-  <v-card>
-    <v-row>
-      <v-col cols="6">
-        <canvas ref="targetScreenRef" width="600" height="600"></canvas>
-      </v-col>
-      <v-divider vertical />
-      <v-col cols="6">
-        <canvas ref="distanceScreenRef" width="400" height="600"></canvas>
-      </v-col>
-    </v-row>
+  <v-card class="px-6 py-6">
+    <div class="d-flex">
+      <v-card>
+        <canvas ref="targetScreenRef" width="600" height="600" class="border"></canvas>
+        <div class="d-flex justify-center pb-2">
+          <v-btn-group>
+            <v-btn color="warning">AC-1</v-btn>
+            <v-btn>
+              <v-icon>mdi-arrow-left-bold</v-icon>
+            </v-btn>
+            <v-btn>
+              <v-icon>mdi-arrow-right-bold</v-icon>
+            </v-btn>
+
+
+            <v-btn>
+              <v-icon>mdi-arrow-up-bold</v-icon>
+            </v-btn>
+            <v-btn>
+              <v-icon>mdi-arrow-down-bold</v-icon>
+            </v-btn>
+            <v-btn color="warning">AC-2</v-btn>
+          </v-btn-group>
+        </div>
+      </v-card>
+      <v-spacer />
+      <canvas ref="distanceScreenRef" width="400" height="600" class="border"></canvas>
+
+
+    </div>
   </v-card>
 </template>
 
