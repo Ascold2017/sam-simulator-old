@@ -20,6 +20,10 @@
       </div>
       <v-card>
         <canvas ref="distanceScreenRef" width="400" height="600" class="border"></canvas>
+        <v-btn-group>
+            <v-btn color="warning" @click="captureTargetByDistance">AC-2</v-btn>
+            <v-btn color="error" @click="resetCaptureTargetByDistance">Сброс AC-2</v-btn>
+          </v-btn-group>
       </v-card>
 
 
@@ -32,6 +36,7 @@ import SNR from '@/classes/SNR';
 import { computed } from '@vue/reactivity';
 import { onMounted, ref } from 'vue';
 const targetScreenRef = ref<HTMLCanvasElement | null>(null);
+const distanceScreenRef = ref<HTMLCanvasElement | null>(null);
 const snrIndicatorsRef = ref<HTMLCanvasElement | null>(null);
 const snr = ref<SNR | null>(null);
 
@@ -40,18 +45,24 @@ const rayWidth = computed(() => {
 })
 
 const setRayWidth = (v: number) => snr.value!.setRayWidth(v);
+
 const captureTargetByDirection = () => snr.value?.captureTargetByDirection();
 const resetCaptureTargetByDirection = () => snr.value?.resetCaptureTargetByDirection();
 
+const captureTargetByDistance = () => snr.value?.captureTargetByDistance();
+const resetCaptureTargetByDistance = () => snr.value?.resetCaptureTargetByDistance();
+
 onMounted(() => {
-  snr.value = new SNR(targetScreenRef.value!, snrIndicatorsRef.value!);
+  snr.value = new SNR(targetScreenRef.value!, snrIndicatorsRef.value!, distanceScreenRef.value!);
   window.addEventListener('keydown', (event: KeyboardEvent) => {
     const map: Record<string, () => void> = {
       'ArrowLeft': () => snr.value?.setAzimut(snr.value.azimut - 0.1),
       'ArrowRight': () => snr.value?.setAzimut(snr.value.azimut + 0.1),
       'ArrowUp': () => snr.value?.setVerticalAngle(snr.value.verticalAngle + 0.1),
       'ArrowDown': () => snr.value?.setVerticalAngle(snr.value.verticalAngle - 0.1),
-      'Space': () => snr.value?.captureTargetByDirection()
+      'Space': () => snr.value?.captureTargetByDirection(),
+      'KeyZ': () => snr.value?.setTargetDistance(snr.value.targetDistance - 0.2),
+      'KeyX': () => snr.value?.setTargetDistance(snr.value.targetDistance + 0.2)
     }
     map[event.code] && map[event.code]();
   }, false)

@@ -3,23 +3,29 @@ import type FlightObject from "./FlightObject";
 export default class SNR {
   _targetRadarCanvasContext: CanvasRenderingContext2D | null = null;
   _indicatorCanvasContext: CanvasRenderingContext2D | null = null;
+  _distanceRadarCanvasContext: CanvasRenderingContext2D | null = null;
   _azimut = -Math.PI / 2; // rad
   _verticalAngle = 0; // rad
+  _targetDistance = 20; // km
   _minVerticalAngle = -5; // degree
   _maxVerticalAngle = 75; // degree
+  _maxDistance = 150;
   _flightObjects: FlightObject[] = [];
   _rayWidth = 20; // degree
   _targetRadarCanvasCenter = { x: 0, y: 0 };
-  _scale = 1;
+  _scale = 0.5;
   _radarHeight = 36; /// m
   _trackTargetInterval: number | null = null;
-  _trackedFlightObject: FlightObject | null = null;
+  _trackTargetDistanceInterval: number | null = null;
+  _trackingTargetIdentifier: string | null = null;
   constructor(
     targetRadarCanvas: HTMLCanvasElement,
     indicatorCanvas: HTMLCanvasElement,
+    distanceRadarCanvas: HTMLCanvasElement,
   ) {
     this._targetRadarCanvasContext = targetRadarCanvas.getContext("2d");
     this._indicatorCanvasContext = indicatorCanvas.getContext("2d");
+    this._distanceRadarCanvasContext = distanceRadarCanvas.getContext("2d");
     this._targetRadarCanvasCenter = {
       x: targetRadarCanvas.width / 2,
       y: targetRadarCanvas.height / 2,
@@ -192,10 +198,18 @@ export default class SNR {
       this._targetRadarCanvasContext!.canvas.width,
       this._targetRadarCanvasContext!.canvas.height,
     );
+    this._distanceRadarCanvasContext!.clearRect(
+      0,
+      0,
+      this._distanceRadarCanvasContext!.canvas.width,
+      this._distanceRadarCanvasContext!.canvas.height,
+    );
+    this._drawTargetScreenSnow();
+    this._drawDistanceScreenSnow();
 
     this._calculateTargetsPosition();
-    this._drawTargetScreenSnow();
     this._drawTargetScreenSite();
+    this._drawDistanceScreenSite();
   }
 
   _drawTargetScreenSite() {
@@ -263,11 +277,20 @@ export default class SNR {
           const targetSpotSize = targetSize / rayWidth;
           const canvasSpotSize = this._targetRadarCanvasContext!.canvas.width *
             targetSpotSize;
-          const targetVisibilityK = targetDistance / 150;
+          const targetVisibilityK = targetDistance / this._maxDistance;
           this._drawTargetScreenTargets(
             canvasX,
             canvasY,
             canvasSpotSize,
+            targetVisibilityK,
+          );
+          const canvasDistanceSpotSize =
+            this._distanceRadarCanvasContext!.canvas.width *
+            targetSpotSize;
+
+          this._drawDistanceScreenTargets(
+            targetDistance,
+            canvasDistanceSpotSize,
             targetVisibilityK,
           );
         }
@@ -320,6 +343,7 @@ export default class SNR {
 
   _trackTargetByDirection(flightObject: FlightObject) {
     this._trackTargetInterval && clearInterval(this._trackTargetInterval);
+    this._trackingTargetIdentifier = flightObject.identifier;
     this._trackTargetInterval = setInterval(() => {
       // Azimut from SNR to target
       const targetAzimutAngle = Math.atan2(
@@ -341,7 +365,7 @@ export default class SNR {
 
       if (
         targetVerticalAngle < this._minVerticalAngle * Math.PI / 180 ||
-        targetVerticalAngle > this._maxVerticalAngle * Math.PI / 180 
+        targetVerticalAngle > this._maxVerticalAngle * Math.PI / 180
       ) {
         this.resetCaptureTargetByDirection();
       }
@@ -352,7 +376,7 @@ export default class SNR {
   }
 
   captureTargetByDirection() {
-    this._flightObjects.find((flightObject) => {
+    this._flightObjects.forEach((flightObject) => {
       // Azimut from SNR to target
       const targetAzimutAngle = Math.atan2(
         flightObject.currentPoint.y,
@@ -392,5 +416,155 @@ export default class SNR {
   resetCaptureTargetByDirection() {
     this._trackTargetInterval && clearInterval(this._trackTargetInterval);
     this._trackTargetInterval = null;
+    this._trackingTargetIdentifier = null;
+  }
+
+  _drawDistanceScreenSnow() {
+    if (!this._distanceRadarCanvasContext) return;
+    for (let i = 0; i < 500; i++) {
+      const pointX = this._distanceRadarCanvasContext.canvas.width *
+        Math.random();
+      const pointY = this._distanceRadarCanvasContext.canvas.height *
+        Math.random();
+      this._distanceRadarCanvasContext.beginPath();
+      this._distanceRadarCanvasContext.fillStyle = `rgba(184, 134, 11,${
+        1 - Math.random()
+      })`;
+      this._distanceRadarCanvasContext.arc(
+        pointX,
+        pointY,
+        2,
+        0,
+        Math.PI * 2,
+      );
+      this._distanceRadarCanvasContext.fill();
+    }
+  }
+
+  _drawDistanceScreenSite() {
+    if (!this._distanceRadarCanvasContext) return;
+    this._distanceRadarCanvasContext.strokeStyle = "white";
+    this._distanceRadarCanvasContext.fillStyle = "white";
+    const maxDistance = this._maxDistance * this._scale;
+    const step = 10 * this._scale;
+    for (let distance = 0; distance <= maxDistance; distance += step) {
+      const pointY = this._distanceRadarCanvasContext.canvas.height /
+        (maxDistance / distance);
+      this._distanceRadarCanvasContext.beginPath();
+      this._distanceRadarCanvasContext.moveTo(0, pointY);
+      this._distanceRadarCanvasContext.lineTo(20, pointY);
+      this._distanceRadarCanvasContext.stroke();
+      this._distanceRadarCanvasContext.beginPath();
+      this._distanceRadarCanvasContext.moveTo(
+        this._distanceRadarCanvasContext.canvas.width - 20,
+        pointY,
+      );
+      this._distanceRadarCanvasContext.lineTo(
+        this._distanceRadarCanvasContext.canvas.width,
+        pointY,
+      );
+      this._distanceRadarCanvasContext.stroke();
+      this._distanceRadarCanvasContext.fillText(
+        (maxDistance - distance).toString(),
+        5,
+        pointY + 15,
+      );
+    }
+
+    this._distanceRadarCanvasContext.strokeStyle = "red";
+    const pointY = this._distanceRadarCanvasContext.canvas.height -
+      this._distanceRadarCanvasContext.canvas.height *
+        (this._targetDistance / (this._maxDistance * this._scale));
+    this._distanceRadarCanvasContext.beginPath();
+    this._distanceRadarCanvasContext.moveTo(0, pointY);
+    this._distanceRadarCanvasContext.lineTo(
+      this._distanceRadarCanvasContext.canvas.width,
+      pointY,
+    );
+    this._distanceRadarCanvasContext.stroke();
+  }
+
+  _drawDistanceScreenTargets(
+    targetDistance: number,
+    canvasDistanceSpotSize: number,
+    targetVisibilityK: number,
+  ) {
+    if (!this._distanceRadarCanvasContext) return;
+    const maxDistance = this._maxDistance * this._scale;
+    const canvasCenterX = this._distanceRadarCanvasContext.canvas.width / 2;
+    const pointY = this._distanceRadarCanvasContext.canvas.height -
+      this._distanceRadarCanvasContext.canvas.height /
+        (maxDistance / targetDistance);
+    this._distanceRadarCanvasContext!.fillStyle = `rgba(184, 134, 11,${
+      1 - targetVisibilityK
+    })`;
+    this._distanceRadarCanvasContext!.beginPath();
+    this._distanceRadarCanvasContext!.ellipse(
+      canvasCenterX,
+      pointY,
+      canvasDistanceSpotSize / 2,
+      canvasDistanceSpotSize,
+      Math.PI / 2,
+      0,
+      Math.PI * 2,
+    );
+    this._distanceRadarCanvasContext!.fill();
+  }
+
+  get targetDistance() {
+    return this._targetDistance;
+  }
+
+  setTargetDistance(distance: number) {
+    if (distance > 0 && distance < this._maxDistance) {
+      this._targetDistance = distance;
+    }
+  }
+
+  captureTargetByDistance() {
+    this._flightObjects.forEach((flightObject) => {
+      // Distance from SNR to target
+      const targetDistance = Math.hypot(
+        flightObject.currentPoint.x,
+        flightObject.currentPoint.y,
+      );
+
+      if (
+        Math.abs(targetDistance - this._targetDistance) < 0.05 &&
+        this._trackingTargetIdentifier === flightObject.identifier
+      ) {
+        console.log("target captured by distance!");
+        this._trackTargetByDistance();
+      }
+    });
+  }
+
+  resetCaptureTargetByDistance() {
+    this._trackTargetDistanceInterval &&
+      clearInterval(this._trackTargetDistanceInterval);
+    this._trackTargetDistanceInterval = null;
+  }
+
+  _trackTargetByDistance() {
+    this._trackTargetDistanceInterval &&
+      clearInterval(this._trackTargetDistanceInterval);
+    const flightObject = this._flightObjects.find((flightObject) =>
+      flightObject.identifier === this._trackingTargetIdentifier
+    )!;
+    this._trackTargetDistanceInterval = setInterval(() => {
+      // Distance from SNR to target
+      const targetDistance = Math.hypot(
+        flightObject.currentPoint.x,
+        flightObject.currentPoint.y,
+      );
+
+      if (
+        targetDistance > this._maxDistance
+      ) {
+        this.resetCaptureTargetByDistance();
+      }
+
+      this._targetDistance = targetDistance;
+    }, 0);
   }
 }
