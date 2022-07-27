@@ -9,7 +9,7 @@
       </v-tabs>
 
       <BIP ref="bipRef" v-show="activeScreen === 'BIP'" />
-      <SOC ref="radarRef" v-show="activeScreen === 'SOC'" />
+      <SOC ref="radarRef" v-show="activeScreen === 'SOC'" @exportAzimut="onExportAzimut" />
       <SNR ref="snrRef" v-show="activeScreen === 'SNR'" />
       <Editor v-show="activeScreen === 'Editor'" @addFlightObject="onCreateFlightObject" />
     </v-main>
@@ -53,11 +53,16 @@ onMounted(() => {
 
 const bipRef = ref<InstanceType<typeof BIP> | null>(null);
 const radarRef = ref<InstanceType<typeof SOC> | null>(null);
+const snrRef = ref<InstanceType<typeof SNR> | null>(null);
 function onCreateFlightObject(flightObject: FlightObject) {
   bipRef.value!.addFlightObject(flightObject);
   radarRef.value?.addFlightObject(flightObject);
+  snrRef.value?.snr?.addFlightObject(flightObject);
   flightObject.launch(msg => bipRef.value!.bip!.listener(msg))
-  
+}
+
+function onExportAzimut(azimut: number) {
+  snrRef.value?.snr?.setAzimut(azimut);
 }
 </script>
 

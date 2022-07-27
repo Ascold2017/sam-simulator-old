@@ -13,4 +13,15 @@
 </template>
 
 <script setup lang="ts">
+import SNR from '@/classes/SNR';
+import { onMounted, ref } from 'vue';
+const targetScreenRef = ref<HTMLCanvasElement | null>(null);
+const snr = ref<SNR | null>(null);
+onMounted(() => {
+  snr.value = new SNR(targetScreenRef.value!);
+});
+
+defineExpose({
+  snr
+})
 </script>
