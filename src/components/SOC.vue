@@ -10,10 +10,13 @@
               <v-radio label="100 km" :value="3" />
               <v-radio label="50 km" :value="6" />
             </v-radio-group>
-            <v-btn color="error" icon @click="exportAzimut">ЦУ</v-btn>
+
           </div>
           <v-slider min="0" max="360" :step="1" :model-value="targetRayAngle" @update:model-value="setTargetRayAnge"
             thumb-label label="Азимут" />
+          <div class="d-flex justify-center">
+            <v-btn color="warning" @click="exportAzimut">ЦУ</v-btn>
+          </div>
         </v-col>
       </v-row>
     </v-card-text>
