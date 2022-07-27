@@ -190,7 +190,7 @@ export default class SNR {
       this._targetRadarCanvasContext!.canvas.width,
       this._targetRadarCanvasContext!.canvas.height,
     );
-    
+
     this._calculateTargetsPosition();
     this._drawTargetScreenSnow();
     this._drawTargetScreenSite();
@@ -257,7 +257,7 @@ export default class SNR {
               this._targetRadarCanvasCenter.y + this._targetRadarCanvasCenter.y;
 
           const rayWidth = ((Math.PI * rayWidthRad * targetDistance) / 180);
-          const targetSize = 2*Math.sqrt(flightObject.rcs/Math.PI) / 1000; // Size in km; rcs converted to diameter of circle with same scale
+          const targetSize = 2 * Math.sqrt(flightObject.rcs / Math.PI) / 1000; // Size in km; rcs converted to diameter of circle with same scale
           const targetSpotSize = targetSize / rayWidth;
           const canvasSpotSize = this._targetRadarCanvasContext!.canvas.width *
             targetSpotSize;
@@ -302,15 +302,47 @@ export default class SNR {
       const pointX = canvasSize * Math.random();
       const pointY = canvasSize * Math.random();
       this._targetRadarCanvasContext.beginPath();
-      this._targetRadarCanvasContext.fillStyle = `rgba(184, 134, 11,${1 - Math.random()})`;
+      this._targetRadarCanvasContext.fillStyle = `rgba(184, 134, 11,${
+        1 - Math.random()
+      })`;
       this._targetRadarCanvasContext.arc(
         pointX,
         pointY,
         2,
         0,
-        Math.PI*2,
+        Math.PI * 2,
       );
       this._targetRadarCanvasContext.fill();
     }
+  }
+
+  captureTargetByDirection() {
+    this._flightObjects.find((flightObject) => {
+      // Azimut from SNR to target
+      const targetAzimutAngle = Math.atan2(
+        flightObject.currentPoint.y,
+        flightObject.currentPoint.x,
+      );
+      // Distance from SNR to target
+      const targetDistance = Math.hypot(
+        flightObject.currentPoint.x,
+        flightObject.currentPoint.y,
+      );
+      // Angle of ray of SNR
+      const rayWidthRad = this._rayWidth * Math.PI / 180;
+      const rayWidth = ((Math.PI * rayWidthRad * targetDistance) / 180);
+      // Azimut of target spot
+      const targetSpotAzimut = ((2 * Math.sqrt(flightObject.rcs / Math.PI) /
+        1000) /
+        targetDistance) / rayWidth;
+
+      const isCapturedByAzimut =
+        Math.abs(this._azimut - targetAzimutAngle) <
+          Math.abs(targetSpotAzimut) * 1.5;
+
+      if (isCapturedByAzimut) {
+        console.log("target capture!");
+      }
+    });
   }
 }

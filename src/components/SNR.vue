@@ -5,7 +5,7 @@
         <canvas ref="targetScreenRef" width="600" height="600" class="border"></canvas>
         <div class="d-flex justify-center pb-2">
 
-          <v-btn color="warning">AC-1</v-btn>
+          <v-btn color="warning" @click="captureTargetByDirection">AC-1</v-btn>
         </div>
       </v-card>
       <div class="flex-1">
@@ -38,6 +38,7 @@ const rayWidth = computed(() => {
 })
 
 const setRayWidth = (v: number) => snr.value!.setRayWidth(v);
+const captureTargetByDirection = () => snr.value?.captureTargetByDirection();
 
 onMounted(() => {
   snr.value = new SNR(targetScreenRef.value!, snrIndicatorsRef.value!);
@@ -47,6 +48,7 @@ onMounted(() => {
       'ArrowRight': () => snr.value?.setAzimut(snr.value.azimut + 0.1),
       'ArrowUp': () => snr.value?.setVerticalAngle(snr.value.verticalAngle + 0.1),
       'ArrowDown': () => snr.value?.setVerticalAngle(snr.value.verticalAngle - 0.1),
+      'Space': () => snr.value?.captureTargetByDirection()
     }
     map[event.code] && map[event.code]();
   }, false)
