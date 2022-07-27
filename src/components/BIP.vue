@@ -1,20 +1,12 @@
 <template>
   <v-card>
-    <v-row>
-      <v-col cols="8">
-        <canvas ref="bipRef" width="1000" height="1000" class="responsive-canvas"
-          style="background-image: url(/snazzy-image.png); background-size: contain;"></canvas>
-      </v-col>
-      <v-divider vertical />
-      <v-col>
+    <div class="d-flex">
+      <canvas ref="bipRef" width="1000" height="1000" class="responsive-canvas border"
+        style="background-image: url(/snazzy-image.png); background-size: contain;"></canvas>
         <v-card>
-          <ul>
-            <li v-for="message in messages">{{ message }}</li>
-          </ul>
+          <v-list></v-list>
         </v-card>
-      </v-col>
-    </v-row>
-
+    </div>
   </v-card>
 </template>
 
