@@ -21,13 +21,13 @@
 </template>
 <script setup lang="ts">
 import type FlightObject from '@/classes/FlightObject';
-import Radar from '@/classes/Radar';
+import SOC from '@/classes/SOC';
 import { computed } from '@vue/reactivity';
 import { onMounted, ref } from 'vue';
 const emit = defineEmits<{ (e: 'exportAzimut', azimut: number): void }>()
 const radarRef = ref<HTMLCanvasElement | null>(null);
 
-const radar = ref<Radar | null>(null);
+const radar = ref<SOC | null>(null);
 const targetRayAngle = computed(() => {
   return radar.value?.targetRayAngle || 0;
 });
@@ -42,7 +42,7 @@ const setScale = (v: number) => {
 }
 
 onMounted(() => {
-  radar.value = new Radar({
+  radar.value = new SOC({
     scale: scale.value,
     canvasRadar: radarRef.value,
     rayWidth: 8

@@ -257,7 +257,7 @@ export default class SNR {
               this._targetRadarCanvasCenter.y + this._targetRadarCanvasCenter.y;
 
           const rayWidth = ((Math.PI * rayWidthRad * targetDistance) / 180);
-          const targetSize = flightObject.visibilityCoefficient / 1000; // Size in km;
+          const targetSize = 2*Math.sqrt(flightObject.rcs/Math.PI) / 1000; // Size in km; rcs converted to diameter of circle with same scale
           const targetSpotSize = targetSize / rayWidth;
           const canvasSpotSize = this._targetRadarCanvasContext!.canvas.width *
             targetSpotSize;

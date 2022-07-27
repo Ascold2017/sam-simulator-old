@@ -1,10 +1,10 @@
 import type FlightObject from "./FlightObject";
-interface IRadar {
+interface ISOC {
   scale?: number;
   canvasRadar: any;
   rayWidth?: number;
 }
-export default class Radar {
+export default class SOC {
   _flightObjects: FlightObject[] = [];
   _scale = 1;
   _canvasContext: CanvasRenderingContext2D | null = null;
@@ -17,8 +17,8 @@ export default class Radar {
   constructor({
     scale = 2,
     canvasRadar,
-    rayWidth = 2, // in degrees
-  }: IRadar) {
+    rayWidth = 20, // in degrees
+  }: ISOC) {
     this._canvasContext = canvasRadar.getContext("2d");
     this._canvasCenter = {
       x: this._canvasContext!.canvas.width / 2,
@@ -194,7 +194,8 @@ export default class Radar {
       y: flightObject.currentPoint.y,
     };
     const rayWidthRad = this._rayWidth * Math.PI / 180;
-    const spotWidth = rayWidthRad * flightObject.visibilityCoefficient;
+    const targetSize = 2 * Math.sqrt(flightObject.rcs/ Math.PI) / 1000 * 10; // Size in km; rcs converted to diameter of circle with same scale
+    const spotWidth = targetSize / rayWidthRad;
     if (!wayPoints || flightObject.isDestroyed || !flightObject.isLaunched) {
       return;
     }

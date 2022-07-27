@@ -8,10 +8,10 @@ export default class FlightObject {
     isLaunched = false;
     isDestroyed = false;
     currentPoint = { x: 0, y: 0, z: 0 }
-    visibilityCoefficient = 0.5;
-    constructor({ identifier = new Date().toString(), wayPoints = [], velocity = 100, visibilityCoefficient = 0.5 }: { identifier: string; wayPoints: { x: number; y: number; z: number }[]; velocity: number; visibilityCoefficient?: number; }) {
+    rcs = 0.5;
+    constructor({ identifier = new Date().toString(), wayPoints = [], velocity = 100, rcs = 0.5 }: { identifier: string; wayPoints: { x: number; y: number; z: number }[]; velocity: number; rcs?: number; }) {
         this.identifier = identifier;
-        this.visibilityCoefficient = visibilityCoefficient;
+        this.rcs = rcs;
         this._wayPoints = wayPoints;
         this._velocity = velocity;
         let flightRange = this._getFlightRange();

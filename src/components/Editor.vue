@@ -16,8 +16,8 @@
               @update:model-value="setAltitude" />
             <v-text-field label="Скорость полета,
                 м/с" :model-value="velocity" @update:model-value="setVelocity" />
-            <v-text-field label="Коэффициент заметности" :model-value="visibilityCoefficient"
-              @update:model-value="setVisibilityCoefficient" />
+            <v-text-field label="Эффективная площадь рассеивания" :model-value="rcs"
+              @update:model-value="setRCS" />
             <h5>Координаты</h5>
             <ul class="pl-3">
               <li v-for="point in points">{{ point.x }}, {{ point.y }}</li>
@@ -68,8 +68,8 @@ const velocity = computed(() => {
 })
 const setVelocity = (v: string) => editor.value!.velocity = v as unknown as number
 
-const visibilityCoefficient = computed(() => editor.value?.visibilityCoefficient);
-const setVisibilityCoefficient = (v: string) => editor.value!.visibilityCoefficient = v as unknown as number
+const rcs = computed(() => editor.value?.rcs);
+const setRCS = (v: string) => editor.value!.rcs = v as unknown as number
 
 const points = computed(() => editor.value?.points || []);
 

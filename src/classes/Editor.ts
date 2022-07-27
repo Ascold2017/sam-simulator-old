@@ -7,7 +7,7 @@ export default class Editor {
   _points: { x: number; y: number; z: number }[] = [];
   _altitude = 0.5;
   _velocity: number = 280;
-  _visibilityCoefficient: number = 0.5;
+  _rcs: number = 0.5;
   constructor(canvasElement: HTMLCanvasElement) {
     this._canvasContext = canvasElement.getContext("2d");
     this._canvasCenter = {
@@ -52,12 +52,12 @@ export default class Editor {
     this._velocity = value;
   }
 
-  get visibilityCoefficient() {
-    return this._visibilityCoefficient;
+  get rcs() {
+    return this._rcs;
   }
 
-  set visibilityCoefficient(value) {
-    this._visibilityCoefficient = value;
+  set rcs(value) {
+    this._rcs = value;
   }
 
   get flightParams() {
@@ -104,7 +104,7 @@ export default class Editor {
     this._points = [];
     this._altitude = 0.5;
     this.velocity = 280;
-    this.visibilityCoefficient = 0.5;
+    this.rcs = 0.5;
     this._canvasContext!.clearRect(
       0,
       0,
@@ -122,7 +122,7 @@ export default class Editor {
       identifier: new Date().toString(),
       velocity: this._velocity,
       wayPoints: wayPoints,
-      visibilityCoefficient: this._visibilityCoefficient,
+      rcs: this._rcs,
     });
 
     this.reset();
