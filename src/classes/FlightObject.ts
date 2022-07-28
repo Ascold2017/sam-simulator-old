@@ -5,8 +5,10 @@ export default class FlightObject {
     _launchTime = 0;
     _timeInAir = 0;
     _flightTime = 0;
+    _interval: number | null = null;
     isLaunched = false;
     isDestroyed = false;
+    isKilled = false;
     currentPoint = { x: 0, y: 0, z: 0 }
     rcs = 0.5;
     constructor({ identifier = new Date().toString(), wayPoints = [], velocity = 100, rcs = 0.5 }: { identifier: string; wayPoints: { x: number; y: number; z: number }[]; velocity: number; rcs?: number; }) {
@@ -26,18 +28,27 @@ export default class FlightObject {
         
         console.log(`Flight object launched at ${new Date(this._launchTime)}`)
         listener(`Flight object launched at ${new Date(this._launchTime).toLocaleTimeString()}`)
-        const interval = setInterval(() => {
+        this._interval = setInterval(() => {
             this._timeInAir = +new Date() - this._launchTime;
             const partOfFlyWay = this._timeInAir / this._flightTime;
             this.currentPoint = this._getCubicBezierXYZatT(this._wayPoints[0], this._wayPoints[1], this._wayPoints[2], this._wayPoints[3], partOfFlyWay);
             if (this._timeInAir >= this._flightTime) {
-                console.log('Flight object hit!')
-                listener(`Flight object hit at ${new Date(this._launchTime).toLocaleTimeString()}!`)
-                this.isDestroyed = true;
-                clearInterval(interval)
+                this.destroy();
             }
         }, 0);
         return this;
+    }
+
+    destroy() {
+        
+        clearInterval(this._interval!);
+        this._interval = null
+        this.isDestroyed = true;
+    }
+
+    kill() {
+        this.isKilled = true;
+        this.destroy();
     }
 
     _getFlightRange() {

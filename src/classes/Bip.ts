@@ -208,8 +208,8 @@ export default class Bip {
           firstPoint.x + 10,
           firstPoint.y - 10,
         );
-      } else {
-        this._canvasContext!.strokeStyle = 'white'
+      } else  {
+        this._canvasContext!.strokeStyle = flightObject.isKilled ? 'white' : 'red';
         this._canvasContext!.beginPath();
 
         this._canvasContext!.moveTo(

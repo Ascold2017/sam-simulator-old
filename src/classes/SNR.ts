@@ -1,4 +1,5 @@
 import type FlightObject from "./FlightObject";
+import type SAMissile from "./SAMissile";
 
 type EventListener = (arg0: string, arg1: any) => void;
 
@@ -23,6 +24,7 @@ export default class SNR {
   _trackTargetDistanceInterval: number | null = null;
   _trackingTargetIdentifier: string | null = null;
   _eventListener: EventListener | null = null;
+  _missiles: SAMissile[] = [];
   constructor(
     targetRadarCanvas: HTMLCanvasElement,
     indicatorCanvas: HTMLCanvasElement,
@@ -39,6 +41,12 @@ export default class SNR {
     };
     this._drawTargetScreen();
     this._drawIndicatorScreen();
+  }
+
+  get trackedTarget() {
+    return this._flightObjects.find((fo) =>
+      fo.identifier === this._trackingTargetIdentifier
+    );
   }
 
   get azimut() {
@@ -230,6 +238,8 @@ export default class SNR {
     this._calculateTargetsPosition();
     this._drawTargetScreenSite();
     this._drawDistanceScreenSite();
+
+    this._calculateMissiles();
   }
 
   _drawTargetScreenSite() {
@@ -636,5 +646,78 @@ export default class SNR {
 
       this._targetDistance = targetDistance;
     }, 0);
+  }
+
+  addMissile(missile: SAMissile) {
+    this._missiles.push(missile);
+  }
+
+  _calculateMissiles() {
+    for (let missile of this._missiles) {
+      if (!missile.isDestroyed) {
+        // Distance from SNR to missile
+        const missileDistance = Math.hypot(
+          missile._currentPoint.x,
+          missile._currentPoint.y,
+        );
+        // Azimut from SNR to target
+        const missileAzimutAngle = Math.atan2(
+          missile._currentPoint.y,
+          missile._currentPoint.x,
+        );
+        // Difference from SNR and target heights
+        const missileHeightOffset = missile._currentPoint.z -
+          this._radarHeight / 1000;
+        // Vertical angle from SNR to target
+        const missileVerticalAngle = (missileHeightOffset / missileDistance);
+
+        // Angle of ray of SNR
+        const rayWidthRad = this._rayWidth * Math.PI / 180;
+        // Difference of SNR azimut and target azimut
+        const missileAzimutOffset = this._azimut - missileAzimutAngle;
+        // Difference of SNR vertical angle and target vertical angle
+        const missileVerticalOffset = missileVerticalAngle -
+          this._verticalAngle;
+        // Calculate target position on canvas
+        const canvasX = -(missileAzimutOffset / rayWidthRad * 2) *
+            this._targetRadarCanvasCenter.x + this._targetRadarCanvasCenter.x;
+        const canvasY = -(missileVerticalOffset / rayWidthRad * 2) *
+            this._targetRadarCanvasCenter.y + this._targetRadarCanvasCenter.y;
+        this._drawMissilesOnTargetScreen(canvasX, canvasY);
+        this._drawMissilesOnDistanceScreen(missileDistance);
+      }
+    }
+  }
+
+  _drawMissilesOnTargetScreen(canvasX: number, canvasY: number) {
+    this._targetRadarCanvasContext!.fillStyle = `rgba(255, 0, 0,1)`;
+    this._targetRadarCanvasContext!.beginPath();
+    this._targetRadarCanvasContext!.arc(
+      canvasX,
+      canvasY,
+      5,
+      0,
+      Math.PI * 2,
+    );
+    this._targetRadarCanvasContext!.fill();
+  }
+
+  _drawMissilesOnDistanceScreen(missileDistance: number) {
+    if (!this._distanceRadarCanvasContext) return;
+    const maxDistance = this._maxDistance * this._scale;
+    const canvasCenterX = this._distanceRadarCanvasContext.canvas.width / 2;
+    const pointY = this._distanceRadarCanvasContext.canvas.height -
+      this._distanceRadarCanvasContext.canvas.height /
+        (maxDistance / missileDistance);
+    this._distanceRadarCanvasContext!.fillStyle = `rgba(255, 0, 0,1)`;
+    this._distanceRadarCanvasContext!.beginPath();
+    this._distanceRadarCanvasContext!.arc(
+      canvasCenterX,
+      pointY,
+      5,
+      0,
+      Math.PI * 2,
+    );
+    this._distanceRadarCanvasContext!.fill();
   }
 }

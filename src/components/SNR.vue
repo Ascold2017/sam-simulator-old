@@ -25,7 +25,8 @@
           <p>Д, km: {{ params.targetDistance }}</p>
           <p>V, m/s: {{ params.targetVelocity }}</p>
           <p>H, km: {{ params.targetHeight }}</p>
-
+          <v-btn color="error" block @click="launchMissile"
+            :disabled="!(params.isCapturedByDirection && params.isCapturedByDistance)">Пуск</v-btn>
 
           <v-divider class="mt-auto" />
           <div class="d-flex justify-space-between mt-3">
@@ -53,6 +54,7 @@
 </template>
 
 <script setup lang="ts">
+import SAMissile from '@/classes/SAMissile';
 import SNR from '@/classes/SNR';
 import { onMounted, ref, reactive, computed } from 'vue';
 const targetScreenRef = ref<HTMLCanvasElement | null>(null);
@@ -82,6 +84,14 @@ function SNRListener(property: string, value: number | boolean) {
   property === 'targetDistance' && (params.targetDistance = value)
   property === 'targetHeight' && (params.targetHeight = value)
   property === 'targetVelocity' && (params.targetVelocity = value)
+}
+
+function launchMissile() {
+  if (snr.value!.trackedTarget) {
+    const missile = new SAMissile(snr.value!.trackedTarget, 25, 900, { x: 0, y: 0, z: 0.03 })
+    missile.launch();
+    snr.value!.addMissile(missile);
+  }
 }
 
 onMounted(() => {
