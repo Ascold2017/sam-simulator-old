@@ -32,24 +32,6 @@ enum ScreensEnum {
 }
 
 const activeScreen = ref(ScreensEnum.Editor);
-const setActiveScreen = (v: ScreensEnum) => activeScreen.value = v;
-
-onMounted(() => {
-  window.addEventListener('keydown', (e: KeyboardEvent) => {
-    const keymap: Record<string, ScreensEnum> = {
-      'KeyA': ScreensEnum.BIP,
-      'KeyS': ScreensEnum.SOC,
-      'KeyD': ScreensEnum.SNR,
-      'KeyQ': ScreensEnum.Editor
-    }
-
-    if (e.code in keymap) {
-      setActiveScreen(keymap[e.code]);
-    }
-  })
-
-});
-
 
 const bipRef = ref<InstanceType<typeof BIP> | null>(null);
 const radarRef = ref<InstanceType<typeof SOC> | null>(null);

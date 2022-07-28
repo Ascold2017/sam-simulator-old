@@ -1,5 +1,7 @@
 import type FlightObject from "./FlightObject";
 
+type EventListener = (arg0: string, arg1: any) => void;
+
 export default class SNR {
   _targetRadarCanvasContext: CanvasRenderingContext2D | null = null;
   _indicatorCanvasContext: CanvasRenderingContext2D | null = null;
@@ -12,20 +14,25 @@ export default class SNR {
   _maxDistance = 150;
   _flightObjects: FlightObject[] = [];
   _rayWidth = 20; // degree
+  _distanceTrackingAccuracy = 0.2; // km
+  _distanceDetectRange = 0.5; // km
   _targetRadarCanvasCenter = { x: 0, y: 0 };
-  _scale = 0.5;
+  _scale = 1;
   _radarHeight = 36; /// m
   _trackTargetInterval: number | null = null;
   _trackTargetDistanceInterval: number | null = null;
   _trackingTargetIdentifier: string | null = null;
+  _eventListener: EventListener | null = null;
   constructor(
     targetRadarCanvas: HTMLCanvasElement,
     indicatorCanvas: HTMLCanvasElement,
     distanceRadarCanvas: HTMLCanvasElement,
+    eventListener: EventListener
   ) {
     this._targetRadarCanvasContext = targetRadarCanvas.getContext("2d");
     this._indicatorCanvasContext = indicatorCanvas.getContext("2d");
     this._distanceRadarCanvasContext = distanceRadarCanvas.getContext("2d");
+    this._eventListener = eventListener;
     this._targetRadarCanvasCenter = {
       x: targetRadarCanvas.width / 2,
       y: targetRadarCanvas.height / 2,
@@ -35,7 +42,8 @@ export default class SNR {
   }
 
   get azimut() {
-    return (this._azimut + Math.PI / 2) * (180 / Math.PI);
+    const azimut = (this._azimut + Math.PI / 2) * (180 / Math.PI)
+    return azimut < 0 ? azimut + 360 : azimut;
   }
 
   setAzimut(azimut: number) { // degree
@@ -43,10 +51,14 @@ export default class SNR {
       azimut = azimut - 360;
     }
     if (azimut < 0) {
-      azimut = 360 - azimut;
+      azimut = 360 + azimut;
     }
 
-    this._azimut = azimut * Math.PI / 180 - Math.PI / 2;
+    if (azimut > 270) {
+      azimut = azimut - 360
+    }
+
+    this._azimut = (azimut - 90) * Math.PI / 180;
   }
 
   get verticalAngle() {
@@ -68,6 +80,14 @@ export default class SNR {
 
   setRayWidth(deg: number) {
     this._rayWidth = deg;
+  }
+
+  get distanceScreenScale() {
+    return this._scale;
+  }
+
+  setDistanceScreenScale(scale: number) {
+    this._scale = scale;
   }
 
   addFlightObject(flightObject: FlightObject) {
@@ -284,16 +304,26 @@ export default class SNR {
             canvasSpotSize,
             targetVisibilityK,
           );
-          const canvasDistanceSpotSize =
+          const canvasDistanceSpotWidth =
             this._distanceRadarCanvasContext!.canvas.width *
             targetSpotSize;
+          const canvasDistanceSpotLength =
+            (this._distanceRadarCanvasContext!.canvas.width *
+              ((targetSpotSize +
+                (this._distanceTrackingAccuracy * Math.random())) * rayWidth) /
+              this._scale);
 
           this._drawDistanceScreenTargets(
             targetDistance,
-            canvasDistanceSpotSize,
+            canvasDistanceSpotWidth,
+            canvasDistanceSpotLength,
             targetVisibilityK,
           );
         }
+      }
+      if (flightObject.isDestroyed && this._trackingTargetIdentifier === flightObject.identifier) {
+        this.resetCaptureTargetByDirection();
+        this.resetCaptureTargetByDistance();
       }
     }
   }
@@ -368,6 +398,7 @@ export default class SNR {
         targetVerticalAngle > this._maxVerticalAngle * Math.PI / 180
       ) {
         this.resetCaptureTargetByDirection();
+        this.resetCaptureTargetByDistance();
       }
 
       this._azimut = targetAzimutAngle;
@@ -407,8 +438,8 @@ export default class SNR {
         Math.abs(this._verticalAngle - targetVerticalAngle) <
           Math.abs(targetSpotAngle);
       if (isCapturedByAzimut && isCapturedByVerticalAngle) {
-        console.log("target captured!");
         this._trackTargetByDirection(flightObject);
+        this._eventListener && this._eventListener('isCapturedByDirection', true)
       }
     });
   }
@@ -417,6 +448,7 @@ export default class SNR {
     this._trackTargetInterval && clearInterval(this._trackTargetInterval);
     this._trackTargetInterval = null;
     this._trackingTargetIdentifier = null;
+    this._eventListener && this._eventListener('isCapturedByDirection', false)
   }
 
   _drawDistanceScreenSnow() {
@@ -472,21 +504,37 @@ export default class SNR {
     }
 
     this._distanceRadarCanvasContext.strokeStyle = "red";
-    const pointY = this._distanceRadarCanvasContext.canvas.height -
+    const pointY1 = this._distanceRadarCanvasContext.canvas.height -
       this._distanceRadarCanvasContext.canvas.height *
-        (this._targetDistance / (this._maxDistance * this._scale));
+        ((this._targetDistance - this._distanceDetectRange) /
+          (this._maxDistance * this._scale));
+
+    const pointY2 = this._distanceRadarCanvasContext.canvas.height -
+      this._distanceRadarCanvasContext.canvas.height *
+        ((this._targetDistance + this._distanceDetectRange) /
+          (this._maxDistance * this._scale));
+
     this._distanceRadarCanvasContext.beginPath();
-    this._distanceRadarCanvasContext.moveTo(0, pointY);
+    this._distanceRadarCanvasContext.moveTo(0, pointY1);
     this._distanceRadarCanvasContext.lineTo(
       this._distanceRadarCanvasContext.canvas.width,
-      pointY,
+      pointY1,
+    );
+    this._distanceRadarCanvasContext.stroke();
+
+    this._distanceRadarCanvasContext.beginPath();
+    this._distanceRadarCanvasContext.moveTo(0, pointY2);
+    this._distanceRadarCanvasContext.lineTo(
+      this._distanceRadarCanvasContext.canvas.width,
+      pointY2,
     );
     this._distanceRadarCanvasContext.stroke();
   }
 
   _drawDistanceScreenTargets(
     targetDistance: number,
-    canvasDistanceSpotSize: number,
+    canvasDistanceSpotWidth: number,
+    canvasDistanceSpotLength: number,
     targetVisibilityK: number,
   ) {
     if (!this._distanceRadarCanvasContext) return;
@@ -502,8 +550,8 @@ export default class SNR {
     this._distanceRadarCanvasContext!.ellipse(
       canvasCenterX,
       pointY,
-      canvasDistanceSpotSize / 2,
-      canvasDistanceSpotSize,
+      canvasDistanceSpotLength / 2,
+      canvasDistanceSpotWidth / 2,
       Math.PI / 2,
       0,
       Math.PI * 2,
@@ -530,11 +578,12 @@ export default class SNR {
       );
 
       if (
-        Math.abs(targetDistance - this._targetDistance) < 0.05 &&
+        Math.abs(targetDistance - this._targetDistance) <
+          this._distanceDetectRange &&
         this._trackingTargetIdentifier === flightObject.identifier
       ) {
-        console.log("target captured by distance!");
         this._trackTargetByDistance();
+        this._eventListener && this._eventListener('isCapturedByDistance', true)
       }
     });
   }
@@ -543,11 +592,13 @@ export default class SNR {
     this._trackTargetDistanceInterval &&
       clearInterval(this._trackTargetDistanceInterval);
     this._trackTargetDistanceInterval = null;
+    this._eventListener && this._eventListener('isCapturedByDistance', false)
   }
 
   _trackTargetByDistance() {
     this._trackTargetDistanceInterval &&
       clearInterval(this._trackTargetDistanceInterval);
+
     const flightObject = this._flightObjects.find((flightObject) =>
       flightObject.identifier === this._trackingTargetIdentifier
     )!;
@@ -561,6 +612,7 @@ export default class SNR {
       if (
         targetDistance > this._maxDistance
       ) {
+        this.resetCaptureTargetByDirection();
         this.resetCaptureTargetByDistance();
       }
 
