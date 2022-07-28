@@ -29,27 +29,32 @@ export default class SAMissile {
       this._timeInAir = (Date.now() - this._launchTime) / 1000;
       const targetPosition = this._targetObject!.currentPoint;
       const flightDistance = (this._timeInAir * this._velocity) / 1000;
+
       const dFlightDistance = ((this._timeInAir - prevTime) * this._velocity) /
         1000; // Расстояние с прошлого цикла
       //находим длину исходного отрезка
       const dx = targetPosition.x - this._currentPoint.x;
       const dy = targetPosition.y - this._currentPoint.y;
+      const dz = targetPosition.z - this._currentPoint.z;
       const targetDistance = Math.sqrt(dx * dx + dy * dy);
       //находим направляющий вектор
       let dirX = dx / targetDistance;
       let dirY = dy / targetDistance;
+      let dirZ = dz * dFlightDistance;
       //умножаем направляющий вектор на необх длину
       dirX *= dFlightDistance;
       dirY *= dFlightDistance;
       this._currentPoint = {
         x: dirX + this._currentPoint.x,
         y: dirY + this._currentPoint.y,
-        z: this._currentPoint.z,
+        z: dirZ + this._currentPoint.z,
       };
       if (targetDistance <= this._explosionDistance) {
         this._killFlightObject();
       }
-      if (flightDistance >= this._maxDistance || this._targetObject!.isDestroyed) {
+      if (
+        flightDistance >= this._maxDistance || this._targetObject!.isDestroyed
+      ) {
         this._destroyMissile();
       }
     }, 0);
