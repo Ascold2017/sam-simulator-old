@@ -25,16 +25,22 @@ export default class SNR {
   _trackingTargetIdentifier: string | null = null;
   _eventListener: EventListener | null = null;
   _missiles: SAMissile[] = [];
+  _missileVelocity = 0;
+  _missileMaxDistance = 0;
   constructor(
     targetRadarCanvas: HTMLCanvasElement,
     indicatorCanvas: HTMLCanvasElement,
     distanceRadarCanvas: HTMLCanvasElement,
     eventListener: EventListener,
+    missileVelocity: number,
+    missileMaxDistance: number,
   ) {
     this._targetRadarCanvasContext = targetRadarCanvas.getContext("2d");
     this._indicatorCanvasContext = indicatorCanvas.getContext("2d");
     this._distanceRadarCanvasContext = distanceRadarCanvas.getContext("2d");
     this._eventListener = eventListener;
+    this._missileVelocity = missileVelocity;
+    this._missileMaxDistance = missileMaxDistance;
     this._targetRadarCanvasCenter = {
       x: targetRadarCanvas.width / 2,
       y: targetRadarCanvas.height / 2,
@@ -328,6 +334,7 @@ export default class SNR {
             canvasDistanceSpotWidth,
             canvasDistanceSpotLength,
             targetVisibilityK,
+            flightObject._velocity,
           );
         }
       }
@@ -476,6 +483,7 @@ export default class SNR {
     this._trackTargetInterval = null;
     this._trackingTargetIdentifier = null;
     this._eventListener && this._eventListener("isCapturedByDirection", false);
+    this.resetCaptureTargetByDistance();
   }
 
   _drawDistanceScreenSnow() {
@@ -556,6 +564,21 @@ export default class SNR {
       pointY2,
     );
     this._distanceRadarCanvasContext.stroke();
+
+    // Draw redline
+    const redlineY = this._distanceRadarCanvasContext.canvas.height -
+      this._distanceRadarCanvasContext.canvas.height /
+        (maxDistance / this._missileMaxDistance);
+    this._distanceRadarCanvasContext!.fillStyle = `rgba(255, 0, 0,1)`;
+    this._distanceRadarCanvasContext.setLineDash([10, 10]);
+    this._distanceRadarCanvasContext!.beginPath();
+    this._distanceRadarCanvasContext.moveTo(0, redlineY);
+    this._distanceRadarCanvasContext.lineTo(
+      this._distanceRadarCanvasContext.canvas.width,
+      redlineY,
+    );
+    this._distanceRadarCanvasContext.stroke();
+    this._distanceRadarCanvasContext.setLineDash([]);
   }
 
   _drawDistanceScreenTargets(
@@ -563,6 +586,7 @@ export default class SNR {
     canvasDistanceSpotWidth: number,
     canvasDistanceSpotLength: number,
     targetVisibilityK: number,
+    velocity: number,
   ) {
     if (!this._distanceRadarCanvasContext) return;
     const maxDistance = this._maxDistance * this._scale;
@@ -584,6 +608,27 @@ export default class SNR {
       Math.PI * 2,
     );
     this._distanceRadarCanvasContext!.fill();
+
+    if (this._trackTargetDistanceInterval) {
+      // Draw point of missile hit
+      const timeToHit = targetDistance /
+        ((velocity + this._missileVelocity) / 1000);
+      const distanceToHit = (timeToHit * this._missileVelocity) / 1000;
+      const missileHitY = this._distanceRadarCanvasContext.canvas.height -
+        this._distanceRadarCanvasContext.canvas.height /
+          (maxDistance / distanceToHit);
+
+      this._distanceRadarCanvasContext!.fillStyle = `rgba(255, 0, 0,1)`;
+      this._distanceRadarCanvasContext.setLineDash([3, 3]);
+      this._distanceRadarCanvasContext!.beginPath();
+      this._distanceRadarCanvasContext.moveTo(0, missileHitY);
+      this._distanceRadarCanvasContext.lineTo(
+        this._distanceRadarCanvasContext.canvas.width,
+        missileHitY,
+      );
+      this._distanceRadarCanvasContext.stroke();
+      this._distanceRadarCanvasContext.setLineDash([]);
+    }
   }
 
   get targetDistance() {

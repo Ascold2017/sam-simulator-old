@@ -95,7 +95,7 @@ function launchMissile() {
 }
 
 onMounted(() => {
-  snr.value = new SNR(targetScreenRef.value!, snrIndicatorsRef.value!, distanceScreenRef.value!, SNRListener);
+  snr.value = new SNR(targetScreenRef.value!, snrIndicatorsRef.value!, distanceScreenRef.value!, SNRListener, 900, 25);
   window.addEventListener('keydown', (event: KeyboardEvent) => {
     const map: Record<string, () => void> = {
       'KeyA': () => snr.value?.setAzimut(snr.value.azimut - 0.1),
