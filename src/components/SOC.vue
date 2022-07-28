@@ -1,5 +1,5 @@
 <template>
-  <div class="px-6 py-6">
+  <div class="px-6">
     <div class="d-flex">
     <div class="d-flex" style="margin: 0 auto">
       <v-card class="px-2 py-2">

@@ -1,13 +1,14 @@
 <template>
   <v-layout full-height>
     <v-main dark>
-      <v-tabs v-model="activeScreen">
-        <v-tab value="BIP">БИП</v-tab>
-        <v-tab value="SOC">СОЦ</v-tab>
-        <v-tab value="SNR">СНР</v-tab>
-        <v-tab value="Editor">Редактор</v-tab>
-      </v-tabs>
-
+      <div class="d-flex justify-center py-3">
+        <v-btn-toggle v-model="activeScreen">
+          <v-btn value="BIP">БИП</v-btn>
+          <v-btn value="SOC">СОЦ</v-btn>
+          <v-btn value="SNR">СНР</v-btn>
+          <v-btn value="Editor">Редактор</v-btn>
+        </v-btn-toggle>
+      </div>
       <BIP ref="bipRef" v-show="activeScreen === 'BIP'" />
       <SOC ref="radarRef" v-show="activeScreen === 'SOC'" @exportAzimut="onExportAzimut" />
       <SNR ref="snrRef" v-show="activeScreen === 'SNR'" />
@@ -17,7 +18,7 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, ref } from 'vue'
+import { ref } from 'vue'
 import BIP from '@/components/BIP.vue'
 import SOC from '@/components/SOC.vue'
 import SNR from '@/components/SNR.vue';
@@ -32,7 +33,6 @@ enum ScreensEnum {
 }
 
 const activeScreen = ref(ScreensEnum.Editor);
-console.log(activeScreen)
 
 const bipRef = ref<InstanceType<typeof BIP> | null>(null);
 const radarRef = ref<InstanceType<typeof SOC> | null>(null);
@@ -49,10 +49,3 @@ function onExportAzimut(azimut: number) {
 }
 </script>
 
-<style>
-.responsive-canvas {
-  display: block;
-  max-width: 100%;
-  height: calc(100vh - 48px);
-}
-</style>

@@ -1,13 +1,13 @@
 <template>
-  <v-card>
+  <div class="px-6">
     <div class="d-flex">
-      <canvas ref="bipRef" width="1000" height="1000" class="responsive-canvas border"
-        style="background-image: url(/snazzy-image.png); background-size: contain;"></canvas>
-        <v-card>
-          <v-list></v-list>
-        </v-card>
+      <v-card style="margin: 0 auto">
+        <canvas ref="bipRef" width="1000" height="1000" class="responsive-canvas border"
+          style="background-image: url(/snazzy-image.png); background-size: contain;"></canvas>
+      </v-card>
     </div>
-  </v-card>
+
+  </div>
 </template>
 
 <script setup lang="ts">
@@ -39,3 +39,11 @@ defineExpose({
   bip
 });
 </script>
+
+<style>
+.responsive-canvas {
+  display: block;
+  max-width: 100%;
+  height: calc(100vh - 96px);
+}
+</style>

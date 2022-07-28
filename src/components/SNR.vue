@@ -1,10 +1,10 @@
 <template>
-  <v-card class="px-6 py-6">
-    <div class="d-flex justify-space-between">
+  <div class="px-6">
+    <div class="d-flex justify-center">
       <v-card>
         <canvas ref="targetScreenRef" width="600" height="600" class="border"></canvas>
       </v-card>
-      <v-card class="flex-1 px-3 py-3 d-flex flex-column">
+      <v-card class="flex-1 mx-3 px-3 py-3 d-flex flex-column">
         <canvas ref="snrIndicatorsRef" width="400" height="200"></canvas>
         <v-divider class="mt-2" />
         <div class="d-flex flex-column flex-grow-1 mt-3">
@@ -46,7 +46,7 @@
 
 
     </div>
-  </v-card>
+  </div>
 </template>
 
 <script setup lang="ts">
