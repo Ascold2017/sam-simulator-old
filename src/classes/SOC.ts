@@ -6,9 +6,10 @@ interface ISOC {
 }
 export default class SOC {
   _flightObjects: FlightObject[] = [];
-  _scale = 1;
+  _scale = 2;
   _canvasContext: CanvasRenderingContext2D | null = null;
   _canvasCenter = { x: 0, y: 0 };
+  _canvasScale = 2;
   _wayPoints: Record<string, { x: number; y: number }[]> = {};
   _rayWidth = 0;
   _maxLocateDistance = 150;
@@ -29,6 +30,10 @@ export default class SOC {
 
     this._draw();
     this._cleanupWaypoints();
+  }
+
+  get _displayedDistance() {
+    return (this._maxLocateDistance * this._canvasScale) / this._scale;
   }
 
   get scale() {
@@ -125,7 +130,7 @@ export default class SOC {
       this._canvasContext!.stroke();
     }
     if (this._scale <= 2) {
-      // Draw 100 km circle
+      // Draw 150 km circle
       this._canvasContext!.beginPath();
       this._canvasContext!.arc(
         centerOfCanvas.x,
@@ -209,14 +214,14 @@ export default class SOC {
         canvasPoint.y - centerOfCanvas.y,
       ) / this._scale;
       if (
-        distanceToCenter < this._maxLocateDistance &&
+        distanceToCenter < this._displayedDistance &&
         this._getVisibleDistance(flightObject) > distanceToCenter
       ) {
         let angleToCenterRad = Math.atan2(
           centerOfCanvas.y - canvasPoint.y,
           centerOfCanvas.x - canvasPoint.x,
         );
-        const k = (distanceToCenter) / 150;
+        const k = (distanceToCenter) / this._maxLocateDistance;
         this._canvasContext!.strokeStyle = `rgba(184, 134, 11,${1 - k})`;
         this._canvasContext!.beginPath();
         this._canvasContext!.arc(
@@ -244,7 +249,7 @@ export default class SOC {
 
   _drawShow() {
     for (let i = 0; i < 500; i++) {
-      const distanceFromCenter = (150) * this._scale * Math.random();
+      const distanceFromCenter = this._displayedDistance * this._scale * Math.random();
       const angle = Math.PI * 2 * Math.random();
       const showWidth = 1 * Math.PI / 180;
       this._canvasContext!.beginPath();
@@ -255,7 +260,7 @@ export default class SOC {
         angle,
         angle + showWidth,
       );
-      const k = (distanceFromCenter) / (150 * this._scale);
+      const k = (distanceFromCenter) / (this._maxLocateDistance * this._scale);
       this._canvasContext!.strokeStyle = `rgba(184, 134, 11,${1 - k})`;
       this._canvasContext!.lineWidth = 3;
       this._canvasContext!.stroke();
@@ -264,25 +269,16 @@ export default class SOC {
   }
 
   _drawTargetRay() {
-    const angleWidth = 4 * (Math.PI / 180);
-    this._canvasContext!.strokeStyle = 'rgba(255,0,0,0.1)'
-    this._canvasContext!.fillStyle = 'rgba(255,0,0,0.1)'
+    this._canvasContext!.strokeStyle = 'rgba(255,0,0,1)'
     this._canvasContext!.beginPath();
-    this._canvasContext!.arc(
+    this._canvasContext!.moveTo(
       this._canvasCenter.x,
       this._canvasCenter.y,
-      150 * this._scale,
-      this._targetRayAngle - Math.PI / 2 - angleWidth / 2,
-      this._targetRayAngle - Math.PI / 2 + angleWidth / 2,
     );
-    this._canvasContext!.arc(
-      this._canvasCenter.x,
-      this._canvasCenter.y,
-      0,
-      this._targetRayAngle - Math.PI / 2 - angleWidth / 2,
-      this._targetRayAngle - Math.PI / 2 + angleWidth / 2,
+    this._canvasContext!.lineTo(
+      (this._displayedDistance * this._scale) * Math.cos(this._targetRayAngle - Math.PI/2) +  this._canvasCenter.x,
+      (this._displayedDistance * this._scale) * Math.sin(this._targetRayAngle - Math.PI/2) + this._canvasCenter.y,
     );
     this._canvasContext!.stroke();
-    this._canvasContext!.fill();
   }
 }

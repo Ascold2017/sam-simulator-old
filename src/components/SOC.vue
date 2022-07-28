@@ -1,26 +1,23 @@
 <template>
-  <v-card>
-    <v-card-text>
-      <v-row>
-        <v-col>
-          <canvas ref="radarRef" width=650 height=650 style="display: block; margin: 0 auto;"></canvas>
-          <div class="d-flex">
-            <v-radio-group :model-value="scale" @update:model-value="setScale" inline label="Масштаб">
-              <v-radio label="150 km" :value="2" />
-              <v-radio label="100 km" :value="3" />
-              <v-radio label="50 km" :value="6" />
-            </v-radio-group>
+  <div class="px-6 py-6">
+    <div class="d-flex">
+    <div class="d-flex" style="margin: 0 auto">
+      <v-card class="px-2 py-2">
+        <canvas ref="radarRef" width=650 height=650 class="border"></canvas>
+      </v-card>
+      <v-card width="300" class="flex-1 px-2 py-2 ml-3 d-flex flex-column">
 
-          </div>
-          <v-slider min="0" max="360" :step="1" :model-value="targetRayAngle" @update:model-value="setTargetRayAnge"
-            thumb-label label="Азимут" />
-          <div class="d-flex justify-center">
-            <v-btn color="warning" @click="exportAzimut">ЦУ</v-btn>
-          </div>
-        </v-col>
-      </v-row>
-    </v-card-text>
-  </v-card>
+        <v-radio-group class="flex-grow-0" :model-value="scale" @update:model-value="setScale" label="Масштаб">
+          <v-radio label="150 km" :value="2" />
+          <v-radio label="100 km" :value="3" />
+          <v-radio label="50 km" :value="6" />
+        </v-radio-group>
+        <v-btn color="warning" block @click="exportAzimut" class="mt-auto flex-grow-0">ЦУ</v-btn>
+
+      </v-card>
+</div>
+    </div>
+  </div>
 </template>
 <script setup lang="ts">
 import type FlightObject from '@/classes/FlightObject';
@@ -31,9 +28,7 @@ const emit = defineEmits<{ (e: 'exportAzimut', azimut: number): void }>()
 const radarRef = ref<HTMLCanvasElement | null>(null);
 
 const radar = ref<SOC | null>(null);
-const targetRayAngle = computed(() => {
-  return radar.value?.targetRayAngle || 0;
-});
+
 const setTargetRayAnge = (v: number) => {
   radar.value!.targetRayAngle = v;
 }
@@ -50,6 +45,14 @@ onMounted(() => {
     canvasRadar: radarRef.value,
     rayWidth: 8
   });
+  window.addEventListener('keydown', (event: KeyboardEvent) => {
+    if (event.code === 'KeyA') {
+      setTargetRayAnge(radar.value!.targetRayAngle - 0.5)
+    }
+    if (event.code === 'KeyD') {
+      setTargetRayAnge(radar.value!.targetRayAngle + 0.5)
+    }
+  })
 });
 
 function addFlightObject(flightObject: FlightObject) {
@@ -57,7 +60,7 @@ function addFlightObject(flightObject: FlightObject) {
 }
 
 function exportAzimut() {
-  emit('exportAzimut', targetRayAngle.value);
+  emit('exportAzimut', radar.value!.targetRayAngle);
 }
 
 defineExpose({

@@ -20,7 +20,7 @@
 import { onMounted, ref } from 'vue'
 import BIP from '@/components/BIP.vue'
 import SOC from '@/components/SOC.vue'
-import SNR from './components/SNR.vue';
+import SNR from '@/components/SNR.vue';
 import Editor from '@/components/Editor.vue'
 import type FlightObject from './classes/FlightObject';
 
@@ -32,6 +32,7 @@ enum ScreensEnum {
 }
 
 const activeScreen = ref(ScreensEnum.Editor);
+console.log(activeScreen)
 
 const bipRef = ref<InstanceType<typeof BIP> | null>(null);
 const radarRef = ref<InstanceType<typeof SOC> | null>(null);
