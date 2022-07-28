@@ -17,24 +17,27 @@
           </v-radio-group>
           <v-divider />
           <v-radio-group inline label="Масштаб" :model-value="distanceScreenScale"
-            @update:model-value="setDistanceScreenScale" hide-details class="flex-grow-0">
+            @update:model-value="setDistanceScreenScale" hide-details class="flex-grow-0 mt-2">
             <v-radio :value="1" label="150 km"></v-radio>
             <v-radio :value="0.5" label="75 km"></v-radio>
             <v-radio :value="0.3" label="45 km"></v-radio>
           </v-radio-group>
+          <p>Д, km: {{ params.targetDistance }}</p>
+          <p>V, m/s: {{ params.targetVelocity }}</p>
+          <p>H, km: {{ params.targetHeight }}</p>
 
 
           <v-divider class="mt-auto" />
           <div class="d-flex justify-space-between mt-3">
-            <v-icon :color="isCapturedByDirection ? 'success' : 'warning'">mdi-checkbox-blank-circle</v-icon> <span
-              class="pr-3">AC-1</span>
-            <v-btn small color="warning" class="mr-3" :disabled="!isCapturedByDirection"
+            <v-icon :color="params.isCapturedByDirection ? 'success' : 'warning'">mdi-checkbox-blank-circle</v-icon>
+            <span class="pr-3">AC-1</span>
+            <v-btn small color="warning" class="mr-3" :disabled="!params.isCapturedByDirection"
               @click="resetCaptureTargetByDirection">Сброс</v-btn>
             <v-divider vertical />
-            <v-btn small color="warning" class="ml-3" :disabled="!isCapturedByDistance"
+            <v-btn small color="warning" class="ml-3" :disabled="!params.isCapturedByDistance"
               @click="resetCaptureTargetByDistance">Сброс</v-btn>
             <span class="pl-3">AC-2</span>
-            <v-icon :color="isCapturedByDistance ? 'success' : 'warning'">mdi-checkbox-blank-circle</v-icon>
+            <v-icon :color="params.isCapturedByDistance ? 'success' : 'warning'">mdi-checkbox-blank-circle</v-icon>
           </div>
         </div>
 
@@ -51,14 +54,19 @@
 
 <script setup lang="ts">
 import SNR from '@/classes/SNR';
-import { computed } from '@vue/reactivity';
-import { onMounted, ref, watch } from 'vue';
+import { onMounted, ref, reactive, computed } from 'vue';
 const targetScreenRef = ref<HTMLCanvasElement | null>(null);
 const distanceScreenRef = ref<HTMLCanvasElement | null>(null);
 const snrIndicatorsRef = ref<HTMLCanvasElement | null>(null);
 const snr = ref<SNR | null>(null);
-let isCapturedByDirection = ref(false);
-let isCapturedByDistance = ref(false);
+
+const params = reactive<Record<string, boolean | number>>({
+  isCapturedByDirection: false,
+  isCapturedByDistance: false,
+  targetDistance: 0,
+  targetHeight: 0,
+  targetVelocity: 0
+})
 
 let rayWidth = computed(() => snr.value?.rayWidth)
 let distanceScreenScale = computed(() => snr.value?.distanceScreenScale);
@@ -68,13 +76,12 @@ const resetCaptureTargetByDirection = () => snr.value?.resetCaptureTargetByDirec
 const resetCaptureTargetByDistance = () => snr.value?.resetCaptureTargetByDistance();
 const setDistanceScreenScale = (v: number) => snr.value?.setDistanceScreenScale(v);
 
-function SNRListener(property: string, value: any) {
-  if (property === 'isCapturedByDirection') {
-    isCapturedByDirection.value = value;
-  }
-  if (property === 'isCapturedByDistance') {
-    isCapturedByDistance.value = value;
-  }
+function SNRListener(property: string, value: number | boolean) {
+  property === 'isCapturedByDirection' && (params.isCapturedByDirection = value)
+  property === 'isCapturedByDistance' && (params.isCapturedByDistance = value)
+  property === 'targetDistance' && (params.targetDistance = value)
+  property === 'targetHeight' && (params.targetHeight = value)
+  property === 'targetVelocity' && (params.targetVelocity = value)
 }
 
 onMounted(() => {

@@ -27,7 +27,7 @@ export default class SNR {
     targetRadarCanvas: HTMLCanvasElement,
     indicatorCanvas: HTMLCanvasElement,
     distanceRadarCanvas: HTMLCanvasElement,
-    eventListener: EventListener
+    eventListener: EventListener,
   ) {
     this._targetRadarCanvasContext = targetRadarCanvas.getContext("2d");
     this._indicatorCanvasContext = indicatorCanvas.getContext("2d");
@@ -42,7 +42,7 @@ export default class SNR {
   }
 
   get azimut() {
-    const azimut = (this._azimut + Math.PI / 2) * (180 / Math.PI)
+    const azimut = (this._azimut + Math.PI / 2) * (180 / Math.PI);
     return azimut < 0 ? azimut + 360 : azimut;
   }
 
@@ -55,7 +55,7 @@ export default class SNR {
     }
 
     if (azimut > 270) {
-      azimut = azimut - 360
+      azimut = azimut - 360;
     }
 
     this._azimut = (azimut - 90) * Math.PI / 180;
@@ -321,7 +321,23 @@ export default class SNR {
           );
         }
       }
-      if (flightObject.isDestroyed && this._trackingTargetIdentifier === flightObject.identifier) {
+
+      if (
+        flightObject.identifier === this._trackingTargetIdentifier &&
+        this._trackTargetInterval && this._trackTargetDistanceInterval &&
+        this._eventListener
+      ) {
+        this._eventListener("targetDistance", this.targetDistance.toFixed(1));
+        this._eventListener("targetVelocity", flightObject._velocity);
+        this._eventListener(
+          "targetHeight",
+          (Math.abs(flightObject.currentPoint.z * 1000)).toFixed(0),
+        );
+      }
+      if (
+        flightObject.isDestroyed &&
+        this._trackingTargetIdentifier === flightObject.identifier
+      ) {
         this.resetCaptureTargetByDirection();
         this.resetCaptureTargetByDistance();
       }
@@ -439,7 +455,8 @@ export default class SNR {
           Math.abs(targetSpotAngle);
       if (isCapturedByAzimut && isCapturedByVerticalAngle) {
         this._trackTargetByDirection(flightObject);
-        this._eventListener && this._eventListener('isCapturedByDirection', true)
+        this._eventListener &&
+          this._eventListener("isCapturedByDirection", true);
       }
     });
   }
@@ -448,7 +465,7 @@ export default class SNR {
     this._trackTargetInterval && clearInterval(this._trackTargetInterval);
     this._trackTargetInterval = null;
     this._trackingTargetIdentifier = null;
-    this._eventListener && this._eventListener('isCapturedByDirection', false)
+    this._eventListener && this._eventListener("isCapturedByDirection", false);
   }
 
   _drawDistanceScreenSnow() {
@@ -583,7 +600,8 @@ export default class SNR {
         this._trackingTargetIdentifier === flightObject.identifier
       ) {
         this._trackTargetByDistance();
-        this._eventListener && this._eventListener('isCapturedByDistance', true)
+        this._eventListener &&
+          this._eventListener("isCapturedByDistance", true);
       }
     });
   }
@@ -592,7 +610,7 @@ export default class SNR {
     this._trackTargetDistanceInterval &&
       clearInterval(this._trackTargetDistanceInterval);
     this._trackTargetDistanceInterval = null;
-    this._eventListener && this._eventListener('isCapturedByDistance', false)
+    this._eventListener && this._eventListener("isCapturedByDistance", false);
   }
 
   _trackTargetByDistance() {
