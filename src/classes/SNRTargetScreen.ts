@@ -145,16 +145,16 @@ export default class SNRTargetScreen {
         this.canvasCenter.x;
       const canvasY = missileParams.missileOffsetY * this.ctx.canvas.height +
         this.canvasCenter.y;
-      this.ctx.fillStyle = `rgba(255, 0, 0,1)`;
+      this.ctx.strokeStyle = `rgba(255, 0, 0,1)`;
+      this.ctx.lineWidth = 4;
+      this.ctx.setLineDash([4, 1])
       this.ctx.beginPath();
-      this.ctx.arc(
-        canvasX,
-        canvasY,
-        5,
-        0,
-        Math.PI * 2,
-      );
-      this.ctx.fill();
+      this.ctx.moveTo(canvasX - 8, canvasY);
+      this.ctx.lineTo(canvasX + 8, canvasY);
+      this.ctx.lineTo(canvasX + 8, canvasY - 8);
+      this.ctx.stroke();
+      this.ctx.lineWidth = 1;
+      this.ctx.setLineDash([])
     });
   }
 }

@@ -12,7 +12,7 @@ export default class SNRDistanceScreen {
     canvas: HTMLCanvasElement,
     maxDistance: number,
     distanceDetectRange: number,
-    initialDistance: number
+    initialDistance: number,
   ) {
     this.ctx = canvas.getContext("2d");
     this.canvasCenter = {
@@ -41,7 +41,7 @@ export default class SNRDistanceScreen {
   }
 
   public setMissileParams(missileIdentifier: string, missileDistance: number) {
-    this.missiles[missileIdentifier] = { missileDistance }
+    this.missiles[missileIdentifier] = { missileDistance };
   }
 
   get screenScale() {
@@ -67,7 +67,6 @@ export default class SNRDistanceScreen {
   public setKillZoneDistance(distance: number) {
     this.killZoneDistance = distance;
   }
-
 
   private drawScreen() {
     if (!this.ctx) return;
@@ -247,19 +246,18 @@ export default class SNRDistanceScreen {
       const maxDistance = this.maxDistance * this.scale;
       const canvasCenterX = this.ctx.canvas.width / 2;
       const pointY = this.ctx.canvas.height -
-      this.ctx.canvas.height /
+        this.ctx.canvas.height /
           (maxDistance / missileParams.missileDistance);
-          this.ctx.fillStyle = `rgba(255, 0, 0,1)`;
+          this.ctx.strokeStyle = `rgba(255, 0, 0,1)`;
+          this.ctx.lineWidth = 4;
+          this.ctx.setLineDash([4, 1])
           this.ctx.beginPath();
-          this.ctx.arc(
-        canvasCenterX,
-        pointY,
-        5,
-        0,
-        Math.PI * 2,
-      );
-      this.ctx.fill();
-    })
-    
+          this.ctx.moveTo(canvasCenterX - 8, pointY);
+          this.ctx.lineTo(canvasCenterX + 8, pointY);
+          this.ctx.lineTo(canvasCenterX + 8, pointY - 8);
+          this.ctx.stroke();
+          this.ctx.lineWidth = 1;
+          this.ctx.setLineDash([])
+    });
   }
 }

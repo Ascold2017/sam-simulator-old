@@ -21,7 +21,7 @@ export default class SAMissile {
     velocity = 900,
     initialPoint = { x: 0, y: 0, z: 0 },
   ) {
-    this._identifier = new Date().toDateString();
+    this._identifier = new Date().toString();
     this.targetObject = targetObject;
     this.maxDistance = maxDistance;
     this.velocity = velocity;
@@ -93,7 +93,7 @@ export default class SAMissile {
     this.targetObject!.kill();
   }
 
-  private destroyMissile() {
+   destroyMissile() {
     this.isDestroyed = true;
     clearInterval(this.interval!);
     this.interval = null;

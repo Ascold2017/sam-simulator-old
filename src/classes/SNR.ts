@@ -279,6 +279,7 @@ export default class SNR {
     this.trackTargetInterval = null;
     this.trackingTargetIdentifier = null;
     this.eventListener && this.eventListener("isCapturedByDirection", false);
+    this.missiles.forEach((missile) => missile.destroyMissile());
     this.resetCaptureTargetByDistance();
   }
 
@@ -387,11 +388,11 @@ export default class SNR {
         );
         this.snrDistanceScreen?.setMissileParams(
           missile.indentifier!,
-          missileDistance
+          missileDistance,
         );
       } else {
-        this.snrTargetScreen?.removeMissile(missile.indentifier!)
-        this.snrDistanceScreen?.removeMissile(missile.indentifier!)
+        this.snrTargetScreen?.removeMissile(missile.indentifier!);
+        this.snrDistanceScreen?.removeMissile(missile.indentifier!);
       }
     }
   }
