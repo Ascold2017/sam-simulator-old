@@ -70,10 +70,10 @@ const params = reactive<Record<string, boolean | number>>({
   targetVelocity: 0
 })
 
-let rayWidth = computed(() => snr.value?.rayWidth)
+let rayWidth = computed(() => snr.value?.radarRayWidth)
 let distanceScreenScale = computed(() => snr.value?.distanceScreenScale);
 
-const setRayWidth = (v: number) => snr.value!.setRayWidth(v);
+const setRayWidth = (v: number) => snr.value!.setRadarRayWidth(v);
 const resetCaptureTargetByDirection = () => snr.value?.resetCaptureTargetByDirection();
 const resetCaptureTargetByDistance = () => snr.value?.resetCaptureTargetByDistance();
 const setDistanceScreenScale = (v: number) => snr.value?.setDistanceScreenScale(v);
@@ -98,16 +98,16 @@ onMounted(() => {
   snr.value = new SNR(targetScreenRef.value!, snrIndicatorsRef.value!, distanceScreenRef.value!, SNRListener, 900, 25);
   window.addEventListener('keydown', (event: KeyboardEvent) => {
     const map: Record<string, () => void> = {
-      'KeyA': () => snr.value?.setAzimut(snr.value.azimut - 0.1),
-      'KeyD': () => snr.value?.setAzimut(snr.value.azimut + 0.1),
-      'KeyW': () => snr.value?.setVerticalAngle(snr.value.verticalAngle + 0.1),
-      'KeyS': () => snr.value?.setVerticalAngle(snr.value.verticalAngle - 0.1),
+      'KeyA': () => snr.value?.setAzimut(snr.value.azimutDeg - 0.1),
+      'KeyD': () => snr.value?.setAzimut(snr.value.azimutDeg + 0.1),
+      'KeyW': () => snr.value?.setVerticalAngle(snr.value.verticalAngleDeg + 0.1),
+      'KeyS': () => snr.value?.setVerticalAngle(snr.value.verticalAngleDeg - 0.1),
       'Space': () => {
         snr.value?.captureTargetByDirection()
         snr.value?.captureTargetByDistance()
       },
-      'KeyQ': () => snr.value?.setTargetDistance(snr.value.targetDistance - 0.2),
-      'KeyE': () => snr.value?.setTargetDistance(snr.value.targetDistance + 0.2)
+      'KeyQ': () => snr.value?.setIndicatorTargetDistance(snr.value.indicatorTargetDistance - 0.2),
+      'KeyE': () => snr.value?.setIndicatorTargetDistance(snr.value.indicatorTargetDistance + 0.2)
     }
     map[event.code] && map[event.code]();
   }, false)
