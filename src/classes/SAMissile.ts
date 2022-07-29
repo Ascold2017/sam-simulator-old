@@ -1,6 +1,7 @@
 import type FlightObject from "./FlightObject";
 
 export default class SAMissile {
+  private _identifier: string | null = null
   private targetObject: FlightObject | null = null;
   private maxDistance: number = 0;
   private velocity: number = 0;
@@ -20,10 +21,15 @@ export default class SAMissile {
     velocity = 900,
     initialPoint = { x: 0, y: 0, z: 0 },
   ) {
+    this._identifier = new Date().toDateString();
     this.targetObject = targetObject;
     this.maxDistance = maxDistance;
     this.velocity = velocity;
     this.currentPoint = initialPoint;
+  }
+
+  get indentifier() {
+    return this._identifier
   }
 
   public get isDestroyedMissile() {

@@ -1,79 +1,140 @@
 export default class FlightObject {
-    identifier: string | null = null
-    _wayPoints: { x: number, y: number, z: number }[] = []
-    _velocity = 0;
-    _launchTime = 0;
-    _timeInAir = 0;
-    _flightTime = 0;
-    _interval: number | null = null;
-    isLaunched = false;
-    isDestroyed = false;
-    isKilled = false;
-    currentPoint = { x: 0, y: 0, z: 0 }
-    rcs = 0.5;
-    constructor({ identifier = new Date().toString(), wayPoints = [], velocity = 100, rcs = 0.5 }: { identifier: string; wayPoints: { x: number; y: number; z: number }[]; velocity: number; rcs?: number; }) {
-        this.identifier = identifier;
-        this.rcs = rcs;
-        this._wayPoints = wayPoints;
-        this._velocity = velocity;
-        let flightRange = this._getFlightRange();
-        let flightTime = (flightRange * 1000) / velocity; // Time in seconds
-        this._flightTime = flightTime * 1000; // time in milliseconds
-        console.log(`Flight range: ${flightRange} km. Flight time: ${Math.round(flightTime / 60)} min. Velocity: ${velocity} m/s`)
-    }
+  private _identifier: string | null = null;
+  private wayPoints: { x: number; y: number; z: number }[] = [];
+  private _velocity = 0;
+  private launchTime = 0;
+  private timeInAir = 0;
+  private flightTime = 0;
+  private interval: number | null = null;
+  private _isLaunched = false;
+  private _isDestroyed = false;
+  private _isKilled = false;
+  private _currentPoint = { x: 0, y: 0, z: 0 };
+  private _rcs = 0.5;
+  constructor(
+    {
+      identifier = new Date().toString(),
+      wayPoints = [],
+      velocity = 100,
+      rcs = 0.5,
+    }: {
+      identifier: string;
+      wayPoints: { x: number; y: number; z: number }[];
+      velocity: number;
+      rcs?: number;
+    },
+  ) {
+    this._identifier = identifier;
+    this._rcs = rcs;
+    this.wayPoints = wayPoints;
+    this._velocity = velocity;
+    let flightRange = this.getFlightRange();
+    let flightTime = (flightRange * 1000) / velocity; // Time in seconds
+    this.flightTime = flightTime * 1000; // time in milliseconds
+    console.log(
+      `Flight range: ${flightRange} km. Flight time: ${
+        Math.round(flightTime / 60)
+      } min. Velocity: ${velocity} m/s`,
+    );
+  }
 
-    launch(listener: ((arg0: string) => void)) {
-        this.isLaunched = true;
-        this._launchTime = +new Date();
-        
-        console.log(`Flight object launched at ${new Date(this._launchTime)}`)
-        listener(`Flight object launched at ${new Date(this._launchTime).toLocaleTimeString()}`)
-        this._interval = setInterval(() => {
-            this._timeInAir = +new Date() - this._launchTime;
-            const partOfFlyWay = this._timeInAir / this._flightTime;
-            this.currentPoint = this._getCubicBezierXYZatT(this._wayPoints[0], this._wayPoints[1], this._wayPoints[2], this._wayPoints[3], partOfFlyWay);
-            if (this._timeInAir >= this._flightTime) {
-                this.destroy();
-            }
-        }, 0);
-        return this;
-    }
+  get identifier() {
+    return this._identifier;
+  }
 
-    destroy() {
-        
-        clearInterval(this._interval!);
-        this._interval = null
-        this.isDestroyed = true;
-    }
+  get velocity() {
+    return this._velocity;
+  }
 
-    kill() {
-        this.isKilled = true;
+  get isLaunched() {
+    return this._isLaunched;
+  }
+
+  get isDestroyed() {
+    return this._isDestroyed;
+  }
+
+  get isKilled() {
+    return this._isKilled;
+  }
+
+  get currentPoint() {
+    return this._currentPoint;
+  }
+
+  get rcs() {
+    return this._rcs;
+  }
+
+  launch(listener: (arg0: string) => void) {
+    this._isLaunched = true;
+    this.launchTime = +new Date();
+
+    console.log(`Flight object launched at ${new Date(this.launchTime)}`);
+    listener(
+      `Flight object launched at ${
+        new Date(this.launchTime).toLocaleTimeString()
+      }`,
+    );
+    this.interval = setInterval(() => {
+      this.timeInAir = +new Date() - this.launchTime;
+      const partOfFlyWay = this.timeInAir / this.flightTime;
+      this._currentPoint = this.getCubicBezierXYZatT(
+        this.wayPoints[0],
+        this.wayPoints[1],
+        this.wayPoints[2],
+        this.wayPoints[3],
+        partOfFlyWay,
+      );
+      if (this.timeInAir >= this.flightTime) {
         this.destroy();
-    }
+      }
+    }, 0);
+    return this;
+  }
 
-    _getFlightRange() {
-        return this._wayPoints.reduce((acc, point, index, points) => {
-            const prevPoint = index === 0 ? point : points[index - 1];
-            const length = Math.hypot(point.x - prevPoint.x, point.y - prevPoint.y);
-            return acc + length
-        }, 0)
-    }
+  destroy() {
+    clearInterval(this.interval!);
+    this.interval = null;
+    this._isDestroyed = true;
+  }
 
-    // Given the 4 control points on a Bezier curve 
-    // Get x,y at interval T along the curve (0<=T<=1)
-    // The curve starts when T==0 and ends when T==1
-    _getCubicBezierXYZatT(startPt: { x: any; y: any; z: any; }, controlPt1: { x: any; y: any; z: any; }, controlPt2: { x: any; y: any; z: any; }, endPt: { x: any; y: any; z: any; }, T: number) {
-        return ({
-            x: this._CubicN(T, startPt.x, controlPt1.x, controlPt2.x, endPt.x),
-            y: this._CubicN(T, startPt.y, controlPt1.y, controlPt2.y, endPt.y),
-            z: this._CubicN(T, startPt.z, controlPt1.z, controlPt2.z, endPt.z),
-        });
-    }
+  kill() {
+    this._isKilled = true;
+    this.destroy();
+  }
 
-    // cubic helper formula
-    _CubicN(T: number, a: number, b: number, c: number, d: number) {
-        var t2 = T * T;
-        var t3 = t2 * T;
-        return a + (-a * 3 + T * (3 * a - a * T)) * T + (3 * b + T * (-6 * b + b * 3 * T)) * T + (c * 3 - c * 3 * T) * t2 + d * t3;
-    }
+  private getFlightRange() {
+    return this.wayPoints.reduce((acc, point, index, points) => {
+      const prevPoint = index === 0 ? point : points[index - 1];
+      const length = Math.hypot(point.x - prevPoint.x, point.y - prevPoint.y);
+      return acc + length;
+    }, 0);
+  }
+
+  // Given the 4 control points on a Bezier curve
+  // Get x,y at interval T along the curve (0<=T<=1)
+  // The curve starts when T==0 and ends when T==1
+  private getCubicBezierXYZatT(
+    startPt: { x: any; y: any; z: any },
+    controlPt1: { x: any; y: any; z: any },
+    controlPt2: { x: any; y: any; z: any },
+    endPt: { x: any; y: any; z: any },
+    T: number,
+  ) {
+    return ({
+      x: this.cubicN(T, startPt.x, controlPt1.x, controlPt2.x, endPt.x),
+      y: this.cubicN(T, startPt.y, controlPt1.y, controlPt2.y, endPt.y),
+      z: this.cubicN(T, startPt.z, controlPt1.z, controlPt2.z, endPt.z),
+    });
+  }
+
+  // cubic helper formula
+  private cubicN(T: number, a: number, b: number, c: number, d: number) {
+    var t2 = T * T;
+    var t3 = t2 * T;
+    return a + (-a * 3 + T * (3 * a - a * T)) * T +
+      (3 * b + T * (-6 * b + b * 3 * T)) * T + (c * 3 - c * 3 * T) * t2 +
+      d * t3;
+  }
 }

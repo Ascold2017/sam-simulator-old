@@ -42,12 +42,10 @@
           </div>
         </div>
 
-
       </v-card>
       <v-card>
         <canvas ref="distanceScreenRef" width="400" height="600" class="border"></canvas>
       </v-card>
-
 
     </div>
   </div>
@@ -56,11 +54,16 @@
 <script setup lang="ts">
 import SAMissile from '@/classes/SAMissile';
 import SNR from '@/classes/SNR';
+import SNRTargetScreen from '@/classes/SNRTargetScreen';
+import SNRIndicatorsScreen from '@/classes/SNRIndicatorsScreen';
+import SNRDistanceScreen from '@/classes/SNRDistanceScreen'
 import { onMounted, ref, reactive, computed } from 'vue';
+import type FlightObject from '@/classes/FlightObject';
 const targetScreenRef = ref<HTMLCanvasElement | null>(null);
 const distanceScreenRef = ref<HTMLCanvasElement | null>(null);
 const snrIndicatorsRef = ref<HTMLCanvasElement | null>(null);
 const snr = ref<SNR | null>(null);
+const snrDistanceScreen = ref<SNRDistanceScreen | null>(null);
 
 const params = reactive<Record<string, boolean | number>>({
   isCapturedByDirection: false,
@@ -71,12 +74,12 @@ const params = reactive<Record<string, boolean | number>>({
 })
 
 let rayWidth = computed(() => snr.value?.radarRayWidth)
-let distanceScreenScale = computed(() => snr.value?.distanceScreenScale);
+let distanceScreenScale = computed(() => snrDistanceScreen.value?.screenScale);
 
 const setRayWidth = (v: number) => snr.value!.setRadarRayWidth(v);
 const resetCaptureTargetByDirection = () => snr.value?.resetCaptureTargetByDirection();
 const resetCaptureTargetByDistance = () => snr.value?.resetCaptureTargetByDistance();
-const setDistanceScreenScale = (v: number) => snr.value?.setDistanceScreenScale(v);
+const setDistanceScreenScale = (v: number) => snrDistanceScreen.value?.setScale(v);
 
 function SNRListener(property: string, value: number | boolean) {
   property === 'isCapturedByDirection' && (params.isCapturedByDirection = value)
@@ -88,14 +91,36 @@ function SNRListener(property: string, value: number | boolean) {
 
 function launchMissile() {
   if (snr.value!.trackedTarget) {
-    const missile = new SAMissile(snr.value!.trackedTarget, 25, 900, { x: 0, y: 0, z: 0.03 })
+    const missile = new SAMissile(snr.value!.trackedTarget as FlightObject, 25, 900, { x: 0, y: 0, z: 0.03 })
     missile.launch();
     snr.value!.addMissile(missile);
   }
 }
 
 onMounted(() => {
-  snr.value = new SNR(targetScreenRef.value!, snrIndicatorsRef.value!, distanceScreenRef.value!, SNRListener, 900, 25);
+  const initialParams = {
+    initialDistance: 30,
+    maxDistance: 150,
+    minVerticalAngle: -5,
+    maxVerticalAngle: 75,
+    missileVelocity: 900,
+    missileMaxDistance: 25,
+    distanceDetectRange: 0.5,
+    initialRayWidth: 20,
+  }
+  const snrTargetScreen = new SNRTargetScreen(targetScreenRef.value!);
+  snrDistanceScreen.value = new SNRDistanceScreen(distanceScreenRef.value!, initialParams.maxDistance, initialParams.distanceDetectRange, initialParams.initialDistance);
+  const snrIndicatorsScreen = new SNRIndicatorsScreen(snrIndicatorsRef.value!, initialParams.minVerticalAngle, initialParams.maxVerticalAngle)
+  snr.value = new SNR({
+    snrTargetScreen,
+    snrIndicatorsScreen,
+    snrDistanceScreen: snrDistanceScreen.value! as SNRDistanceScreen,
+    eventListener: SNRListener,
+    distanceDetectRange: initialParams.distanceDetectRange,
+    initialDistance: initialParams.initialDistance,
+    initialRayWidth: initialParams.initialRayWidth,
+    maxDistance: initialParams.maxDistance
+});
   window.addEventListener('keydown', (event: KeyboardEvent) => {
     const map: Record<string, () => void> = {
       'KeyA': () => snr.value?.setAzimut(snr.value.azimutDeg - 0.1),

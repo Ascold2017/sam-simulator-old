@@ -1,58 +1,71 @@
 import type FlightObject from "./FlightObject";
 import type SAMissile from "./SAMissile";
+import type SNRDistanceScreen from "./SNRDistanceScreen";
+import type SNRIndicatorsScreen from "./SNRIndicatorsScreen";
+import type SNRTargetScreen from "./SNRTargetScreen";
 
 type EventListener = (arg0: string, arg1: any) => void;
 
+interface ISNR {
+  snrTargetScreen: SNRTargetScreen;
+  snrIndicatorsScreen: SNRIndicatorsScreen;
+  snrDistanceScreen: SNRDistanceScreen;
+  eventListener: EventListener;
+  distanceDetectRange: number;
+  initialDistance: number;
+  initialRayWidth: number;
+  maxDistance: number;
+}
 export default class SNR {
-  private targetRadarCanvasContext: CanvasRenderingContext2D | null = null;
-  private indicatorCanvasContext: CanvasRenderingContext2D | null = null;
-  private distanceRadarCanvasContext: CanvasRenderingContext2D | null = null;
+  private snrTargetScreen: SNRTargetScreen | null = null;
+  private snrIndicatorsScreen: SNRIndicatorsScreen | null = null;
+  private snrDistanceScreen: SNRDistanceScreen | null = null;
   private azimut = -Math.PI / 2; // rad
   private verticalAngle = 0; // rad
-  private targetDistance = 20; // km
+  private targetDistance = 0; // km
   private minVerticalAngle = -5; // degree
   private maxVerticalAngle = 75; // degree
-  private maxDistance = 150;
+  private maxDistance = 0;
   private flightObjects: FlightObject[] = [];
-  private rayWidth = 20; // degree
+  private rayWidth = 0; // degree
   private distanceTrackingAccuracy = 0.2; // km
-  private distanceDetectRange = 0.5; // km
-  private targetRadarCanvasCenter = { x: 0, y: 0 };
-  private scale = 1;
+  private distanceDetectRange = 0; // km
+
   private radarHeight = 36; /// m
   private trackTargetInterval: number | null = null;
   private trackTargetDistanceInterval: number | null = null;
   private trackingTargetIdentifier: string | null = null;
   private eventListener: EventListener | null = null;
   private missiles: SAMissile[] = [];
-  private missileVelocity = 0;
-  private missileMaxDistance = 0;
-  constructor(
-    targetRadarCanvas: HTMLCanvasElement,
-    indicatorCanvas: HTMLCanvasElement,
-    distanceRadarCanvas: HTMLCanvasElement,
-    eventListener: EventListener,
-    missileVelocity: number,
-    missileMaxDistance: number,
-  ) {
-    this.targetRadarCanvasContext = targetRadarCanvas.getContext("2d");
-    this.indicatorCanvasContext = indicatorCanvas.getContext("2d");
-    this.distanceRadarCanvasContext = distanceRadarCanvas.getContext("2d");
+  constructor({
+    snrTargetScreen,
+    snrIndicatorsScreen,
+    snrDistanceScreen,
+    eventListener,
+    distanceDetectRange,
+    initialDistance,
+    initialRayWidth,
+    maxDistance,
+  }: ISNR) {
+    this.snrTargetScreen = snrTargetScreen;
+    this.snrIndicatorsScreen = snrIndicatorsScreen;
+    this.snrDistanceScreen = snrDistanceScreen;
     this.eventListener = eventListener;
-    this.missileVelocity = missileVelocity;
-    this.missileMaxDistance = missileMaxDistance;
-    this.targetRadarCanvasCenter = {
-      x: targetRadarCanvas.width / 2,
-      y: targetRadarCanvas.height / 2,
-    };
-    this.drawTargetScreen();
-    this.drawIndicatorScreen();
+    this.distanceDetectRange = distanceDetectRange;
+    this.targetDistance = initialDistance;
+    this.rayWidth = initialRayWidth;
+    this.maxDistance = maxDistance;
+
+    const interval = setInterval(() => {
+      this.calculateTargetsParams();
+      this.calculateMissiles();
+    }, 0);
   }
 
-  get trackedTarget() {
+  get trackedTarget(): FlightObject | null {
     return this.flightObjects.find((fo) =>
       fo.identifier === this.trackingTargetIdentifier
-    );
+    ) || null;
   }
 
   get azimutDeg() {
@@ -73,6 +86,7 @@ export default class SNR {
     }
 
     this.azimut = (azimut - 90) * Math.PI / 180;
+    this.snrIndicatorsScreen!.setAzimut(this.azimut);
   }
 
   get verticalAngleDeg() {
@@ -85,6 +99,7 @@ export default class SNR {
       verticalAngle < this.maxVerticalAngle
     ) {
       this.verticalAngle = verticalAngle * Math.PI / 180;
+      this.snrIndicatorsScreen!.setVerticalAngle(this.verticalAngle);
     }
   }
 
@@ -96,186 +111,11 @@ export default class SNR {
     this.rayWidth = deg;
   }
 
-  get distanceScreenScale() {
-    return this.scale;
-  }
-
-  setDistanceScreenScale(scale: number) {
-    this.scale = scale;
-  }
-
   public addFlightObject(flightObject: FlightObject) {
     this.flightObjects.push(flightObject);
   }
 
-  private drawIndicatorScreen() {
-    requestAnimationFrame(this.drawIndicatorScreen.bind(this));
-    if (!this.indicatorCanvasContext) return;
-    this.indicatorCanvasContext.clearRect(
-      0,
-      0,
-      this.indicatorCanvasContext.canvas.width,
-      this.indicatorCanvasContext.canvas.height,
-    );
-    this.drawAzimutIndicator();
-    this.drawVerticalAngleIndicator();
-  }
-
-  private drawAzimutIndicator() {
-    if (!this.indicatorCanvasContext) return;
-    const ctx = this.indicatorCanvasContext;
-
-    const canvasCenterY = ctx.canvas.height / 2;
-    const canvasCenterX = ctx.canvas.width / 2;
-    const radius = canvasCenterY;
-    ctx.strokeStyle = "white";
-    ctx.lineWidth = 1;
-    ctx.beginPath();
-    ctx.arc(
-      canvasCenterX / 2,
-      canvasCenterY,
-      radius,
-      0,
-      Math.PI * 2,
-    );
-    ctx.stroke();
-
-    const pointX = radius * Math.cos(this.azimut) + canvasCenterX / 2;
-    const pointY = radius * Math.sin(this.azimut) + canvasCenterY;
-
-    ctx.moveTo(canvasCenterX / 2, canvasCenterY);
-    ctx.lineTo(pointX, pointY);
-    ctx.stroke();
-    const textMeasurements = ctx.measureText(
-      Number(this.azimutDeg).toFixed(1),
-    );
-    ctx.fillStyle = "white";
-    ctx.font = "bold 14px Arial";
-    ctx.fillText(
-      Number(this.azimutDeg).toFixed(1),
-      canvasCenterX / 2 - textMeasurements.width / 2,
-      canvasCenterY - 10,
-    );
-
-    // Draw radial lines and degrees
-    for (let deg = 0; deg < 360; deg += 5) {
-      const radians = deg * Math.PI / 180 - Math.PI / 2;
-
-      const innerX = canvasCenterX / 2 +
-        (radius - 5) * Math.cos(radians);
-      const innerY = canvasCenterY +
-        (radius - 5) * Math.sin(radians);
-      const outerX = canvasCenterX / 2 +
-        radius * Math.cos(radians);
-      const outerY = canvasCenterY +
-        radius * Math.sin(radians);
-
-      ctx.beginPath();
-      ctx.moveTo(innerX, innerY);
-      ctx.lineTo(outerX, outerY);
-      ctx.stroke();
-    }
-  }
-
-  private drawVerticalAngleIndicator() {
-    if (!this.indicatorCanvasContext) return;
-    const ctx = this.indicatorCanvasContext;
-    const canvasWidth = ctx.canvas.width;
-    const canvasHeight = ctx.canvas.height;
-    const offsetY = 10;
-    const availableCanvasHeight = canvasHeight - offsetY * 2;
-    for (
-      let deg = this.minVerticalAngle, numOfLine = 1;
-      deg <= this.maxVerticalAngle;
-      deg += 5, numOfLine++
-    ) {
-      const totalAngle = Math.abs(this.minVerticalAngle) +
-        Math.abs(this.maxVerticalAngle);
-      const normalizedDeg = deg +
-        Math.abs(this.minVerticalAngle);
-      const lineY = (availableCanvasHeight + offsetY) -
-        availableCanvasHeight * (normalizedDeg / totalAngle) +
-        offsetY;
-        ctx.strokeStyle = "white";
-        ctx.beginPath();
-        ctx.moveTo(canvasWidth, lineY);
-        ctx.lineTo(canvasWidth - 150, lineY);
-        ctx.stroke();
-
-        ctx.fillStyle = "white";
-        ctx.font = "11px Arial";
-      const textMeasurements = ctx.measureText(
-        Number(deg).toString(),
-      );
-      ctx.fillText(
-        Number(deg).toString(),
-        canvasWidth - 150 - textMeasurements.width - 5,
-        lineY,
-      );
-      const normalizedVerticalAngle = this.verticalAngleDeg +
-        Math.abs(this.minVerticalAngle);
-      const indicatorLineY = (availableCanvasHeight + offsetY) -
-        availableCanvasHeight * (normalizedVerticalAngle / totalAngle) +
-        offsetY;
-
-        ctx.strokeStyle = "red";
-        ctx.beginPath();
-        ctx.moveTo(canvasWidth, indicatorLineY);
-        ctx.lineTo(canvasWidth - 150, indicatorLineY);
-        ctx.stroke();
-    }
-  }
-
-  private drawTargetScreen() {
-    requestAnimationFrame(this.drawTargetScreen.bind(this));
-    this.targetRadarCanvasContext!.clearRect(
-      0,
-      0,
-      this.targetRadarCanvasContext!.canvas.width,
-      this.targetRadarCanvasContext!.canvas.height,
-    );
-    this.distanceRadarCanvasContext!.clearRect(
-      0,
-      0,
-      this.distanceRadarCanvasContext!.canvas.width,
-      this.distanceRadarCanvasContext!.canvas.height,
-    );
-    this.drawTargetScreenSnow();
-    this.drawDistanceScreenSnow();
-
-    this.calculateTargetsPosition();
-    this.drawTargetScreenSite();
-    this.drawDistanceScreenSite();
-
-    this.calculateMissiles();
-  }
-
-  private drawTargetScreenSite() {
-    const ctx = this.targetRadarCanvasContext;
-    if (!ctx) return;
-    ctx.strokeStyle = "white";
-    ctx.beginPath();
-    ctx.moveTo(
-      this.targetRadarCanvasCenter.x,
-      0,
-    );
-    ctx.lineTo(
-      this.targetRadarCanvasCenter.x,
-      ctx.canvas.height,
-    );
-    ctx.stroke();
-    ctx.moveTo(
-      0,
-      this.targetRadarCanvasCenter.y,
-    );
-    ctx.lineTo(
-      ctx.canvas.width,
-      this.targetRadarCanvasCenter.y,
-    );
-    ctx.stroke();
-  }
-
-  private calculateTargetsPosition() {
+  private calculateTargetsParams() {
     for (const flightObject of this.flightObjects) {
       if (flightObject.isLaunched && !flightObject.isDestroyed) {
         // Distance from SNR to target
@@ -307,39 +147,32 @@ export default class SNR {
           Math.abs(targetVerticalOffset) < (rayWidthRad / 2)
         ) {
           // Calculate target position on canvas
-          const canvasX = -(targetAzimutOffset / rayWidthRad * 2) *
-              this.targetRadarCanvasCenter.x + this.targetRadarCanvasCenter.x;
-          const canvasY = -(targetVerticalOffset / rayWidthRad * 2) *
-              this.targetRadarCanvasCenter.y + this.targetRadarCanvasCenter.y;
+          const targetOffsetX = -(targetAzimutOffset / rayWidthRad * 2);
+          const targetOffsetY = -(targetVerticalOffset / rayWidthRad * 2);
 
           const rayWidth = ((Math.PI * rayWidthRad * targetDistance) / 180);
           const targetSize = 2 * Math.sqrt(flightObject.rcs / Math.PI) / 1000; // Size in km; rcs converted to diameter of circle with same scale
           const targetSpotSize = targetSize / rayWidth;
-          const canvasSpotSize = this.targetRadarCanvasContext!.canvas.width *
-            targetSpotSize;
           const targetVisibilityK = targetDistance / this.maxDistance;
-          this.drawTargetScreenTargets(
-            canvasX,
-            canvasY,
-            canvasSpotSize,
+          this.snrTargetScreen!.setTargetParams(
+            flightObject.identifier!,
             targetVisibilityK,
+            targetSpotSize,
+            targetOffsetX,
+            targetOffsetY,
           );
-          const canvasDistanceSpotWidth =
-            this.distanceRadarCanvasContext!.canvas.width *
-            targetSpotSize;
-          const canvasDistanceSpotLength =
-            (this.distanceRadarCanvasContext!.canvas.width *
-              ((targetSpotSize +
-                (this.distanceTrackingAccuracy * Math.random())) * rayWidth) /
-              this.scale);
-
-          this.drawDistanceScreenTargets(
+          const targetSpotLength = (targetSpotSize +
+            (this.distanceTrackingAccuracy * Math.random())) * rayWidth;
+          this.snrDistanceScreen!.setTargetParams(
+            flightObject.identifier!,
+            targetVisibilityK,
             targetDistance,
-            canvasDistanceSpotWidth,
-            canvasDistanceSpotLength,
-            targetVisibilityK,
-            flightObject._velocity,
+            targetSpotSize,
+            targetSpotLength,
           );
+        } else {
+          this.snrTargetScreen!.removeTarget(flightObject.identifier!);
+          this.snrDistanceScreen!.removeTarget(flightObject.identifier!);
         }
       }
 
@@ -349,7 +182,7 @@ export default class SNR {
         this.eventListener
       ) {
         this.eventListener("targetDistance", this.targetDistance.toFixed(1));
-        this.eventListener("targetVelocity", flightObject._velocity);
+        this.eventListener("targetVelocity", flightObject.velocity);
         this.eventListener(
           "targetHeight",
           (Math.abs(flightObject.currentPoint.z * 1000)).toFixed(0),
@@ -361,50 +194,9 @@ export default class SNR {
       ) {
         this.resetCaptureTargetByDirection();
         this.resetCaptureTargetByDistance();
+        this.snrTargetScreen!.removeTarget(flightObject.identifier!);
+        this.snrDistanceScreen!.removeTarget(flightObject.identifier!);
       }
-    }
-  }
-
-  private drawTargetScreenTargets(
-    canvasX: number,
-    canvasY: number,
-    targetSpotSize: number,
-    targetVisibilityK: number,
-  ) {
-    this.targetRadarCanvasContext!.fillStyle = `rgba(184, 134, 11,${
-      1 - targetVisibilityK
-    })`;
-    this.targetRadarCanvasContext!.beginPath();
-    this.targetRadarCanvasContext!.ellipse(
-      canvasX,
-      canvasY,
-      targetSpotSize / 2,
-      targetSpotSize,
-      Math.PI / 2,
-      0,
-      Math.PI * 2,
-    );
-    this.targetRadarCanvasContext!.fill();
-  }
-
-  private drawTargetScreenSnow() {
-    if (!this.targetRadarCanvasContext) return;
-    const canvasSize = this.targetRadarCanvasContext?.canvas.width;
-    for (let i = 0; i < 500; i++) {
-      const pointX = canvasSize * Math.random();
-      const pointY = canvasSize * Math.random();
-      this.targetRadarCanvasContext.beginPath();
-      this.targetRadarCanvasContext.fillStyle = `rgba(184, 134, 11,${
-        1 - Math.random()
-      })`;
-      this.targetRadarCanvasContext.arc(
-        pointX,
-        pointY,
-        2,
-        0,
-        Math.PI * 2,
-      );
-      this.targetRadarCanvasContext.fill();
     }
   }
 
@@ -490,153 +282,6 @@ export default class SNR {
     this.resetCaptureTargetByDistance();
   }
 
-  private drawDistanceScreenSnow() {
-    if (!this.distanceRadarCanvasContext) return;
-    for (let i = 0; i < 500; i++) {
-      const pointX = this.distanceRadarCanvasContext.canvas.width *
-        Math.random();
-      const pointY = this.distanceRadarCanvasContext.canvas.height *
-        Math.random();
-      this.distanceRadarCanvasContext.beginPath();
-      this.distanceRadarCanvasContext.fillStyle = `rgba(184, 134, 11,${
-        1 - Math.random()
-      })`;
-      this.distanceRadarCanvasContext.arc(
-        pointX,
-        pointY,
-        2,
-        0,
-        Math.PI * 2,
-      );
-      this.distanceRadarCanvasContext.fill();
-    }
-  }
-
-  private drawDistanceScreenSite() {
-    if (!this.distanceRadarCanvasContext) return;
-    const ctx = this.distanceRadarCanvasContext;
-    ctx.strokeStyle = "white";
-    ctx.fillStyle = "white";
-    const maxDistance = this.maxDistance * this.scale;
-    const step = 10 * this.scale;
-    for (let distance = 0; distance <= maxDistance; distance += step) {
-      const pointY = ctx.canvas.height /
-        (maxDistance / distance);
-        ctx.beginPath();
-        ctx.moveTo(0, pointY);
-        ctx.lineTo(20, pointY);
-        ctx.stroke();
-        ctx.beginPath();
-        ctx.moveTo(
-          ctx.canvas.width - 20,
-        pointY,
-      );
-      ctx.lineTo(
-        ctx.canvas.width,
-        pointY,
-      );
-      ctx.stroke();
-      ctx.fillText(
-        (maxDistance - distance).toString(),
-        5,
-        pointY + 15,
-      );
-    }
-
-    ctx.strokeStyle = "red";
-    const pointY1 = ctx.canvas.height -
-    ctx.canvas.height *
-        ((this.targetDistance - this.distanceDetectRange) /
-          (this.maxDistance * this.scale));
-
-    const pointY2 = ctx.canvas.height -
-    ctx.canvas.height *
-        ((this.targetDistance + this.distanceDetectRange) /
-          (this.maxDistance * this.scale));
-
-          ctx.beginPath();
-          ctx.moveTo(0, pointY1);
-          ctx.lineTo(
-            ctx.canvas.width,
-      pointY1,
-    );
-    ctx.stroke();
-
-    ctx.beginPath();
-    ctx.moveTo(0, pointY2);
-    ctx.lineTo(
-      ctx.canvas.width,
-      pointY2,
-    );
-    ctx.stroke();
-
-    // Draw redline
-    const redlineY = ctx.canvas.height -
-    ctx.canvas.height /
-        (maxDistance / this.missileMaxDistance);
-        ctx.fillStyle = `rgba(255, 0, 0,1)`;
-        ctx.setLineDash([10, 10]);
-        ctx.beginPath();
-        ctx.moveTo(0, redlineY);
-        ctx.lineTo(
-          ctx.canvas.width,
-      redlineY,
-    );
-    ctx.stroke();
-    ctx.setLineDash([]);
-  }
-
-  private drawDistanceScreenTargets(
-    targetDistance: number,
-    canvasDistanceSpotWidth: number,
-    canvasDistanceSpotLength: number,
-    targetVisibilityK: number,
-    velocity: number,
-  ) {
-    if (!this.distanceRadarCanvasContext) return;
-    const ctx = this.distanceRadarCanvasContext;
-    const maxDistance = this.maxDistance * this.scale;
-    const canvasCenterX = ctx.canvas.width / 2;
-    const pointY = ctx.canvas.height -
-    ctx.canvas.height /
-        (maxDistance / targetDistance);
-        ctx.fillStyle = `rgba(184, 134, 11,${
-      1 - targetVisibilityK
-    })`;
-    ctx.beginPath();
-    ctx.ellipse(
-      canvasCenterX,
-      pointY,
-      canvasDistanceSpotLength / 2,
-      canvasDistanceSpotWidth / 2,
-      Math.PI / 2,
-      0,
-      Math.PI * 2,
-    );
-    ctx.fill();
-
-    if (this.trackTargetDistanceInterval) {
-      // Draw point of missile hit
-      const timeToHit = targetDistance /
-        ((velocity + this.missileVelocity) / 1000);
-      const distanceToHit = (timeToHit * this.missileVelocity) / 1000;
-      const missileHitY = ctx.canvas.height -
-      ctx.canvas.height /
-          (maxDistance / distanceToHit);
-
-          ctx.fillStyle = `rgba(255, 0, 0,1)`;
-          ctx.setLineDash([3, 3]);
-          ctx.beginPath();
-          ctx.moveTo(0, missileHitY);
-          ctx.lineTo(
-            ctx.canvas.width,
-        missileHitY,
-      );
-      ctx.stroke();
-      ctx.setLineDash([]);
-    }
-  }
-
   get indicatorTargetDistance() {
     return this.targetDistance;
   }
@@ -644,6 +289,7 @@ export default class SNR {
   setIndicatorTargetDistance(distance: number) {
     if (distance > 0 && distance < this.maxDistance) {
       this.targetDistance = distance;
+      this.snrDistanceScreen?.setDistance(distance);
     }
   }
 
@@ -696,6 +342,7 @@ export default class SNR {
       }
 
       this.targetDistance = targetDistance;
+      this.snrDistanceScreen!.setDistance(targetDistance);
     }, 0);
   }
 
@@ -729,49 +376,23 @@ export default class SNR {
         // Difference of SNR vertical angle and target vertical angle
         const missileVerticalOffset = missileVerticalAngle -
           this.verticalAngle;
-        // Calculate target position on canvas
-        const canvasX = -(missileAzimutOffset / rayWidthRad * 2) *
-            this.targetRadarCanvasCenter.x + this.targetRadarCanvasCenter.x;
-        const canvasY = -(missileVerticalOffset / rayWidthRad * 2) *
-            this.targetRadarCanvasCenter.y + this.targetRadarCanvasCenter.y;
-        this.drawMissilesOnTargetScreen(canvasX, canvasY);
-        this.drawMissilesOnDistanceScreen(missileDistance);
+
+        // Calculate missile offsets
+        const missileOffsetX = -(missileAzimutOffset / rayWidthRad * 2);
+        const missileOffsetY = -(missileVerticalOffset / rayWidthRad * 2);
+        this.snrTargetScreen?.setMissileParams(
+          missile.indentifier!,
+          missileOffsetX,
+          missileOffsetY,
+        );
+        this.snrDistanceScreen?.setMissileParams(
+          missile.indentifier!,
+          missileDistance
+        );
+      } else {
+        this.snrTargetScreen?.removeMissile(missile.indentifier!)
+        this.snrDistanceScreen?.removeMissile(missile.indentifier!)
       }
     }
-  }
-
-  private drawMissilesOnTargetScreen(canvasX: number, canvasY: number) {
-    if (!this.targetRadarCanvasContext) return;
-    const ctx = this.targetRadarCanvasContext
-    ctx.fillStyle = `rgba(255, 0, 0,1)`;
-    ctx.beginPath();
-    ctx.arc(
-      canvasX,
-      canvasY,
-      5,
-      0,
-      Math.PI * 2,
-    );
-    ctx.fill();
-  }
-
-  private drawMissilesOnDistanceScreen(missileDistance: number) {
-    if (!this.distanceRadarCanvasContext) return;
-    const ctx = this.distanceRadarCanvasContext
-    const maxDistance = this.maxDistance * this.scale;
-    const canvasCenterX = ctx.canvas.width / 2;
-    const pointY = ctx.canvas.height -
-    ctx.canvas.height /
-        (maxDistance / missileDistance);
-        ctx.fillStyle = `rgba(255, 0, 0,1)`;
-        ctx.beginPath();
-        ctx.arc(
-      canvasCenterX,
-      pointY,
-      5,
-      0,
-      Math.PI * 2,
-    );
-    ctx.fill();
   }
 }
