@@ -24,7 +24,8 @@
           </v-radio-group>
           <p>Д, km: {{ params.targetDistance }}</p>
           <p>V, m/s: {{ params.targetVelocity }}</p>
-          <p>H, km: {{ params.targetHeight }}</p>
+          <p>H, m: {{ params.targetHeight }}</p>
+          <p>P, km: {{ params.targetParam }}</p>
           <v-btn color="error" block @click="launchMissile"
             :disabled="!(params.isCapturedByDirection && params.isCapturedByDistance)">Пуск</v-btn>
 
@@ -46,6 +47,8 @@
       <v-card>
         <canvas ref="distanceScreenRef" width="400" height="600" class="border"></canvas>
       </v-card>
+
+      
 
     </div>
   </div>
@@ -70,7 +73,8 @@ const params = reactive<Record<string, boolean | number>>({
   isCapturedByDistance: false,
   targetDistance: 0,
   targetHeight: 0,
-  targetVelocity: 0
+  targetVelocity: 0,
+  targetParam: 0
 })
 
 let rayWidth = computed(() => snr.value?.radarRayWidth)
@@ -87,6 +91,7 @@ function SNRListener(property: string, value: number | boolean) {
   property === 'targetDistance' && (params.targetDistance = value)
   property === 'targetHeight' && (params.targetHeight = value)
   property === 'targetVelocity' && (params.targetVelocity = value)
+  property === 'targetParam' && (params.targetParam = value)
 }
 
 function launchMissile() {
@@ -109,7 +114,7 @@ onMounted(() => {
     initialRayWidth: 20,
   }
   const snrTargetScreen = new SNRTargetScreen(targetScreenRef.value!);
-  snrDistanceScreen.value = new SNRDistanceScreen(distanceScreenRef.value!, initialParams.maxDistance, initialParams.distanceDetectRange, initialParams.initialDistance);
+  snrDistanceScreen.value = new SNRDistanceScreen(distanceScreenRef.value!, initialParams.maxDistance, initialParams.distanceDetectRange, initialParams.initialDistance, initialParams.missileMaxDistance);
   const snrIndicatorsScreen = new SNRIndicatorsScreen(snrIndicatorsRef.value!, initialParams.minVerticalAngle, initialParams.maxVerticalAngle)
   snr.value = new SNR({
     snrTargetScreen,
@@ -119,7 +124,9 @@ onMounted(() => {
     distanceDetectRange: initialParams.distanceDetectRange,
     initialDistance: initialParams.initialDistance,
     initialRayWidth: initialParams.initialRayWidth,
-    maxDistance: initialParams.maxDistance
+    maxDistance: initialParams.maxDistance,
+    missileVelocity: initialParams.missileVelocity,
+    missileMaxDistance: initialParams.missileMaxDistance
 });
   window.addEventListener('keydown', (event: KeyboardEvent) => {
     const map: Record<string, () => void> = {

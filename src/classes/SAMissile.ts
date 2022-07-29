@@ -6,15 +6,18 @@ export default class SAMissile {
   private maxDistance: number = 0;
   private velocity: number = 0;
   private interval: number | null = null;
-  private currentPoint: { x: number; y: number; z: number } = {
+   currentPoint: { x: number; y: number; z: number } = {
     x: 0,
     y: 0,
     z: 0,
   };
+  private currentRotation = 0;
   private launchTime: number = 0;
   private timeInAir: number = 0;
   private killRadius: number = 0.05; // 50 meters
   private isDestroyed = false;
+  private traveledDistance = 0;
+  private traveledDistance2 = 0;
   constructor(
     targetObject: FlightObject,
     maxDistance = 25,
@@ -46,40 +49,48 @@ export default class SAMissile {
     // Запускаем рассчет текущей позиции ракеты
     this.interval = setInterval(() => {
       if (!this.targetObject) return;
+      const vectorVelocity = Math.abs(Math.cos(this.currentRotation)) * this.velocity;
       // Время в воздухе с прошлого тика
       const prevTime = this.timeInAir;
       this.timeInAir = (Date.now() - this.launchTime) / 1000;
       const targetPosition = this.targetObject.currentPoint;
-      const flightDistance = (this.timeInAir * this.velocity) / 1000;
-      // Пройденное расстояние с прошлого тика
-      const dFlightDistance = ((this.timeInAir - prevTime) * this.velocity) /
-        1000;
-
+      
       const dx = targetPosition.x - this.currentPoint.x;
       const dy = targetPosition.y - this.currentPoint.y;
       const dz = targetPosition.z - this.currentPoint.z;
+      // 
+      // Пройденное расстояние с прошлого тика
+      const dFlightDistance = ((this.timeInAir - prevTime) * vectorVelocity) /
+        1000;
+      const dFlightDistance2 = ((this.timeInAir - prevTime) * this.velocity) /
+        1000;
       // Пройденное растоянии
       const targetDistance = Math.sqrt(dx * dx + dy * dy);
       //находим направляющий вектор до цели
       let dirX = dx / targetDistance;
       let dirY = dy / targetDistance;
       let dirZ = dz * dFlightDistance;
+     
       //умножаем направляющий вектор на необх длину
       dirX *= dFlightDistance;
       dirY *= dFlightDistance;
+      this.currentRotation =  Math.atan2(dirY, dirX) - this.currentRotation;
       // Получаем новые координаты ракеты
       this.currentPoint = {
         x: dirX + this.currentPoint.x,
         y: dirY + this.currentPoint.y,
         z: dirZ + this.currentPoint.z,
       };
+      this.traveledDistance += Math.sqrt(dirX * dirX + dirY * dirY);
       // Если цель в радиусе поражения
       if (targetDistance <= this.killRadius) {
         this.killFlightObject();
       }
+      this.traveledDistance += dFlightDistance;
+      this.traveledDistance2 += dFlightDistance2;
       // Если превышена дальность полета или цель уничтожена
       if (
-        flightDistance >= this.maxDistance || this.targetObject.isDestroyed
+        this.traveledDistance2 >= this.maxDistance || this.targetObject.isDestroyed
       ) {
         this.destroyMissile();
       }

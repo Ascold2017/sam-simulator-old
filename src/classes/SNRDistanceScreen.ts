@@ -1,28 +1,33 @@
+import type SAMissile from "./SAMissile";
+
+
 export default class SNRDistanceScreen {
   private ctx: CanvasRenderingContext2D | null = null;
-  private canvasCenter = { x: 0, y: 0 };
   private targets: Record<string, any> = {};
   private missiles: Record<string, any> = {};
   private distance = 0;
   private scale = 1;
   private maxDistance = 0;
-  private killZoneDistance = 0;
+  private maxKillZoneDistance = 0;
   private distanceDetectRange = 0;
+  private trackingDistanceTargetIdentifier: string | null = null;
   constructor(
     canvas: HTMLCanvasElement,
     maxDistance: number,
     distanceDetectRange: number,
     initialDistance: number,
+    maxKillZoneDistance: number,
   ) {
     this.ctx = canvas.getContext("2d");
-    this.canvasCenter = {
-      x: canvas.width / 2,
-      y: canvas.height / 2,
-    };
     this.maxDistance = maxDistance;
     this.distanceDetectRange = distanceDetectRange;
     this.distance = initialDistance;
+    this.maxKillZoneDistance = maxKillZoneDistance;
     this.drawScreen();
+  }
+
+  public setTrackingTargetByDistance(identifier: string | null) {
+    this.trackingDistanceTargetIdentifier = identifier;
   }
 
   public setTargetParams(
@@ -31,12 +36,16 @@ export default class SNRDistanceScreen {
     distance: number,
     spotWidth: number,
     spotLength: number,
+    distanceToHit: number,
+    targetParam: number,
   ) {
     this.targets[targetIdentifier] = {
       targetDistanceK,
       distance,
       spotWidth,
       spotLength,
+      distanceToHit,
+      targetParam,
     };
   }
 
@@ -62,10 +71,6 @@ export default class SNRDistanceScreen {
 
   public removeMissile(missileIdentifier: string) {
     delete this.missiles[missileIdentifier];
-  }
-
-  public setKillZoneDistance(distance: number) {
-    this.killZoneDistance = distance;
   }
 
   private drawScreen() {
@@ -169,16 +174,16 @@ export default class SNRDistanceScreen {
     ctx.stroke();
 
     // Draw redline
-    const redlineY = ctx.canvas.height -
+    const redlineY1 = ctx.canvas.height -
       ctx.canvas.height /
-        (maxDistance / this.killZoneDistance);
+        (maxDistance / this.maxKillZoneDistance);
     ctx.fillStyle = `rgba(255, 0, 0,1)`;
     ctx.setLineDash([10, 10]);
     ctx.beginPath();
-    ctx.moveTo(0, redlineY);
+    ctx.moveTo(0, redlineY1);
     ctx.lineTo(
       ctx.canvas.width,
-      redlineY,
+      redlineY1,
     );
     ctx.stroke();
     ctx.setLineDash([]);
@@ -212,30 +217,40 @@ export default class SNRDistanceScreen {
         Math.PI * 2,
       );
       this.ctx.fill();
+
+      if (targetIdentifier === this.trackingDistanceTargetIdentifier) {
+        // Draw point of missile hit
+        const missileHitY = this.ctx.canvas.height -
+          this.ctx.canvas.height /
+            (maxDistance / targetParams.distanceToHit);
+
+        this.ctx.fillStyle = `rgba(255, 0, 0,1)`;
+        this.ctx.setLineDash([3, 3]);
+        this.ctx.beginPath();
+        this.ctx.moveTo(0, missileHitY);
+        this.ctx.lineTo(
+          this.ctx.canvas.width,
+          missileHitY,
+        );
+        this.ctx.stroke();
+        this.ctx.setLineDash([]);
+
+        // Draw redline of minimal kill range
+        const redlineY2 = this.ctx.canvas.height -
+          this.ctx.canvas.height /
+            (maxDistance / targetParams.targetParam);
+        this.ctx.fillStyle = `rgba(255, 0, 0,1)`;
+        this.ctx.setLineDash([10, 10]);
+        this.ctx.beginPath();
+        this.ctx.moveTo(0, redlineY2);
+        this.ctx.lineTo(
+          this.ctx.canvas.width,
+          redlineY2,
+        );
+        this.ctx.stroke();
+        this.ctx.setLineDash([]);
+      }
     });
-
-    /*
-    if (this.trackTargetDistanceInterval) {
-      // Draw point of missile hit
-      const timeToHit = targetDistance /
-        ((velocity + this.missileVelocity) / 1000);
-      const distanceToHit = (timeToHit * this.missileVelocity) / 1000;
-      const missileHitY = ctx.canvas.height -
-        ctx.canvas.height /
-          (maxDistance / distanceToHit);
-
-      ctx.fillStyle = `rgba(255, 0, 0,1)`;
-      ctx.setLineDash([3, 3]);
-      ctx.beginPath();
-      ctx.moveTo(0, missileHitY);
-      ctx.lineTo(
-        ctx.canvas.width,
-        missileHitY,
-      );
-      ctx.stroke();
-      ctx.setLineDash([]);
-    }
-     */
   }
 
   private drawDistanceScreenMissiles() {
@@ -248,16 +263,16 @@ export default class SNRDistanceScreen {
       const pointY = this.ctx.canvas.height -
         this.ctx.canvas.height /
           (maxDistance / missileParams.missileDistance);
-          this.ctx.strokeStyle = `rgba(255, 0, 0,1)`;
-          this.ctx.lineWidth = 4;
-          this.ctx.setLineDash([4, 1])
-          this.ctx.beginPath();
-          this.ctx.moveTo(canvasCenterX - 8, pointY);
-          this.ctx.lineTo(canvasCenterX + 8, pointY);
-          this.ctx.lineTo(canvasCenterX + 8, pointY - 8);
-          this.ctx.stroke();
-          this.ctx.lineWidth = 1;
-          this.ctx.setLineDash([])
+      this.ctx.strokeStyle = `rgba(255, 0, 0,1)`;
+      this.ctx.lineWidth = 4;
+      this.ctx.setLineDash([4, 1]);
+      this.ctx.beginPath();
+      this.ctx.moveTo(canvasCenterX - 8, pointY);
+      this.ctx.lineTo(canvasCenterX + 8, pointY);
+      this.ctx.lineTo(canvasCenterX + 8, pointY - 8);
+      this.ctx.stroke();
+      this.ctx.lineWidth = 1;
+      this.ctx.setLineDash([]);
     });
   }
 }

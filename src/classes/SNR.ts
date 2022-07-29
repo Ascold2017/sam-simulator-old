@@ -15,6 +15,8 @@ interface ISNR {
   initialDistance: number;
   initialRayWidth: number;
   maxDistance: number;
+  missileVelocity: number;
+  missileMaxDistance: number
 }
 export default class SNR {
   private snrTargetScreen: SNRTargetScreen | null = null;
@@ -32,11 +34,12 @@ export default class SNR {
   private distanceDetectRange = 0; // km
 
   private radarHeight = 36; /// m
-  private trackTargetInterval: number | null = null;
-  private trackTargetDistanceInterval: number | null = null;
-  private trackingTargetIdentifier: string | null = null;
+  private trackingDirectionTargetIdentifier: string | null = null;
+  private trackingDistanceTargetIdentifier: string | null = null;
   private eventListener: EventListener | null = null;
   private missiles: SAMissile[] = [];
+  private missileVelocity = 0;
+  private missileMaxDistance = 0;
   constructor({
     snrTargetScreen,
     snrIndicatorsScreen,
@@ -46,6 +49,8 @@ export default class SNR {
     initialDistance,
     initialRayWidth,
     maxDistance,
+    missileVelocity,
+    missileMaxDistance
   }: ISNR) {
     this.snrTargetScreen = snrTargetScreen;
     this.snrIndicatorsScreen = snrIndicatorsScreen;
@@ -55,6 +60,8 @@ export default class SNR {
     this.targetDistance = initialDistance;
     this.rayWidth = initialRayWidth;
     this.maxDistance = maxDistance;
+    this.missileVelocity = missileVelocity;
+    this.missileMaxDistance = missileMaxDistance;
 
     const interval = setInterval(() => {
       this.calculateTargetsParams();
@@ -64,7 +71,7 @@ export default class SNR {
 
   get trackedTarget(): FlightObject | null {
     return this.flightObjects.find((fo) =>
-      fo.identifier === this.trackingTargetIdentifier
+      fo.identifier === this.trackingDirectionTargetIdentifier
     ) || null;
   }
 
@@ -117,6 +124,10 @@ export default class SNR {
 
   private calculateTargetsParams() {
     for (const flightObject of this.flightObjects) {
+      const isCapturedByDirection =
+        flightObject.identifier! === this.trackingDirectionTargetIdentifier;
+      const isCapturedByDistance =
+        flightObject.identifier! === this.trackingDistanceTargetIdentifier;
       if (flightObject.isLaunched && !flightObject.isDestroyed) {
         // Distance from SNR to target
         const targetDistance = Math.hypot(
@@ -141,6 +152,16 @@ export default class SNR {
         // Difference of SNR vertical angle and target vertical angle
         const targetVerticalOffset = targetVerticalAngle - this.verticalAngle;
 
+        // Target angle
+        const targetAngle = Math.abs(
+          flightObject.currentRotation - this.azimut - Math.PI,
+        );
+        // Radial velocity
+        const radialVelocity = flightObject.velocity -
+          flightObject.velocity * (targetAngle / (Math.PI / 2));
+        // Target param
+        const targetParam = targetDistance * Math.tan(targetAngle);
+
         // If target inside of SNR ray
         if (
           Math.abs(targetAzimutOffset) < (rayWidthRad / 2) &&
@@ -163,34 +184,66 @@ export default class SNR {
           );
           const targetSpotLength = (targetSpotSize +
             (this.distanceTrackingAccuracy * Math.random())) * rayWidth;
+
+          // Draw point of missile hit
+          const timeToHit = targetDistance /
+            ((radialVelocity + this.missileVelocity) / 1000);
+          const distanceToHit = (timeToHit * this.missileVelocity) / 1000;
           this.snrDistanceScreen!.setTargetParams(
             flightObject.identifier!,
             targetVisibilityK,
             targetDistance,
             targetSpotSize,
             targetSpotLength,
+            distanceToHit,
+            targetParam
           );
         } else {
           this.snrTargetScreen!.removeTarget(flightObject.identifier!);
           this.snrDistanceScreen!.removeTarget(flightObject.identifier!);
         }
-      }
 
-      if (
-        flightObject.identifier === this.trackingTargetIdentifier &&
-        this.trackTargetInterval && this.trackTargetDistanceInterval &&
-        this.eventListener
-      ) {
-        this.eventListener("targetDistance", this.targetDistance.toFixed(1));
-        this.eventListener("targetVelocity", flightObject.velocity);
-        this.eventListener(
-          "targetHeight",
-          (Math.abs(flightObject.currentPoint.z * 1000)).toFixed(0),
-        );
+        if (isCapturedByDirection) {
+          if (
+            targetVerticalAngle < this.minVerticalAngle * Math.PI / 180 ||
+            targetVerticalAngle > this.maxVerticalAngle * Math.PI / 180
+          ) {
+            this.resetCaptureTargetByDirection();
+            this.resetCaptureTargetByDistance();
+          }
+          this.azimut = targetAzimutAngle;
+          this.verticalAngle = targetVerticalAngle;
+        }
+
+        if (isCapturedByDistance) {
+          if (
+            targetDistance > this.maxDistance
+          ) {
+            this.resetCaptureTargetByDirection();
+            this.resetCaptureTargetByDistance();
+          }
+
+          this.targetDistance = targetDistance;
+          this.snrDistanceScreen!.setDistance(targetDistance);
+        }
+
+        if (
+          isCapturedByDirection &&
+          isCapturedByDistance &&
+          this.eventListener
+        ) {
+          this.eventListener("targetDistance", this.targetDistance.toFixed(1));
+          this.eventListener("targetVelocity", flightObject.velocity);
+          this.eventListener(
+            "targetHeight",
+            (Math.abs(flightObject.currentPoint.z * 1000)).toFixed(0),
+          );
+          this.eventListener('targetParam', targetParam.toFixed(1))
+        }
       }
-      if (
+      else if (
         flightObject.isDestroyed &&
-        this.trackingTargetIdentifier === flightObject.identifier
+        this.trackingDirectionTargetIdentifier === flightObject.identifier
       ) {
         this.resetCaptureTargetByDirection();
         this.resetCaptureTargetByDistance();
@@ -198,41 +251,6 @@ export default class SNR {
         this.snrDistanceScreen!.removeTarget(flightObject.identifier!);
       }
     }
-  }
-
-  private trackTargetByDirection(flightObject: FlightObject) {
-    this.trackTargetInterval && clearInterval(this.trackTargetInterval);
-    this.trackingTargetIdentifier = flightObject.identifier;
-    this.trackTargetInterval = setInterval(() => {
-      // Azimut from SNR to target
-      const targetAzimutAngle = Math.atan2(
-        flightObject.currentPoint.y,
-        flightObject.currentPoint.x,
-      );
-
-      // Difference from SNR and target heights
-      const targetHeightOffset = flightObject.currentPoint.z -
-        this.radarHeight / 1000;
-
-      // Distance from SNR to target
-      const targetDistance = Math.hypot(
-        flightObject.currentPoint.x,
-        flightObject.currentPoint.y,
-      );
-      // Vertical angle from SNR to target
-      const targetVerticalAngle = (targetHeightOffset / targetDistance);
-
-      if (
-        targetVerticalAngle < this.minVerticalAngle * Math.PI / 180 ||
-        targetVerticalAngle > this.maxVerticalAngle * Math.PI / 180
-      ) {
-        this.resetCaptureTargetByDirection();
-        this.resetCaptureTargetByDistance();
-      }
-
-      this.azimut = targetAzimutAngle;
-      this.verticalAngle = targetVerticalAngle;
-    }, 0);
   }
 
   captureTargetByDirection() {
@@ -267,7 +285,8 @@ export default class SNR {
         Math.abs(this.verticalAngle - targetVerticalAngle) <
           Math.abs(targetSpotAngle);
       if (isCapturedByAzimut && isCapturedByVerticalAngle) {
-        this.trackTargetByDirection(flightObject);
+        this.trackingDirectionTargetIdentifier = flightObject.identifier!;
+
         this.eventListener &&
           this.eventListener("isCapturedByDirection", true);
       }
@@ -275,9 +294,7 @@ export default class SNR {
   }
 
   resetCaptureTargetByDirection() {
-    this.trackTargetInterval && clearInterval(this.trackTargetInterval);
-    this.trackTargetInterval = null;
-    this.trackingTargetIdentifier = null;
+    this.trackingDirectionTargetIdentifier = null;
     this.eventListener && this.eventListener("isCapturedByDirection", false);
     this.missiles.forEach((missile) => missile.destroyMissile());
     this.resetCaptureTargetByDistance();
@@ -305,9 +322,12 @@ export default class SNR {
       if (
         Math.abs(targetDistance - this.targetDistance) <
           this.distanceDetectRange &&
-        this.trackingTargetIdentifier === flightObject.identifier
+        this.trackingDirectionTargetIdentifier === flightObject.identifier
       ) {
-        this.trackTargetByDistance();
+        this.trackingDistanceTargetIdentifier = flightObject.identifier!;
+        this.snrDistanceScreen!.setTrackingTargetByDistance(
+          flightObject.identifier!,
+        );
         this.eventListener &&
           this.eventListener("isCapturedByDistance", true);
       }
@@ -315,36 +335,9 @@ export default class SNR {
   }
 
   resetCaptureTargetByDistance() {
-    this.trackTargetDistanceInterval &&
-      clearInterval(this.trackTargetDistanceInterval);
-    this.trackTargetDistanceInterval = null;
+    this.trackingDistanceTargetIdentifier = null;
+    this.snrDistanceScreen!.setTrackingTargetByDistance(null);
     this.eventListener && this.eventListener("isCapturedByDistance", false);
-  }
-
-  private trackTargetByDistance() {
-    this.trackTargetDistanceInterval &&
-      clearInterval(this.trackTargetDistanceInterval);
-
-    const flightObject = this.flightObjects.find((flightObject) =>
-      flightObject.identifier === this.trackingTargetIdentifier
-    )!;
-    this.trackTargetDistanceInterval = setInterval(() => {
-      // Distance from SNR to target
-      const targetDistance = Math.hypot(
-        flightObject.currentPoint.x,
-        flightObject.currentPoint.y,
-      );
-
-      if (
-        targetDistance > this.maxDistance
-      ) {
-        this.resetCaptureTargetByDirection();
-        this.resetCaptureTargetByDistance();
-      }
-
-      this.targetDistance = targetDistance;
-      this.snrDistanceScreen!.setDistance(targetDistance);
-    }, 0);
   }
 
   addMissile(missile: SAMissile) {

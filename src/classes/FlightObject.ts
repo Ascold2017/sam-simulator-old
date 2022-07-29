@@ -10,6 +10,7 @@ export default class FlightObject {
   private _isDestroyed = false;
   private _isKilled = false;
   private _currentPoint = { x: 0, y: 0, z: 0 };
+  private _currentRotation = 0; // rad
   private _rcs = 0.5;
   constructor(
     {
@@ -62,6 +63,10 @@ export default class FlightObject {
     return this._currentPoint;
   }
 
+  get currentRotation() {
+    return this._currentRotation
+  }
+
   get rcs() {
     return this._rcs;
   }
@@ -79,6 +84,7 @@ export default class FlightObject {
     this.interval = setInterval(() => {
       this.timeInAir = +new Date() - this.launchTime;
       const partOfFlyWay = this.timeInAir / this.flightTime;
+      const prevPoint = {...this._currentPoint};
       this._currentPoint = this.getCubicBezierXYZatT(
         this.wayPoints[0],
         this.wayPoints[1],
@@ -86,6 +92,7 @@ export default class FlightObject {
         this.wayPoints[3],
         partOfFlyWay,
       );
+      this._currentRotation =  Math.atan2(this._currentPoint.y - prevPoint.y, this._currentPoint.x - prevPoint.x)
       if (this.timeInAir >= this.flightTime) {
         this.destroy();
       }
