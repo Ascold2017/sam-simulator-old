@@ -3,8 +3,7 @@
     <v-row>
       <v-col cols="6">
         <div style="overflow: auto; height: 768px;">
-          <canvas ref="editorRef" width="1000" height="1000"
-            style="background-image: url(/snazzy-image.png); background-size: contain;"
+          <canvas ref="editorRef" width="1000" height="1000" class="map-image" style="background-size: contain;"
             @click="exportCoordinates"></canvas>
         </div>
       </v-col>
@@ -16,8 +15,7 @@
               @update:model-value="setAltitude" />
             <v-text-field label="Скорость полета,
                 м/с" :model-value="velocity" @update:model-value="setVelocity" />
-            <v-text-field label="Эффективная площадь рассеивания" :model-value="rcs"
-              @update:model-value="setRCS" />
+            <v-text-field label="Эффективная площадь рассеивания" :model-value="rcs" @update:model-value="setRCS" />
             <h5>Координаты</h5>
             <ul class="pl-3">
               <li v-for="point in points">{{ point.x }}, {{ point.y }}</li>

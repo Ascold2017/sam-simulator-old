@@ -3,10 +3,10 @@ import { fileURLToPath, URL } from 'node:url'
 import { defineConfig } from 'vite'
 import vue from '@vitejs/plugin-vue'
 import vuetify from 'vite-plugin-vuetify';
-
+import { viteSingleFile } from "vite-plugin-singlefile"
 // https://vitejs.dev/config/
 export default defineConfig({
-  plugins: [vue(), vuetify({ autoImport: true })],
+  plugins: [vue(), vuetify(), viteSingleFile({ removeViteModuleLoader: true, useRecommendedBuildConfig: false })],
   resolve: {
     alias: {
       '@': fileURLToPath(new URL('./src', import.meta.url))

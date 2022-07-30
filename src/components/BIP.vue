@@ -2,8 +2,8 @@
   <div class="px-6">
     <div class="d-flex">
       <v-card style="margin: 0 auto">
-        <canvas ref="bipRef" width="1000" height="1000" class="responsive-canvas border"
-          style="background-image: url(/snazzy-image.png); background-size: contain;"></canvas>
+        <canvas ref="bipRef" width="1000" height="1000" class="map-image responsive-canvas border"
+          style="background-size: contain;"></canvas>
       </v-card>
     </div>
 
@@ -15,7 +15,6 @@ import { onMounted, ref } from 'vue';
 import Bip from "@/classes/Bip";
 import type FlightObject from "@/classes/FlightObject";
 import { computed } from '@vue/reactivity';
-
 
 const bipRef = ref<HTMLCanvasElement | null>(null);
 const bip = ref<Bip | null>(null)

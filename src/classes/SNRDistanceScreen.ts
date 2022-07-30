@@ -1,6 +1,3 @@
-import type SAMissile from "./SAMissile";
-
-
 export default class SNRDistanceScreen {
   private ctx: CanvasRenderingContext2D | null = null;
   private targets: Record<string, any> = {};
@@ -217,9 +214,8 @@ export default class SNRDistanceScreen {
         Math.PI * 2,
       );
       this.ctx.fill();
-
       if (targetIdentifier === this.trackingDistanceTargetIdentifier) {
-        // Draw point of missile hit
+        // Draw line of missile hit
         const missileHitY = this.ctx.canvas.height -
           this.ctx.canvas.height /
             (maxDistance / targetParams.distanceToHit);
