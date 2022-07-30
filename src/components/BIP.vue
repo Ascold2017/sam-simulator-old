@@ -19,10 +19,6 @@ import { computed } from '@vue/reactivity';
 const bipRef = ref<HTMLCanvasElement | null>(null);
 const bip = ref<Bip | null>(null)
 
-const messages = computed(() => {
-  return bip.value?.messages || []
-});
-
 onMounted(() => {
   bip.value = new Bip({
     canvasBip: bipRef.value!

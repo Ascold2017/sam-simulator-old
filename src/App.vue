@@ -41,7 +41,7 @@ function onCreateFlightObject(flightObject: FlightObject) {
   bipRef.value!.addFlightObject(flightObject);
   radarRef.value?.addFlightObject(flightObject);
   snrRef.value?.snr?.addFlightObject(flightObject);
-  flightObject.launch(msg => bipRef.value!.bip!.listener(msg))
+  flightObject.launch()
 }
 
 function onExportAzimut(azimut: number) {

@@ -1,7 +1,12 @@
+interface IPoint {
+  x: number;
+  y: number;
+  z: number;
+  v: number;
+}
 export default class FlightObject {
   private _identifier: string | null = null;
-  private wayPoints: { x: number; y: number; z: number }[] = [];
-  private _velocity = 0;
+  private points: IPoint[] = [];
   private launchTime = 0;
   private timeInAir = 0;
   private flightTime = 0;
@@ -9,34 +14,24 @@ export default class FlightObject {
   private _isLaunched = false;
   private _isDestroyed = false;
   private _isKilled = false;
-  private _currentPoint = { x: 0, y: 0, z: 0 };
+  private _currentPoint = { x: 0, y: 0, z: 0, v: 0 };
   private _currentRotation = 0; // rad
   private _rcs = 0.5;
   constructor(
     {
-      identifier = new Date().toString(),
-      wayPoints = [],
-      velocity = 100,
+      identifier,
+      points,
       rcs = 0.5,
     }: {
       identifier: string;
-      wayPoints: { x: number; y: number; z: number }[];
-      velocity: number;
+      points: IPoint[];
       rcs?: number;
     },
   ) {
     this._identifier = identifier;
     this._rcs = rcs;
-    this.wayPoints = wayPoints;
-    this._velocity = velocity;
-    let flightRange = this.getFlightRange();
-    let flightTime = (flightRange * 1000) / velocity; // Time in seconds
-    this.flightTime = flightTime * 1000; // time in milliseconds
-    console.log(
-      `Flight range: ${flightRange} km. Flight time: ${
-        Math.round(flightTime / 60)
-      } min. Velocity: ${velocity} m/s`,
-    );
+    this.points = points;
+    this.flightTime = this.getFlightTime();
   }
 
   get identifier() {
@@ -44,7 +39,7 @@ export default class FlightObject {
   }
 
   get velocity() {
-    return this._velocity;
+    return this._currentPoint.v;
   }
 
   get isLaunched() {
@@ -64,35 +59,26 @@ export default class FlightObject {
   }
 
   get currentRotation() {
-    return this._currentRotation
+    return this._currentRotation;
   }
 
   get rcs() {
     return this._rcs;
   }
 
-  launch(listener: (arg0: string) => void) {
+  launch() {
     this._isLaunched = true;
     this.launchTime = +new Date();
-
+    
     console.log(`Flight object launched at ${new Date(this.launchTime)}`);
-    listener(
-      `Flight object launched at ${
-        new Date(this.launchTime).toLocaleTimeString()
-      }`,
-    );
     this.interval = setInterval(() => {
       this.timeInAir = +new Date() - this.launchTime;
-      const partOfFlyWay = this.timeInAir / this.flightTime;
-      const prevPoint = {...this._currentPoint};
-      this._currentPoint = this.getCubicBezierXYZatT(
-        this.wayPoints[0],
-        this.wayPoints[1],
-        this.wayPoints[2],
-        this.wayPoints[3],
-        partOfFlyWay,
+      const prevPoint = { ...this._currentPoint };
+      this._currentPoint = this.getPositionAtTime();
+      this._currentRotation = Math.atan2(
+        this._currentPoint.y - prevPoint.y,
+        this._currentPoint.x - prevPoint.x,
       );
-      this._currentRotation =  Math.atan2(this._currentPoint.y - prevPoint.y, this._currentPoint.x - prevPoint.x)
       if (this.timeInAir >= this.flightTime) {
         this.destroy();
       }
@@ -101,6 +87,7 @@ export default class FlightObject {
   }
 
   destroy() {
+    console.log('destroyed')
     clearInterval(this.interval!);
     this.interval = null;
     this._isDestroyed = true;
@@ -111,37 +98,47 @@ export default class FlightObject {
     this.destroy();
   }
 
-  private getFlightRange() {
-    return this.wayPoints.reduce((acc, point, index, points) => {
+  getFlightTime() {
+    return this.points.reduce((acc, point, index, points) => {
       const prevPoint = index === 0 ? point : points[index - 1];
-      const length = Math.hypot(point.x - prevPoint.x, point.y - prevPoint.y);
-      return acc + length;
+      const distance = Math.hypot(point.x - prevPoint.x, point.y - prevPoint.y);
+      const timeMs = ((distance * 1000) / prevPoint.v) * 1000;
+      return acc + timeMs;
     }, 0);
   }
 
-  // Given the 4 control points on a Bezier curve
-  // Get x,y at interval T along the curve (0<=T<=1)
-  // The curve starts when T==0 and ends when T==1
-  private getCubicBezierXYZatT(
-    startPt: { x: any; y: any; z: any },
-    controlPt1: { x: any; y: any; z: any },
-    controlPt2: { x: any; y: any; z: any },
-    endPt: { x: any; y: any; z: any },
-    T: number,
-  ) {
-    return ({
-      x: this.cubicN(T, startPt.x, controlPt1.x, controlPt2.x, endPt.x),
-      y: this.cubicN(T, startPt.y, controlPt1.y, controlPt2.y, endPt.y),
-      z: this.cubicN(T, startPt.z, controlPt1.z, controlPt2.z, endPt.z),
-    });
+  getPositionAtTime() {
+    let totalTime = 0;
+    for (let i = 0; i < this.points.length; i++) {
+      const currentPoint = this.points[i];
+      const prevPoint = i === 0 ? currentPoint : this.points[i - 1];
+      const distance = Math.hypot(
+        currentPoint.x - prevPoint.x,
+        currentPoint.y - prevPoint.y,
+      );
+      const flightTime = ((distance * 1000) / prevPoint.v) * 1000;
+      totalTime += flightTime;
+      // If next real point finded - current point is next point
+      if (totalTime >= this.timeInAir) {
+        
+        const distanceToNextPointK = 1 -
+          ((totalTime - this.timeInAir) / totalTime);
+        return this.getPositionBetweenPoints(
+          prevPoint,
+          currentPoint,
+          distanceToNextPointK,
+        );
+      }
+    }
+    return this._currentPoint;
   }
 
-  // cubic helper formula
-  private cubicN(T: number, a: number, b: number, c: number, d: number) {
-    var t2 = T * T;
-    var t3 = t2 * T;
-    return a + (-a * 3 + T * (3 * a - a * T)) * T +
-      (3 * b + T * (-6 * b + b * 3 * T)) * T + (c * 3 - c * 3 * T) * t2 +
-      d * t3;
+  getPositionBetweenPoints(currentPoint: IPoint, nextPoint: IPoint, K: number) {
+    return {
+      x: currentPoint.x - (currentPoint.x - nextPoint.x) * K,
+      y: currentPoint.y - (currentPoint.y - nextPoint.y) * K,
+      z: currentPoint.z - (currentPoint.z - nextPoint.z) * K,
+      v: currentPoint.v
+    };
   }
 }

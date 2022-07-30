@@ -152,15 +152,16 @@ export default class SNR {
         // Difference of SNR vertical angle and target vertical angle
         const targetVerticalOffset = targetVerticalAngle - this.verticalAngle;
 
-        // Target angle
-        const targetAngle = Math.abs(
-          flightObject.currentRotation - this.azimut - Math.PI,
-        );
+        const targetAngle = flightObject.currentRotation - this.azimut - Math.PI;
+  
         // Radial velocity
         const radialVelocity = flightObject.velocity -
-          flightObject.velocity * (targetAngle / (Math.PI / 2));
+          flightObject.velocity * Math.cos(targetAngle / (Math.PI / 2));
+       
         // Target param
-        const targetParam = targetDistance * Math.tan(targetAngle);
+        const targetParam = Math.abs(targetDistance * Math.tan(flightObject.currentRotation));
+
+        // console.log(radialVelocity, targetAngle * 180/Math.PI)
 
         // If target inside of SNR ray
         if (

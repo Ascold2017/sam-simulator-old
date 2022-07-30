@@ -208,8 +208,10 @@ export default class Bip {
           firstPoint.x + 10,
           firstPoint.y - 10,
         );
-      } else  {
-        this._canvasContext!.strokeStyle = flightObject.isKilled ? 'white' : 'red';
+      } else {
+        this._canvasContext!.strokeStyle = flightObject.isKilled
+          ? "white"
+          : "red";
         this._canvasContext!.beginPath();
 
         this._canvasContext!.moveTo(
@@ -239,13 +241,5 @@ export default class Bip {
   addFlightObject(flightObject: FlightObject) {
     this._wayPoints[flightObject.identifier!] = [];
     this._flightObjects.push(flightObject);
-  }
-
-  get messages() {
-    return this._messages;
-  }
-
-  listener(message: string) {
-    this._messages.push(message);
   }
 }
