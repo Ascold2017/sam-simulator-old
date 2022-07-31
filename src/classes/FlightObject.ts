@@ -36,7 +36,6 @@ export default class FlightObject {
       0,
       this.points.length - 1,
     );
-    console.log(this.flightTime / 1000 / 60);
   }
 
   get identifier() {

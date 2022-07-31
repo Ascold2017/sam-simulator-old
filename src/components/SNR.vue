@@ -42,14 +42,10 @@
             <v-icon :color="params.isCapturedByDistance ? 'success' : 'warning'">mdi-checkbox-blank-circle</v-icon>
           </div>
         </div>
-
       </v-card>
       <v-card>
         <canvas ref="distanceScreenRef" width="400" height="600" class="border"></canvas>
       </v-card>
-
-      
-
     </div>
   </div>
 </template>
@@ -130,10 +126,10 @@ onMounted(() => {
 });
   window.addEventListener('keydown', (event: KeyboardEvent) => {
     const map: Record<string, () => void> = {
-      'KeyA': () => snr.value?.setAzimut(snr.value.azimutDeg - 0.1),
-      'KeyD': () => snr.value?.setAzimut(snr.value.azimutDeg + 0.1),
-      'KeyW': () => snr.value?.setVerticalAngle(snr.value.verticalAngleDeg + 0.1),
-      'KeyS': () => snr.value?.setVerticalAngle(snr.value.verticalAngleDeg - 0.1),
+      'KeyA': () => snr.value?.setAzimut(snr.value.azimutDeg - 0.05),
+      'KeyD': () => snr.value?.setAzimut(snr.value.azimutDeg + 0.05),
+      'KeyW': () => snr.value?.setVerticalAngle(snr.value.verticalAngleDeg + 0.05),
+      'KeyS': () => snr.value?.setVerticalAngle(snr.value.verticalAngleDeg - 0.05),
       'Space': () => {
         snr.value?.captureTargetByDirection()
         snr.value?.captureTargetByDistance()

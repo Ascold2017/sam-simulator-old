@@ -2,7 +2,7 @@
   <v-layout full-height>
     <v-main dark>
       <div class="d-flex justify-center py-3">
-        <v-btn-toggle v-model="activeScreen">
+        <v-btn-toggle v-model="activeScreen" mandatory >
           <v-btn value="BIP">БИП</v-btn>
           <v-btn value="SOC">СОЦ</v-btn>
           <v-btn value="SNR">СНР</v-btn>
