@@ -16,7 +16,7 @@ interface ISNR {
   initialRayWidth: number;
   maxDistance: number;
   missileVelocity: number;
-  missileMaxDistance: number
+  missileMaxDistance: number;
 }
 export default class SNR {
   private snrTargetScreen: SNRTargetScreen | null = null;
@@ -50,7 +50,7 @@ export default class SNR {
     initialRayWidth,
     maxDistance,
     missileVelocity,
-    missileMaxDistance
+    missileMaxDistance,
   }: ISNR) {
     this.snrTargetScreen = snrTargetScreen;
     this.snrIndicatorsScreen = snrIndicatorsScreen;
@@ -63,7 +63,7 @@ export default class SNR {
     this.missileVelocity = missileVelocity;
     this.missileMaxDistance = missileMaxDistance;
 
-    const interval = setInterval(() => {
+    setInterval(() => {
       this.calculateTargetsParams();
       this.calculateMissiles();
     }, 0);
@@ -92,7 +92,7 @@ export default class SNR {
       azimut = azimut - 360;
     }
 
-    this.azimut = (azimut - 90) * Math.PI / 180;
+    this.azimut = (azimut - 90) * (Math.PI / 180);
     this.snrIndicatorsScreen!.setAzimut(this.azimut);
   }
 
@@ -152,17 +152,15 @@ export default class SNR {
         // Difference of SNR vertical angle and target vertical angle
         const targetVerticalOffset = targetVerticalAngle - this.verticalAngle;
 
-        const targetAngle = flightObject.currentRotation - this.azimut - Math.PI;
-  
+        const targetAngle = (this.azimut > flightObject.currentRotation
+          ? this.azimut - flightObject.currentRotation
+          : flightObject.currentRotation - this.azimut) - Math.PI;
+
         // Radial velocity
-        const radialVelocity = flightObject.velocity -
-          flightObject.velocity * Math.cos(targetAngle / (Math.PI / 2));
-       
+        const radialVelocity = flightObject.velocity * Math.cos(targetAngle);
+
         // Target param
-        const targetParam = Math.abs(targetDistance * Math.tan(flightObject.currentRotation));
-
-        // console.log(radialVelocity, targetAngle * 180/Math.PI)
-
+        const targetParam = Math.abs(targetDistance * Math.tan(targetAngle));
         // If target inside of SNR ray
         if (
           Math.abs(targetAzimutOffset) < (rayWidthRad / 2) &&
@@ -197,7 +195,7 @@ export default class SNR {
             targetSpotSize,
             targetSpotLength,
             distanceToHit,
-            targetParam
+            targetParam,
           );
         } else {
           this.snrTargetScreen!.removeTarget(flightObject.identifier!);
@@ -239,10 +237,9 @@ export default class SNR {
             "targetHeight",
             (Math.abs(flightObject.currentPoint.z * 1000)).toFixed(0),
           );
-          this.eventListener('targetParam', targetParam.toFixed(1))
+          this.eventListener("targetParam", targetParam.toFixed(1));
         }
-      }
-      else if (
+      } else if (
         flightObject.isDestroyed &&
         this.trackingDirectionTargetIdentifier === flightObject.identifier
       ) {

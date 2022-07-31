@@ -62,6 +62,11 @@ export default class FlightObject {
     return this._currentRotation;
   }
 
+  get currentRotationDeg() {
+    const azimut = (this._currentRotation + Math.PI / 2) * (180 / Math.PI);
+    return azimut < 0 ? azimut + 360 : azimut;
+  }
+
   get rcs() {
     return this._rcs;
   }
@@ -79,6 +84,7 @@ export default class FlightObject {
         this._currentPoint.y - prevPoint.y,
         this._currentPoint.x - prevPoint.x,
       );
+     
       if (this.timeInAir >= this.flightTime) {
         this.destroy();
       }
@@ -87,7 +93,6 @@ export default class FlightObject {
   }
 
   destroy() {
-    console.log('destroyed')
     clearInterval(this.interval!);
     this.interval = null;
     this._isDestroyed = true;
