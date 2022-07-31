@@ -7,6 +7,7 @@ interface IPoint {
 export default class FlightObject {
   private _identifier: string | null = null;
   private points: IPoint[] = [];
+  private currentPointIndex = 0;
   private launchTime = 0;
   private timeInAir = 0;
   private flightTime = 0;
@@ -31,7 +32,11 @@ export default class FlightObject {
     this._identifier = identifier;
     this._rcs = rcs;
     this.points = points;
-    this.flightTime = this.getFlightTime();
+    this.flightTime = this.getFlightTimeBetweenPoints(
+      0,
+      this.points.length - 1,
+    );
+    console.log(this.flightTime / 1000 / 60);
   }
 
   get identifier() {
@@ -74,7 +79,7 @@ export default class FlightObject {
   launch() {
     this._isLaunched = true;
     this.launchTime = +new Date();
-    
+
     console.log(`Flight object launched at ${new Date(this.launchTime)}`);
     this.interval = setInterval(() => {
       this.timeInAir = +new Date() - this.launchTime;
@@ -84,7 +89,7 @@ export default class FlightObject {
         this._currentPoint.y - prevPoint.y,
         this._currentPoint.x - prevPoint.x,
       );
-     
+
       if (this.timeInAir >= this.flightTime) {
         this.destroy();
       }
@@ -103,8 +108,9 @@ export default class FlightObject {
     this.destroy();
   }
 
-  getFlightTime() {
-    return this.points.reduce((acc, point, index, points) => {
+  getFlightTimeBetweenPoints(fromIndex: number, toIndex: number) {
+    const points = this.points.slice(fromIndex, toIndex + 1);
+    return points.reduce((acc, point, index, points) => {
       const prevPoint = index === 0 ? point : points[index - 1];
       const distance = Math.hypot(point.x - prevPoint.x, point.y - prevPoint.y);
       const timeMs = ((distance * 1000) / prevPoint.v) * 1000;
@@ -113,29 +119,31 @@ export default class FlightObject {
   }
 
   getPositionAtTime() {
-    let totalTime = 0;
-    for (let i = 0; i < this.points.length; i++) {
-      const currentPoint = this.points[i];
-      const prevPoint = i === 0 ? currentPoint : this.points[i - 1];
-      const distance = Math.hypot(
-        currentPoint.x - prevPoint.x,
-        currentPoint.y - prevPoint.y,
-      );
-      const flightTime = ((distance * 1000) / prevPoint.v) * 1000;
-      totalTime += flightTime;
-      // If next real point finded - current point is next point
-      if (totalTime >= this.timeInAir) {
-        
-        const distanceToNextPointK = 1 -
-          ((totalTime - this.timeInAir) / totalTime);
-        return this.getPositionBetweenPoints(
-          prevPoint,
-          currentPoint,
-          distanceToNextPointK,
-        );
-      }
+    const prevPoint = this.points[this.currentPointIndex];
+    const nextPoint = this.points[this.currentPointIndex + 1];
+    const flightTimeToCurrentPoint = this.getFlightTimeBetweenPoints(
+      this.currentPointIndex === 0 ? 0 : this.currentPointIndex - 1,
+      this.currentPointIndex,
+    );
+    const flightTimeToNextPoint = this.getFlightTimeBetweenPoints(
+      this.currentPointIndex,
+      this.currentPointIndex + 1,
+    );
+    const timeBetweenPoints = this.timeInAir - flightTimeToCurrentPoint;
+    const K = timeBetweenPoints / flightTimeToNextPoint;
+
+    if (
+      timeBetweenPoints >= flightTimeToNextPoint &&
+      this.currentPointIndex < this.points.length - 1
+    ) {
+      this.currentPointIndex++;
     }
-    return this._currentPoint;
+
+    return this.getPositionBetweenPoints(
+      prevPoint,
+      nextPoint,
+      K,
+    );
   }
 
   getPositionBetweenPoints(currentPoint: IPoint, nextPoint: IPoint, K: number) {
@@ -143,7 +151,7 @@ export default class FlightObject {
       x: currentPoint.x - (currentPoint.x - nextPoint.x) * K,
       y: currentPoint.y - (currentPoint.y - nextPoint.y) * K,
       z: currentPoint.z - (currentPoint.z - nextPoint.z) * K,
-      v: currentPoint.v
+      v: currentPoint.v,
     };
   }
 }
