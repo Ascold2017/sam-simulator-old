@@ -1,5 +1,5 @@
 import type FlightObject from "./FlightObject";
-
+import MissileStartSound from '@/assets/missile-start.mp3'
 export default class SAMissile {
   private _identifier: string | null = null;
   private targetObject: FlightObject | null = null;
@@ -45,6 +45,7 @@ export default class SAMissile {
     if (!this.targetObject) return;
     this.launchTime = +new Date();
     let timer = 0;
+    new Audio(MissileStartSound).play()
     // Запускаем рассчет текущей позиции ракеты
     this.interval = setInterval(() => {
       if (!this.targetObject) return;

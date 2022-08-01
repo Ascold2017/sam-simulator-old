@@ -22,10 +22,12 @@
             <v-radio :value="0.5" label="75 km"></v-radio>
             <v-radio :value="0.3" label="45 km"></v-radio>
           </v-radio-group>
-          <p>Д, km: {{ params.targetDistance }}</p>
-          <p>V, m/s: {{ params.targetVelocity }}</p>
-          <p>H, m: {{ params.targetHeight }}</p>
-          <p>P, km: {{ params.targetParam }}</p>
+          <div class="mb-3">
+            <p>Д, km: {{ params.targetDistance }}</p>
+            <p>V, m/s: {{ params.targetVelocity }}</p>
+            <p>H, m: {{ params.targetHeight }}</p>
+            <p>P, km: {{ params.targetParam }}</p>
+          </div>
           <v-btn color="error" block @click="launchMissile"
             :disabled="!(params.isCapturedByDirection && params.isCapturedByDistance)">Пуск</v-btn>
 
@@ -123,7 +125,7 @@ onMounted(() => {
     maxDistance: initialParams.maxDistance,
     missileVelocity: initialParams.missileVelocity,
     missileMaxDistance: initialParams.missileMaxDistance
-});
+  });
   window.addEventListener('keydown', (event: KeyboardEvent) => {
     const map: Record<string, () => void> = {
       'KeyA': () => snr.value?.setAzimut(snr.value.azimutDeg - 0.05),

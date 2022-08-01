@@ -148,7 +148,7 @@ export default class SOC {
       const map: Record<number, { start: number; end: number }> = {
         2: { start: 50, end: 150 },
         3: { start: 50, end: 100 },
-        6: { start: 5, end: 50 },
+        6: { start: 20, end: 50 },
       };
       const linesDistances = map[this._scale];
       const innerX = centerOfCanvas.x +
@@ -262,9 +262,7 @@ export default class SOC {
       );
       const k = (distanceFromCenter) / (this._maxLocateDistance * this._scale);
       this._canvasContext!.strokeStyle = `rgba(184, 134, 11,${1 - k})`;
-      this._canvasContext!.lineWidth = 3;
       this._canvasContext!.stroke();
-      this._canvasContext!.lineWidth = 1;
     }
   }
 

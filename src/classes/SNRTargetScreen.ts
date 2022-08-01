@@ -73,12 +73,11 @@ export default class SNRTargetScreen {
       const pointY = canvasSize * Math.random();
       this.ctx.beginPath();
       this.ctx.fillStyle = `rgba(184, 134, 11,${1 - Math.random()})`;
-      this.ctx.arc(
+      this.ctx.rect(
         pointX,
         pointY,
         2,
-        0,
-        Math.PI * 2,
+        2,
       );
       this.ctx.fill();
     }

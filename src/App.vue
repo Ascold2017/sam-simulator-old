@@ -1,22 +1,25 @@
 <template>
   <v-layout full-height>
     <v-main dark>
-      <div class="d-flex justify-space-between py-3">
-        <v-spacer />
-        <v-btn-toggle v-model="activeScreen" mandatory>
-          <v-btn value="BIP">БИП</v-btn>
-          <v-btn value="SOC">СОЦ</v-btn>
-          <v-btn value="SNR">СНР</v-btn>
-          <v-btn value="Editor">Редактор</v-btn>
-        </v-btn-toggle>
-        <v-spacer />
-        <v-btn-toggle :model-value="acceleration" @update:model-value="setAcceleration">
-          <v-btn :value="1">1X</v-btn>
-          <v-btn :value="2">2X</v-btn>
-          <v-btn :value="4">4X</v-btn>
-          <v-btn :value="8">8X</v-btn>
-        </v-btn-toggle>
-      </div>
+      <v-row class="py-3">
+        <v-col></v-col>
+        <v-col class="d-flex justify-center">
+          <v-btn-toggle v-model="activeScreen" mandatory>
+            <v-btn value="BIP">БИП</v-btn>
+            <v-btn value="SOC">СОЦ</v-btn>
+            <v-btn value="SNR">СНР</v-btn>
+            <v-btn value="Editor">Редактор</v-btn>
+          </v-btn-toggle>
+        </v-col>
+        <v-col class="d-flex justify-end">
+          <v-btn-toggle :model-value="acceleration" @update:model-value="setAcceleration">
+            <v-btn :value="1">1X</v-btn>
+            <v-btn :value="2">2X</v-btn>
+            <v-btn :value="4">4X</v-btn>
+            <v-btn :value="8">8X</v-btn>
+          </v-btn-toggle>
+        </v-col>
+      </v-row>
       <BIP ref="bipRef" v-show="activeScreen === 'BIP'" />
       <SOC ref="radarRef" v-show="activeScreen === 'SOC'" @exportAzimut="onExportAzimut" />
       <SNR ref="snrRef" v-show="activeScreen === 'SNR'" />
