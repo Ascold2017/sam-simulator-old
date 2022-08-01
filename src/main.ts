@@ -1,4 +1,5 @@
 import "vuetify/styles"; // Global CSS has to be imported
+import '@/assets/main.css'
 import { createApp } from "vue";
 import App from "./App.vue";
 

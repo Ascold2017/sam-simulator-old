@@ -164,7 +164,7 @@ export default class SOC {
       this._canvasContext!.moveTo(innerX, innerY);
       this._canvasContext!.lineTo(outerX, outerY);
       this._canvasContext!.stroke();
-      this._canvasContext!.font = "bold 14px Arial";
+      this._canvasContext!.font = "12px Russo One, sans-serif";
       this._canvasContext!.fillStyle = "white";
       this._canvasContext!.save();
       this._canvasContext!.translate(outerX, outerY);

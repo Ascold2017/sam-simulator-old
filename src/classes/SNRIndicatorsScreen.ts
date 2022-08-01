@@ -68,7 +68,7 @@ export default class SNRIndicatorsScreen {
       azimutDegLabel,
     );
     ctx.fillStyle = "white";
-    ctx.font = "bold 14px Arial";
+    ctx.font = "14px Russo One, sans-serif";
     ctx.fillText(
       azimutDegLabel,
       canvasCenterX / 2 - textMeasurements.width / 2,
@@ -121,7 +121,7 @@ export default class SNRIndicatorsScreen {
       ctx.stroke();
 
       ctx.fillStyle = "white";
-      ctx.font = "11px Arial";
+      ctx.font = "11px Russo One, sans-serif";
       const textMeasurements = ctx.measureText(
         Number(deg).toString(),
       );

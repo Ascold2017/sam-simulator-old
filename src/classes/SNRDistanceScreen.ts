@@ -137,6 +137,7 @@ export default class SNRDistanceScreen {
         pointY,
       );
       ctx.stroke();
+      ctx.font = '12px Russo One, sans-serif'
       ctx.fillText(
         (maxDistance - distance).toString(),
         5,

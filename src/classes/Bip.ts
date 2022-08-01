@@ -52,7 +52,7 @@ export default class Bip {
 
     this.ctx!.strokeStyle = "white";
     this.ctx!.fillStyle = "white";
-    this.ctx.font = "bold 14px Arial";
+    this.ctx.font = "14px Russo One, sans-serif";
     const intToChar = (int: number) => String.fromCharCode(int + 65);
     // Draw rects
     for (let i = 1; i <= 10; i++) {
@@ -99,7 +99,7 @@ export default class Bip {
     this.ctx!.moveTo(prevCanvasPoint.x, prevCanvasPoint.y);
     this.ctx!.strokeStyle = "goldenrod";
     this.ctx!.fillStyle = "goldenrod";
-    this.ctx!.font = "12px Arial";
+    this.ctx!.font = "12px Russo One, sans-serif";
     this.ctx!.lineTo(currentCanvasPoint.x, currentCanvasPoint.y);
     this.ctx!.stroke();
     this.ctx!.beginPath();
@@ -123,7 +123,7 @@ export default class Bip {
         15,
       );
       this.ctx!.fillStyle = "goldenrod";
-      this.ctx!.font = "14px Arial";
+      this.ctx!.font = "14px Russo One, sans-serif";
       this.ctx!.fillText(
         String(heightText),
         firstPoint.x + 10,
@@ -190,7 +190,7 @@ export default class Bip {
     // Number of target
     const numberOfTargetText = (new Array(2).join("0") +
       Number(Object.keys(this.wayPoints).length).toFixed(0)).slice(-2);
-    this.ctx!.font = "16px Arial";
+    this.ctx!.font = "16px Russo One, sans-serif";
     this.ctx!.fillText(
       `24${numberOfTargetText}`,
       currentCanvasPoint.x - 40,
@@ -198,7 +198,7 @@ export default class Bip {
     );
 
     // Height of target
-    this.ctx!.font = "14px Arial";
+    this.ctx!.font = "14px Russo One, sans-serif";
     const heightText = (new Array(3).join("0") +
       Number(flightObject.currentPoint.z * 10).toFixed(0)).slice(-3);
     this.ctx!.fillText(

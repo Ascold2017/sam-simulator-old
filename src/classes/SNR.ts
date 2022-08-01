@@ -232,13 +232,12 @@ export default class SNR {
           isCapturedByDistance &&
           this.eventListener
         ) {
-          this.eventListener("targetDistance", this.targetDistance.toFixed(1));
           this.eventListener("targetVelocity", flightObject.velocity);
           this.eventListener(
             "targetHeight",
-            (Math.abs(flightObject.currentPoint.z * 1000)).toFixed(0),
+            flightObject.currentPoint.z,
           );
-          this.eventListener("targetParam", targetParam.toFixed(1));
+          this.eventListener("targetParam", targetParam);
         }
       } else if (
         flightObject.isDestroyed &&
