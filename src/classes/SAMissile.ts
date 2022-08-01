@@ -1,23 +1,21 @@
 import type FlightObject from "./FlightObject";
 
 export default class SAMissile {
-  private _identifier: string | null = null
+  private _identifier: string | null = null;
   private targetObject: FlightObject | null = null;
   private maxDistance: number = 0;
   private velocity: number = 0;
   private interval: number | null = null;
-   currentPoint: { x: number; y: number; z: number } = {
+  currentPoint: { x: number; y: number; z: number } = {
     x: 0,
     y: 0,
     z: 0,
   };
   private currentRotation = 0;
   private launchTime: number = 0;
-  private timeInAir: number = 0;
   private killRadius: number = 0.05; // 50 meters
   private isDestroyed = false;
   private traveledDistance = 0;
-  private traveledDistance2 = 0;
   constructor(
     targetObject: FlightObject,
     maxDistance = 25,
@@ -32,7 +30,7 @@ export default class SAMissile {
   }
 
   get indentifier() {
-    return this._identifier
+    return this._identifier;
   }
 
   public get isDestroyedMissile() {
@@ -40,57 +38,54 @@ export default class SAMissile {
   }
 
   public get missileCurrentPoint() {
-    return {...this.currentPoint}
+    return { ...this.currentPoint };
   }
 
   public launch() {
     if (!this.targetObject) return;
-    this.launchTime = Date.now();
+    this.launchTime = +new Date();
+    let timer = 0;
     // Запускаем рассчет текущей позиции ракеты
     this.interval = setInterval(() => {
       if (!this.targetObject) return;
       const vectorVelocity = Math.abs(Math.cos(this.currentRotation)) * this.velocity;
       // Время в воздухе с прошлого тика
-      const prevTime = this.timeInAir;
-      this.timeInAir = (Date.now() - this.launchTime) / 1000;
+      const acc = (window as any).__ACCELERATION__;
+      const tt = +new Date() - this.launchTime;
+      const dt = (tt - timer) * acc;
+      timer = tt;
+      const dFlightDistance = ((dt / 1000) * vectorVelocity) /
+        1000;
       const targetPosition = this.targetObject.currentPoint;
-      
+
       const dx = targetPosition.x - this.currentPoint.x;
       const dy = targetPosition.y - this.currentPoint.y;
       const dz = targetPosition.z - this.currentPoint.z;
-      // 
-      // Пройденное расстояние с прошлого тика
-      const dFlightDistance = ((this.timeInAir - prevTime) * vectorVelocity) /
-        1000;
-      const dFlightDistance2 = ((this.timeInAir - prevTime) * this.velocity) /
-        1000;
-      // Пройденное растоянии
+
       const targetDistance = Math.sqrt(dx * dx + dy * dy);
+
       //находим направляющий вектор до цели
-      let dirX = dx / targetDistance;
-      let dirY = dy / targetDistance;
+      let dirX = (dx / targetDistance) * dFlightDistance;
+      let dirY = (dy / targetDistance) * dFlightDistance;
       let dirZ = dz * dFlightDistance;
-     
-      //умножаем направляющий вектор на необх длину
-      dirX *= dFlightDistance;
-      dirY *= dFlightDistance;
-      this.currentRotation =  Math.atan2(dirY, dirX) - this.currentRotation;
+
+      this.currentRotation = Math.atan2(dirY, dirX) - this.currentRotation;
       // Получаем новые координаты ракеты
       this.currentPoint = {
-        x: dirX + this.currentPoint.x,
-        y: dirY + this.currentPoint.y,
-        z: dirZ + this.currentPoint.z,
+        x: this.currentPoint.x + dirX,
+        y: this.currentPoint.y + dirY,
+        z: this.currentPoint.z + dirZ,
       };
-      this.traveledDistance += Math.sqrt(dirX * dirX + dirY * dirY);
+
       // Если цель в радиусе поражения
       if (targetDistance <= this.killRadius) {
         this.killFlightObject();
       }
       this.traveledDistance += dFlightDistance;
-      this.traveledDistance2 += dFlightDistance2;
       // Если превышена дальность полета или цель уничтожена
       if (
-        this.traveledDistance2 >= this.maxDistance || this.targetObject.isDestroyed
+        this.traveledDistance >= this.maxDistance ||
+        this.targetObject.isDestroyed
       ) {
         this.destroyMissile();
       }
@@ -104,7 +99,7 @@ export default class SAMissile {
     this.targetObject!.kill();
   }
 
-   destroyMissile() {
+  destroyMissile() {
     this.isDestroyed = true;
     clearInterval(this.interval!);
     this.interval = null;
