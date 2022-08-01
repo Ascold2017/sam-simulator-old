@@ -191,6 +191,7 @@ export default class SNR {
           this.snrDistanceScreen!.setTargetParams(
             flightObject.identifier!,
             targetVisibilityK,
+            targetOffsetX,
             targetDistance,
             targetSpotSize,
             targetSpotLength,

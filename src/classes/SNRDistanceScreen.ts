@@ -30,6 +30,7 @@ export default class SNRDistanceScreen {
   public setTargetParams(
     targetIdentifier: string,
     targetDistanceK: number,
+    targetOffsetX: number,
     distance: number,
     spotWidth: number,
     spotLength: number,
@@ -37,6 +38,7 @@ export default class SNRDistanceScreen {
     targetParam: number,
   ) {
     this.targets[targetIdentifier] = {
+      targetOffsetX,
       targetDistanceK,
       distance,
       spotWidth,
@@ -191,6 +193,9 @@ export default class SNRDistanceScreen {
       const targetParams = this.targets[targetIdentifier];
       const maxDistance = this.maxDistance * this.scale;
       const canvasCenterX = this.ctx.canvas.width / 2;
+      const pointX = targetParams.targetOffsetX *
+          canvasCenterX +
+        canvasCenterX;
       const pointY = this.ctx.canvas.height -
         this.ctx.canvas.height /
           (maxDistance / targetParams.distance);
@@ -204,7 +209,7 @@ export default class SNRDistanceScreen {
       })`;
       this.ctx.beginPath();
       this.ctx.ellipse(
-        canvasCenterX,
+        pointX,
         pointY,
         canvasDistanceSpotLength / 2,
         canvasDistanceSpotWidth / 2,
