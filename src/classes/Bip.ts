@@ -2,244 +2,227 @@ import type FlightObject from "./FlightObject";
 interface IBip {
   canvasBip: HTMLCanvasElement;
 }
+interface IRect {
+  i: number;
+  j: number;
+  flightObjectIdentifiers: string[];
+}
 export default class Bip {
-  _flightObjects: FlightObject[] = [];
-  _scale = 2;
-  _canvasContext: CanvasRenderingContext2D | null = null;
-  _canvasCenter = { x: 0, y: 0 };
-  _wayPoints: Record<string, { x: number; y: number }[]> = {};
-  _messages: string[] = [];
+  private flightObjects: FlightObject[] = [];
+  private scale = 2;
+  private ctx: CanvasRenderingContext2D | null = null;
+  private canvasCenter = { x: 0, y: 0 };
+  private wayPoints: Record<string, { x: number; y: number }[]> = {};
   constructor({ canvasBip }: IBip) {
-    this._canvasContext = canvasBip.getContext("2d");
-    this._canvasCenter = {
-      x: this._canvasContext!.canvas.width / 2,
-      y: this._canvasContext!.canvas.height / 2,
+    this.ctx = canvasBip.getContext("2d");
+    this.canvasCenter = {
+      x: this.ctx!.canvas.width / 2,
+      y: this.ctx!.canvas.height / 2,
     };
     this._draw();
   }
 
   _draw() {
+    const acc = (window as any).__ACCELERATION__;
     this._drawSite();
-    this._flightObjects.map((flightObject) =>
-      this._drawFlightObjectWay(flightObject)
+    this.flightObjects.map((flightObject) =>
+      this.drawFlightObjectWay(flightObject)
     );
     setInterval(() => {
-      this._flightObjects.map((flightObject) =>
-        this._drawFlightObjectWay(flightObject)
+      this.flightObjects.map((flightObject) =>
+        this.drawFlightObjectWay(flightObject)
       );
-    }, 5000);
+    }, 10000 / acc);
   }
 
   _drawSite() {
-    const centerOfCanvas = {
-      x: this._canvasContext!.canvas.width / 2,
-      y: this._canvasContext!.canvas.height / 2,
-    };
-    this._canvasContext!.strokeStyle = "red";
-
-    this._canvasContext!.beginPath();
-    this._canvasContext!.arc(
-      centerOfCanvas.x,
-      centerOfCanvas.y,
-      2,
-      1,
-      0,
-    );
-    this._canvasContext!.stroke();
+    if (!this.ctx) return;
+    this.ctx!.strokeStyle = "red";
 
     // Draw 25 km circle killzone
-    this._canvasContext!.beginPath();
-    this._canvasContext!.arc(
-      centerOfCanvas.x,
-      centerOfCanvas.y,
-      25 * this._scale,
+    this.ctx!.beginPath();
+    this.ctx!.arc(
+      this.canvasCenter.x,
+      this.canvasCenter.y,
+      25 * this.scale,
       0,
       2 * Math.PI,
     );
-    this._canvasContext!.stroke();
+    this.ctx!.stroke();
 
-    this._canvasContext!.strokeStyle = "white";
-
-    // Draw 50 km circle
-    this._canvasContext!.beginPath();
-    this._canvasContext!.arc(
-      centerOfCanvas.x,
-      centerOfCanvas.y,
-      50 * this._scale,
-      0,
-      2 * Math.PI,
-    );
-    this._canvasContext!.stroke();
-    // Draw 100 km circle
-    this._canvasContext!.beginPath();
-    this._canvasContext!.arc(
-      centerOfCanvas.x,
-      centerOfCanvas.y,
-      100 * this._scale,
-      0,
-      2 * Math.PI,
-    );
-    this._canvasContext!.stroke();
-    // Draw 100 km circle
-    this._canvasContext!.beginPath();
-    this._canvasContext!.arc(
-      centerOfCanvas.x,
-      centerOfCanvas.y,
-      150 * this._scale,
-      0,
-      2 * Math.PI,
-    );
-    this._canvasContext!.stroke();
-
-    // Draw radial lines and degrees
-    for (let deg = 0; deg < 360; deg += 5) {
-      const radians = deg * Math.PI / 180 - Math.PI / 2;
-      const innerX = centerOfCanvas.x + (50 * this._scale) * Math.cos(radians);
-      const innerY = centerOfCanvas.y + (50 * this._scale) * Math.sin(radians);
-      const outerX = centerOfCanvas.x + (150 * this._scale) * Math.cos(radians);
-      const outerY = centerOfCanvas.y + (150 * this._scale) * Math.sin(radians);
-
-      this._canvasContext!.beginPath();
-      this._canvasContext!.moveTo(innerX, innerY);
-      this._canvasContext!.lineTo(outerX, outerY);
-      this._canvasContext!.stroke();
+    this.ctx!.strokeStyle = "white";
+    this.ctx!.fillStyle = "white";
+    this.ctx.font = "bold 14px Arial";
+    const intToChar = (int: number) => String.fromCharCode(int + 65);
+    // Draw rects
+    for (let i = 1; i <= 10; i++) {
+      // Horizontal lines
+      this.ctx.beginPath();
+      this.ctx.moveTo(0, (i * 50) * this.scale);
+      this.ctx.lineTo(this.ctx.canvas.width, (i * 50) * this.scale);
+      this.ctx.stroke();
+      // Vertical lines
+      this.ctx.beginPath();
+      this.ctx.moveTo((i * 50) * this.scale, 0);
+      this.ctx.lineTo((i * 50) * this.scale, this.ctx.canvas.height);
+      this.ctx.stroke();
+      // Legend
+      this.ctx.fillText(intToChar(i - 1), 5, ((i - 1) * 50) * this.scale + 15);
+      this.ctx.fillText(String(i - 1), (i * 50) * this.scale - 15, 15);
     }
   }
 
-  _getCanvasCoordinates(point: any) {
+  private getCanvasCoordinates(point: any) {
     return {
-      x: point.x * this._scale + this._canvasCenter.x,
-      y: point.y * this._scale + this._canvasCenter.y,
+      x: point.x * this.scale + this.canvasCenter.x,
+      y: point.y * this.scale + this.canvasCenter.y,
     };
   }
 
-  _drawFlightObjectWay(flightObject: FlightObject) {
+  private drawFlightObjectWay(flightObject: FlightObject) {
     if (!flightObject.isLaunched) return;
 
-    const wayPoints = this._wayPoints[flightObject.identifier!];
+    const wayPoints = this.wayPoints[flightObject.identifier!];
     const prevPoint = wayPoints.length >= 1
       ? wayPoints[wayPoints.length - 1]
       : flightObject.currentPoint;
     const heightText = (new Array(3).join("0") +
       Number(flightObject.currentPoint.z * 10).toFixed(0)).slice(-3);
 
-    if (
-      flightObject.isDestroyed && prevPoint.x === flightObject.currentPoint.x &&
-      prevPoint.y === flightObject.currentPoint.y
-    ) {
-      return;
-    }
-
-    const prevCanvasPoint = this._getCanvasCoordinates(prevPoint);
-    const currentCanvasPoint = this._getCanvasCoordinates(
+    const prevCanvasPoint = this.getCanvasCoordinates(prevPoint);
+    const currentCanvasPoint = this.getCanvasCoordinates(
       flightObject.currentPoint,
     );
-    if (wayPoints.length === 0) {
-      this._canvasContext!.fillStyle = "white";
-      this._canvasContext!.strokeStyle = "red";
-      // draw legend
-      this._canvasContext!.beginPath();
-      this._canvasContext!.moveTo(
-        currentCanvasPoint.x,
-        currentCanvasPoint.y - 20,
-      );
-      this._canvasContext!.lineTo(
-        currentCanvasPoint.x,
-        currentCanvasPoint.y + 20,
-      );
+    this.wayPoints[flightObject.identifier!].push(flightObject.currentPoint);
+    // draw way
+    this.ctx!.beginPath();
+    this.ctx!.moveTo(prevCanvasPoint.x, prevCanvasPoint.y);
+    this.ctx!.strokeStyle = "goldenrod";
+    this.ctx!.fillStyle = "goldenrod";
+    this.ctx!.font = "12px Arial";
+    this.ctx!.lineTo(currentCanvasPoint.x, currentCanvasPoint.y);
+    this.ctx!.stroke();
+    this.ctx!.beginPath();
+    this.ctx?.arc(
+      currentCanvasPoint.x,
+      currentCanvasPoint.y,
+      1,
+      0,
+      Math.PI * 2,
+    );
+    this.ctx?.fill();
 
-      this._canvasContext!.stroke();
-      this._canvasContext!.moveTo(currentCanvasPoint.x, currentCanvasPoint.y);
-      this._canvasContext!.lineTo(
-        currentCanvasPoint.x + 50,
-        currentCanvasPoint.y,
+    if (!flightObject.isDestroyed) {
+      // Redrawing height
+      const firstPoint = this.getCanvasCoordinates(wayPoints[0]);
+      this.ctx!.beginPath();
+      this.ctx!.clearRect(
+        firstPoint.x + 10,
+        firstPoint.y - 25,
+        30,
+        15,
       );
-      this._canvasContext!.stroke();
-      this._canvasContext!.font = "16px Arial";
-      this._canvasContext!.fillText(
-        "2401",
-        currentCanvasPoint.x - 40,
-        currentCanvasPoint.y,
-      );
-      this._canvasContext!.font = "14px Arial";
-
-      this._canvasContext!.fillText(
+      this.ctx!.fillStyle = "goldenrod";
+      this.ctx!.font = "14px Arial";
+      this.ctx!.fillText(
         String(heightText),
+        firstPoint.x + 10,
+        firstPoint.y - 10,
+      );
+    } else {
+      // Drawing ending cross
+      this.ctx!.strokeStyle = flightObject.isKilled ? "white" : "red";
+      this.ctx!.beginPath();
+
+      this.ctx!.moveTo(
+        currentCanvasPoint.x - 10,
+        currentCanvasPoint.y - 10,
+      );
+      this.ctx!.lineTo(
+        currentCanvasPoint.x + 10,
+        currentCanvasPoint.y + 10,
+      );
+
+      this.ctx!.moveTo(
         currentCanvasPoint.x + 10,
         currentCanvasPoint.y - 10,
       );
-      this._canvasContext!.fillText(
-        "81",
-        currentCanvasPoint.x + 10,
-        currentCanvasPoint.y + 15,
+      this.ctx!.lineTo(
+        currentCanvasPoint.x - 10,
+        currentCanvasPoint.y + 10,
       );
-    } else {
-      // draw way
-      this._canvasContext!.beginPath();
-      this._canvasContext!.moveTo(prevCanvasPoint.x, prevCanvasPoint.y);
-      this._canvasContext!.lineJoin = "miter";
-      this._canvasContext!.strokeStyle = "red";
-      this._canvasContext!.fillStyle = "red";
-      this._canvasContext!.font = "12px Arial";
-      this._canvasContext!.lineTo(currentCanvasPoint.x, currentCanvasPoint.y);
-      this._canvasContext!.stroke();
-      this._canvasContext!.beginPath();
-      this._canvasContext?.arc(
-        currentCanvasPoint.x,
-        currentCanvasPoint.y,
-        1,
-        0,
-        Math.PI * 2,
+      this.ctx!.stroke();
+      // Remove flight object
+      this.flightObjects = this.flightObjects.filter((fo) =>
+        fo.identifier !== flightObject.identifier
       );
-      this._canvasContext?.fill();
-      if (!flightObject.isDestroyed) {
-        const firstPoint = this._getCanvasCoordinates(wayPoints[0]);
-        this._canvasContext!.beginPath();
-        this._canvasContext!.clearRect(
-          firstPoint.x + 10,
-          firstPoint.y - 25,
-          30,
-          15,
-        );
-        this._canvasContext!.fillStyle = "white";
-        this._canvasContext!.font = "14px Arial";
-        this._canvasContext!.fillText(
-          String(heightText),
-          firstPoint.x + 10,
-          firstPoint.y - 10,
-        );
-      } else {
-        this._canvasContext!.strokeStyle = flightObject.isKilled
-          ? "white"
-          : "red";
-        this._canvasContext!.beginPath();
-
-        this._canvasContext!.moveTo(
-          currentCanvasPoint.x - 10,
-          currentCanvasPoint.y - 10,
-        );
-        this._canvasContext!.lineTo(
-          currentCanvasPoint.x + 10,
-          currentCanvasPoint.y + 10,
-        );
-
-        this._canvasContext!.moveTo(
-          currentCanvasPoint.x + 10,
-          currentCanvasPoint.y - 10,
-        );
-        this._canvasContext!.lineTo(
-          currentCanvasPoint.x - 10,
-          currentCanvasPoint.y + 10,
-        );
-        this._canvasContext!.stroke();
-      }
+      delete this.wayPoints[flightObject.identifier!];
     }
+  }
 
-    this._wayPoints[flightObject.identifier!].push(flightObject.currentPoint);
+  private drawFlightObjectStartPoint(flightObject: FlightObject) {
+    const i = Math.round(flightObject.currentPoint.x / 50) + 5;
+    const j = Math.round(flightObject.currentPoint.y / 50) + 5;
+    const currentCanvasPoint = this.getCanvasCoordinates(
+      flightObject.currentPoint,
+    );
+
+    this.ctx!.fillStyle = "goldenrod";
+    this.ctx!.strokeStyle = "goldenrod";
+    // draw legend
+    this.ctx!.beginPath();
+    this.ctx!.moveTo(
+      currentCanvasPoint.x,
+      currentCanvasPoint.y - 20,
+    );
+    this.ctx!.lineTo(
+      currentCanvasPoint.x,
+      currentCanvasPoint.y + 20,
+    );
+
+    this.ctx!.stroke();
+    this.ctx!.moveTo(currentCanvasPoint.x, currentCanvasPoint.y);
+    this.ctx!.lineTo(
+      currentCanvasPoint.x + 50,
+      currentCanvasPoint.y,
+    );
+    this.ctx!.stroke();
+    // Number of target
+    const numberOfTargetText = (new Array(2).join("0") +
+      Number(Object.keys(this.wayPoints).length).toFixed(0)).slice(-2);
+    this.ctx!.font = "16px Arial";
+    this.ctx!.fillText(
+      `24${numberOfTargetText}`,
+      currentCanvasPoint.x - 40,
+      currentCanvasPoint.y,
+    );
+
+    // Height of target
+    this.ctx!.font = "14px Arial";
+    const heightText = (new Array(3).join("0") +
+      Number(flightObject.currentPoint.z * 10).toFixed(0)).slice(-3);
+    this.ctx!.fillText(
+      String(heightText),
+      currentCanvasPoint.x + 10,
+      currentCanvasPoint.y - 10,
+    );
+    this.ctx!.fillText(
+      "81",
+      currentCanvasPoint.x + 10,
+      currentCanvasPoint.y + 15,
+    );
+    this.wayPoints[flightObject.identifier!].push({
+      x: flightObject.currentPoint.x,
+      y: flightObject.currentPoint.y,
+    });
   }
 
   addFlightObject(flightObject: FlightObject) {
-    this._wayPoints[flightObject.identifier!] = [];
-    this._flightObjects.push(flightObject);
+    const int = setTimeout(() => {
+      this.wayPoints[flightObject.identifier!] = [];
+      this.flightObjects.push(flightObject);
+      this.drawFlightObjectStartPoint(flightObject);
+      clearTimeout(int);
+    });
   }
 }

@@ -176,6 +176,7 @@ export default class Editor {
       const dt = (tt - timer) * acc;
       currentTimeOffset += dt;
       timer = tt;
+      
       flightMissions = flightMissions.filter((fm) => {
         if (currentTimeOffset / 1000 >= fm.time) {
           const flightObject = new FlightObject({

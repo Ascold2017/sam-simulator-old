@@ -54,10 +54,11 @@ const bipRef = ref<InstanceType<typeof BIP> | null>(null);
 const radarRef = ref<InstanceType<typeof SOC> | null>(null);
 const snrRef = ref<InstanceType<typeof SNR> | null>(null);
 function onCreateFlightObject(flightObject: FlightObject) {
+  flightObject.launch()
   bipRef.value!.addFlightObject(flightObject);
   radarRef.value?.addFlightObject(flightObject);
   snrRef.value?.snr?.addFlightObject(flightObject);
-  flightObject.launch()
+  
 }
 
 function onExportAzimut(azimut: number) {
