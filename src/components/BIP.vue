@@ -14,7 +14,6 @@
 import { onMounted, ref } from 'vue';
 import Bip from "@/classes/Bip";
 import type FlightObject from "@/classes/FlightObject";
-import { computed } from '@vue/reactivity';
 
 const bipRef = ref<HTMLCanvasElement | null>(null);
 const bip = ref<Bip | null>(null)

@@ -168,10 +168,16 @@ export default class Editor {
     const startTime = Date.now();
     let flightMissions = [...this.flightMissions];
     this.clear();
+    let currentTimeOffset = 0;
+    let timer = 0
     this.startingInterval = setInterval(() => {
-      const currentTimeOffset = (Date.now() - startTime) / 1000;
+      const acc = (window as any).__ACCELERATION__;
+      const tt = +new Date() - startTime;
+      const dt = (tt - timer) * acc;
+      currentTimeOffset += dt;
+      timer = tt;
       flightMissions = flightMissions.filter((fm) => {
-        if (currentTimeOffset >= fm.time) {
+        if (currentTimeOffset / 1000 >= fm.time) {
           const flightObject = new FlightObject({
             identifier: fm.identifier,
             points: fm.points,

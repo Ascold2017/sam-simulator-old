@@ -80,10 +80,15 @@ export default class FlightObject {
     this.launchTime = +new Date();
 
     console.log(`Flight object launched at ${new Date(this.launchTime)}`);
+    let timer = 0;
     this.interval = setInterval(() => {
-      this.timeInAir = +new Date() - this.launchTime;
+      const acc = (window as any).__ACCELERATION__;
+      const tt = +new Date() - this.launchTime;
+      const dt = (tt - timer) * acc;
+      this.timeInAir += dt;
+      timer = tt;
       const prevPoint = { ...this._currentPoint };
-      this._currentPoint = this.getPositionAtTime();
+      this._currentPoint = this.getCurrentPoint();
       this._currentRotation = Math.atan2(
         this._currentPoint.y - prevPoint.y,
         this._currentPoint.x - prevPoint.x,
@@ -117,27 +122,24 @@ export default class FlightObject {
     }, 0);
   }
 
-  getPositionAtTime() {
+  getCurrentPoint() {
     const prevPoint = this.points[this.currentPointIndex];
     const nextPoint = this.points[this.currentPointIndex + 1];
     const flightTimeToCurrentPoint = this.getFlightTimeBetweenPoints(
-      this.currentPointIndex === 0 ? 0 : this.currentPointIndex - 1,
+      0,
       this.currentPointIndex,
     );
     const flightTimeToNextPoint = this.getFlightTimeBetweenPoints(
       this.currentPointIndex,
       this.currentPointIndex + 1,
     );
-    const timeBetweenPoints = this.timeInAir - flightTimeToCurrentPoint;
-    const K = timeBetweenPoints / flightTimeToNextPoint;
-
+    const timeOverCurrentPoint = this.timeInAir - flightTimeToCurrentPoint;
+    const K = timeOverCurrentPoint / flightTimeToNextPoint;
     if (
-      timeBetweenPoints >= flightTimeToNextPoint &&
-      this.currentPointIndex < this.points.length - 1
+      timeOverCurrentPoint >= flightTimeToNextPoint
     ) {
       this.currentPointIndex++;
     }
-
     return this.getPositionBetweenPoints(
       prevPoint,
       nextPoint,

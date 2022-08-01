@@ -94,8 +94,7 @@ const startFlightMissions = () => {
   editor.value?.startFlightMissions(flightObject => emit('addFlightObject', flightObject))
 }
 function addFlightMission() {
-  if (points.value.length < 3) return
+  if (points.value.length < 2) return
   editor.value!.addFlightMission();
-  //
 }
 </script>
