@@ -6,7 +6,7 @@ import type SOCScreen from "./SOCScreen";
 
 type EventListener = (arg0: string, arg1: any) => void;
 
-interface ISNR {
+interface ISAM {
   snrTargetScreen: SNRTargetScreen;
   snrDistanceScreen: SNRDistanceScreen;
   socScreen: SOCScreen;
@@ -20,7 +20,7 @@ interface ISNR {
   minVerticalAngle: number;
   maxVerticalAngle: number;
 }
-export default class SNR {
+export default class SAM {
   private snrTargetScreen: SNRTargetScreen | null = null;
   private snrDistanceScreen: SNRDistanceScreen | null = null;
   private socScreen: SOCScreen | null = null;
@@ -43,6 +43,7 @@ export default class SNR {
   private missileVelocity = 0;
   private missileMaxDistance = 0;
   distanceScale = 1;
+  private isEnabled = false
   constructor({
     snrTargetScreen,
     snrDistanceScreen,
@@ -56,7 +57,7 @@ export default class SNR {
     missileMaxDistance,
     minVerticalAngle,
     maxVerticalAngle,
-  }: ISNR) {
+  }: ISAM) {
     this.snrTargetScreen = snrTargetScreen;
     this.snrDistanceScreen = snrDistanceScreen;
     this.socScreen = socScreen;
@@ -74,6 +75,25 @@ export default class SNR {
       this.calculateTargetsParams();
       this.calculateMissiles();
     }, 0);
+  }
+
+  setIsEnabled(value: boolean) {
+    this.isEnabled = value;
+    if (value === false) {
+      this.snrDistanceScreen!.isEnabled = false;
+      this.snrTargetScreen!.isEnabled = false
+    }
+  }
+
+  setIsEnabledSOC(value: boolean) {
+    if (!this.isEnabled) return;
+    this.socScreen!.isEnabled = value
+  }
+
+  setIsEnabledSNR(value: boolean) {
+    if (!this.isEnabled) return;
+    this.snrDistanceScreen!.isEnabled = value;
+    this.snrTargetScreen!.isEnabled = value
   }
 
   get trackedTarget(): FlightObject | null {
@@ -121,6 +141,7 @@ export default class SNR {
   setDistanceScale(value: number) {
     this.distanceScale = value;
     this.socScreen!.setScale(this.distanceScale);
+    this.snrDistanceScreen!.setScale(this.distanceScale);
   }
 
   get radarRayWidth() {

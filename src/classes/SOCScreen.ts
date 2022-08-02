@@ -13,6 +13,7 @@ export default class SOCScreen {
   private rayWidth = 0;
   private maxLocateDistance = 100;
   private targetRayAngle = -Math.PI / 2;
+  isEnabled = false;
   constructor({
     scale,
     canvasRadar,
@@ -64,9 +65,11 @@ export default class SOCScreen {
       this.ctx!.canvas.width,
       this.ctx!.canvas.height,
     );
+    if (this.isEnabled) {
+      this.drawSnow();
+      this.drawTargets();
+    }
 
-    this.drawSnow();
-    this.drawTargets();
     this.drawRadarSite();
     this.drawTargetRay();
   }
@@ -176,23 +179,34 @@ export default class SOCScreen {
 
     Object.keys(this.targets).forEach((identifier) => {
       const targetParams = this.targets[identifier];
-      const canvasDistance = targetParams.targetDistance * this.canvasScale / this.scale;
-      if (!this.ctx || targetParams.targetDistance > this.maxLocateDistance * this.scale) return;
-      
+      const canvasDistance = targetParams.targetDistance * this.canvasScale /
+        this.scale;
+      if (
+        !this.ctx ||
+        targetParams.targetDistance > this.maxLocateDistance * this.scale
+      ) {
+        return;
+      }
+
       this.ctx.beginPath();
-      const targetAngle = Math.atan2(targetParams.targetY, targetParams.targetX);
+      const targetAngle = Math.atan2(
+        targetParams.targetY,
+        targetParams.targetX,
+      );
       // Angle of ray of SOC
       const rayWidthRad = this.rayWidth * Math.PI / 180;
-      const rayWidth = ((Math.PI * rayWidthRad * targetParams.targetDistance) / 180);
+      const rayWidth =
+        ((Math.PI * rayWidthRad * targetParams.targetDistance) / 180);
       const targetSpotSize = targetParams.targetSize / rayWidth * 10;
-      const targetVisibilityK = targetParams.targetDistance / this.maxLocateDistance;
+      const targetVisibilityK = targetParams.targetDistance /
+        this.maxLocateDistance;
       this.ctx.strokeStyle = `rgba(184, 134, 11,${1 - targetVisibilityK})`;
       this.ctx.arc(
         this.canvasCenter.x,
         this.canvasCenter.y,
         canvasDistance,
-        targetAngle - targetSpotSize/2,
-        targetAngle + targetSpotSize/2,
+        targetAngle - targetSpotSize / 2,
+        targetAngle + targetSpotSize / 2,
       );
       this.ctx.stroke();
     });

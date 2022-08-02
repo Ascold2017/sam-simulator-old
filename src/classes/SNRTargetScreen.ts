@@ -5,6 +5,7 @@ export default class SNRTargetScreen {
   private missiles: Record<string, any> = {};
   private azimut = -Math.PI / 2; // rad
   private verticalAngle = 0; // rad
+  isEnabled = false;
   constructor(canvas: HTMLCanvasElement) {
     this.ctx = canvas.getContext("2d");
     this.canvasCenter = {
@@ -78,9 +79,12 @@ export default class SNRTargetScreen {
       this.ctx.canvas.width,
       this.ctx.canvas.height,
     );
-    this.drawTargetScreenSnow();
-    this.drawTargetScreenTargets();
-    this.drawMissiles();
+    if (this.isEnabled) {
+      this.drawTargetScreenSnow();
+      this.drawTargetScreenTargets();
+      this.drawMissiles();
+    }
+
     this.drawTargetScreenSite();
   }
 
@@ -112,8 +116,8 @@ export default class SNRTargetScreen {
     this.ctx.fillText(this.azimutDeg.toFixed(2), this.canvasCenter.x, 20);
     // Draw current vertical angle
     this.ctx.save();
-    this.ctx.translate(0, this.canvasCenter.y)
-    this.ctx.rotate(-Math.PI/2)
+    this.ctx.translate(0, this.canvasCenter.y);
+    this.ctx.rotate(-Math.PI / 2);
     this.ctx.fillText(this.verticalAngleDeg.toFixed(2), 0, 20);
     this.ctx.restore();
 

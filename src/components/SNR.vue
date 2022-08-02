@@ -7,33 +7,38 @@
           <div>
             <div class="mb-2">
               <span class="v-label">Питание</span>
-              <v-icon :color="'warning'" class="mx-3">mdi-checkbox-blank-circle</v-icon>
+              <v-icon :color="params.isEnabled ? 'success' : 'warning'" class="mx-3">mdi-checkbox-blank-circle</v-icon>
             </div>
-            <v-btn-toggle divided variant="outlined">
-              <v-btn>Вкл</v-btn>
-              <v-btn>Выкл</v-btn>
+            <v-btn-toggle :model-value="params.isEnabled" @update:model-value="setIsEnabled" divided mandatory
+              variant="outlined">
+              <v-btn :value="true">Вкл</v-btn>
+              <v-btn :value="false">Выкл</v-btn>
             </v-btn-toggle>
           </div>
           <v-divider vertical class="mx-3" />
           <div>
             <div class="mb-2">
               <span class="v-label">COЦ</span>
-              <v-icon :color="'warning'" class="mx-3">mdi-checkbox-blank-circle</v-icon>
+              <v-icon :color="params.isEnabledSOC ? 'success' : 'warning'" class="mx-3">mdi-checkbox-blank-circle
+              </v-icon>
             </div>
-            <v-btn-toggle divided variant="outlined">
-              <v-btn>Вкл</v-btn>
-              <v-btn>Выкл</v-btn>
+            <v-btn-toggle :disabled="!params.isEnabled" mandatory :model-value="params.isEnabledSOC"
+              @update:model-value="setIsEnabledSOC" divided variant="outlined">
+              <v-btn :value="true">Вкл</v-btn>
+              <v-btn :value="false">Выкл</v-btn>
             </v-btn-toggle>
           </div>
           <v-divider vertical class="mx-3" />
           <div>
             <div class="mb-2">
               <span class="v-label">CНР</span>
-              <v-icon :color="'warning'" class="mx-3">mdi-checkbox-blank-circle</v-icon>
+              <v-icon :color="params.isEnabledSNR ? 'success' : 'warning'" class="mx-3">mdi-checkbox-blank-circle
+              </v-icon>
             </div>
-            <v-btn-toggle divided variant="outlined">
-              <v-btn>Вкл</v-btn>
-              <v-btn>Выкл</v-btn>
+            <v-btn-toggle :disabled="!params.isEnabled" mandatory :model-value="params.isEnabledSNR"
+              @update:model-value="setIsEnabledSNR" divided variant="outlined">
+              <v-btn :value="true">Вкл</v-btn>
+              <v-btn :value="false">Выкл</v-btn>
             </v-btn-toggle>
           </div>
 
@@ -101,7 +106,8 @@
           <v-row class="h-100">
             <v-col cols="2" v-for="missile in missiles"
               class="h-100 d-flex flex-column align-center justify-space-between">
-              <v-icon :color="missile.isLaunched ? 'warning' : 'success'">mdi-checkbox-blank-circle</v-icon>
+              <v-icon :color="missile.isLaunched || !params.isEnabled ? 'warning' : 'success'">
+                mdi-checkbox-blank-circle</v-icon>
               <span>{{ missile.id + 1 }}</span>
               <v-btn color="error" size="small" @click="launchMissile(missile)"
                 :disabled="!(params.isCapturedByDirection && params.isCapturedByDistance) || missile.isLaunched" icon>
@@ -121,7 +127,7 @@
 <script setup lang="ts">
 import SAMissile from '@/classes/SAMissile';
 
-import SNR from '@/classes/SNR';
+import SAM from '@/classes/SAM';
 import SOCScreen from '@/classes/SOCScreen.js';
 import SNRTargetScreen from '@/classes/SNRTargetScreen';
 import SNRDistanceScreen from '@/classes/SNRDistanceScreen'
@@ -151,26 +157,44 @@ const targetScreenRef = ref<HTMLCanvasElement | null>(null);
 const distanceScreenRef = ref<HTMLCanvasElement | null>(null);
 const radarRef = ref<HTMLCanvasElement | null>(null);
 const targetParamsRef = ref<HTMLCanvasElement | null>(null);
-const snr = ref<SNR | null>(null);
+const sam = ref<SAM | null>(null);
 const socScreen = ref<SOCScreen | null>(null);
 const snrDistanceScreen = ref<SNRDistanceScreen | null>(null);
+const snrTargetScreen = ref<SNRTargetScreen | null>(null);
 const snrTargetParamsScreen = ref<SNRTargetParamsScreen | null>(null);
 
 const params = reactive<Record<string, boolean | number>>({
   isCapturedByDirection: false,
   isCapturedByDistance: false,
+  isEnabled: false,
+  isEnabledSOC: false,
+  isEnabledSNR: false
 })
 
 const missiles = ref<IMissileParams[]>(Array(6).fill(0).map((_, i) => ({ id: i, isLaunched: false, velocity: 900, maxDistance: 25, initialPoint: { x: 0, y: 0, z: 0.03 } })))
 
-let rayWidth = computed(() => snr.value?.radarRayWidth)
-let distanceScale = computed(() => snr.value?.distanceScale);
+let rayWidth = computed(() => sam.value?.radarRayWidth)
+let distanceScale = computed(() => sam.value?.distanceScale);
 
-const setRayWidth = (v: number) => snr.value!.setRadarRayWidth(v);
-const resetCaptureTargetByDirection = () => snr.value?.resetCaptureTargetByDirection();
-const resetCaptureTargetByDistance = () => snr.value?.resetCaptureTargetByDistance();
+const setRayWidth = (v: number) => sam.value!.setRadarRayWidth(v);
+const resetCaptureTargetByDirection = () => sam.value?.resetCaptureTargetByDirection();
+const resetCaptureTargetByDistance = () => sam.value?.resetCaptureTargetByDistance();
 const setDistanceScale = (v: number) => {
-  snr.value?.setDistanceScale(v);
+  sam.value?.setDistanceScale(v);
+}
+
+const setIsEnabled = (value: boolean) => {
+  params.isEnabled = value;
+  sam.value?.setIsEnabled(value)
+}
+const setIsEnabledSNR = (value: boolean) => {
+  params.isEnabledSNR = value;
+  sam.value?.setIsEnabledSNR(value)
+}
+
+const setIsEnabledSOC = (value: boolean) => {
+  params.isEnabledSOC = value;
+  sam.value?.setIsEnabledSOC(value)
 }
 
 function SNRListener(property: string, value: number | boolean) {
@@ -182,16 +206,16 @@ function SNRListener(property: string, value: number | boolean) {
 }
 
 function launchMissile(missileParams: IMissileParams) {
-  if (snr.value!.trackedTarget) {
-    const missile = new SAMissile(snr.value!.trackedTarget as FlightObject, missileParams.maxDistance, missileParams.velocity, missileParams.initialPoint)
+  if (sam.value!.trackedTarget) {
+    const missile = new SAMissile(sam.value!.trackedTarget as FlightObject, missileParams.maxDistance, missileParams.velocity, missileParams.initialPoint)
     missile.launch();
     missiles.value = missiles.value.map(m => m.id === missileParams.id ? { ...m, isLaunched: true } : m)
-    snr.value!.addMissile(missile);
+    sam.value!.addMissile(missile);
   }
 }
 
 function addFlightObject(flightObject: FlightObject) {
-  snr.value?.addFlightObject(flightObject);
+  sam.value?.addFlightObject(flightObject);
 }
 
 onMounted(() => {
@@ -200,11 +224,11 @@ onMounted(() => {
     canvasRadar: radarRef.value!,
     rayWidth: 8
   });
-  const snrTargetScreen = new SNRTargetScreen(targetScreenRef.value!);
+  snrTargetScreen.value = new SNRTargetScreen(targetScreenRef.value!);
   snrDistanceScreen.value = new SNRDistanceScreen(distanceScreenRef.value!, initialParams.maxDistance, initialParams.distanceDetectRange, initialParams.initialDistance, initialParams.missileMaxDistance);
   snrTargetParamsScreen.value = new SNRTargetParamsScreen({ indicatorsCanvas: targetParamsRef.value!, maxHeight: 15, maxVelocity: 900, killZoneDistance: initialParams.missileMaxDistance });
-  snr.value = new SNR({
-    snrTargetScreen,
+  sam.value = new SAM({
+    snrTargetScreen: snrTargetScreen.value! as SNRTargetScreen,
     snrDistanceScreen: snrDistanceScreen.value! as SNRDistanceScreen,
     socScreen: socScreen.value! as SOCScreen,
     eventListener: SNRListener,
@@ -221,26 +245,26 @@ onMounted(() => {
     const map: Record<string, () => void> = {
       'KeyA': () => {
         if (event.shiftKey) {
-          snr.value?.setAzimut(snr.value.azimutDeg - 0.5)
+          sam.value?.setAzimut(sam.value.azimutDeg - 0.5)
         } else {
-          snr.value?.setAzimut(snr.value.azimutDeg - 0.05)
+          sam.value?.setAzimut(sam.value.azimutDeg - 0.05)
         }
       },
       'KeyD': () => {
         if (event.shiftKey) {
-          snr.value?.setAzimut(snr.value.azimutDeg + 0.5)
+          sam.value?.setAzimut(sam.value.azimutDeg + 0.5)
         } else {
-          snr.value?.setAzimut(snr.value.azimutDeg + 0.05)
+          sam.value?.setAzimut(sam.value.azimutDeg + 0.05)
         }
       },
-      'KeyW': () => snr.value?.setVerticalAngle(snr.value.verticalAngleDeg + 0.05),
-      'KeyS': () => snr.value?.setVerticalAngle(snr.value.verticalAngleDeg - 0.05),
+      'KeyW': () => sam.value?.setVerticalAngle(sam.value.verticalAngleDeg + 0.05),
+      'KeyS': () => sam.value?.setVerticalAngle(sam.value.verticalAngleDeg - 0.05),
       'Space': () => {
-        snr.value?.captureTargetByDirection()
-        snr.value?.captureTargetByDistance()
+        sam.value?.captureTargetByDirection()
+        sam.value?.captureTargetByDistance()
       },
-      'KeyQ': () => snr.value?.setIndicatorTargetDistance(snr.value.indicatorTargetDistance - 0.2),
-      'KeyE': () => snr.value?.setIndicatorTargetDistance(snr.value.indicatorTargetDistance + 0.2),
+      'KeyQ': () => sam.value?.setIndicatorTargetDistance(sam.value.indicatorTargetDistance - 0.2),
+      'KeyE': () => sam.value?.setIndicatorTargetDistance(sam.value.indicatorTargetDistance + 0.2),
     }
     map[event.code] && map[event.code]();
   }, false)
