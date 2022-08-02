@@ -134,6 +134,7 @@ import SNRDistanceScreen from '@/classes/SNRDistanceScreen'
 import SNRTargetParamsScreen from '@/classes/SNRTargetParamsScreen';
 import { onMounted, ref, reactive, computed } from 'vue';
 import type FlightObject from '@/classes/FlightObject';
+import Sounds from '@/classes/Sounds.js';
 interface IMissileParams {
   id: number;
   isLaunched: boolean;
@@ -215,6 +216,7 @@ function launchMissile(missileParams: IMissileParams) {
     missile.launch();
     missiles.value = missiles.value.map(m => m.id === missileParams.id ? { ...m, isLaunched: true } : m)
     sam.value!.addMissile(missile);
+    Sounds.click();
   }
 }
 
