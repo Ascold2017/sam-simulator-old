@@ -186,6 +186,10 @@ const setDistanceScale = (v: number) => {
 const setIsEnabled = (value: boolean) => {
   params.isEnabled = value;
   sam.value?.setIsEnabled(value)
+  if (!value) {
+    params.isEnabledSNR = false;
+    params.isEnabledSOC = false;
+  }
 }
 const setIsEnabledSNR = (value: boolean) => {
   params.isEnabledSNR = value;
