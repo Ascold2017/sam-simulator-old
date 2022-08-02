@@ -177,7 +177,7 @@ export default class SOCScreen {
     Object.keys(this.targets).forEach((identifier) => {
       const targetParams = this.targets[identifier];
       const canvasDistance = targetParams.targetDistance * this.canvasScale / this.scale;
-      if (!this.ctx) return;
+      if (!this.ctx || targetParams.targetDistance > this.maxLocateDistance * this.scale) return;
       
       this.ctx.beginPath();
       const targetAngle = Math.atan2(targetParams.targetY, targetParams.targetX);
