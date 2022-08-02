@@ -1,5 +1,6 @@
 <template>
   <v-container fluid class="px-6">
+    <!-- TOP PANEL -->
     <v-card class="mb-6 py-1 px-3 mx-auto" max-width="1900">
       <v-row>
         <v-col cols="4"></v-col>
@@ -21,6 +22,7 @@
         </v-col>
       </v-row>
     </v-card>
+    <!-- MIDDLE PANEL -->
     <v-card class="mb-6 py-3 px-3 mx-auto" max-width="1900">
       <v-row>
         <v-col cols="4" style="position: relative">
@@ -33,11 +35,9 @@
 
           </div>
         </v-col>
-        <v-col cols="4" style="position: relative;">
+        <v-col cols="4">
           <canvas ref="radarRef" width=650 height=650 class="border mx-auto"
             style="display: block; max-width: 100%; background-color: black"></canvas>
-          <v-btn color="red" icon @click="exportAzimut" style="position: absolute; right: 20px; top: 20px;">ЦУ
-          </v-btn>
         </v-col>
         <v-col cols="4">
           <div style="position: relative" class="mb-3">
@@ -54,10 +54,10 @@
         </v-col>
       </v-row>
     </v-card>
+    <!-- BOTTOM PANEL -->
     <v-card class="px-3 py-3 mx-auto" max-width="1900">
       <v-row>
         <v-col cols="4" class="d-flex">
-          <canvas ref="snrIndicatorsRef" width="400" height="200" class="mr-3"></canvas>
           <v-radio-group label="Режим антенны" :model-value="rayWidth" @update:model-value="setRayWidth" hide-details
             class="flex-grow-0">
             <v-radio :value="16" label="Широкий луч"></v-radio>
@@ -85,7 +85,6 @@ import SAMissile from '@/classes/SAMissile';
 import SOC from '@/classes/SOC.js';
 import SNR from '@/classes/SNR';
 import SNRTargetScreen from '@/classes/SNRTargetScreen';
-import SNRIndicatorsScreen from '@/classes/SNRIndicatorsScreen';
 import SNRDistanceScreen from '@/classes/SNRDistanceScreen'
 import SNRTargetParamsScreen from '@/classes/SNRTargetParamsScreen';
 import { onMounted, ref, reactive, computed } from 'vue';
@@ -105,7 +104,6 @@ const initialParams = {
 const targetScreenRef = ref<HTMLCanvasElement | null>(null);
 const distanceScreenRef = ref<HTMLCanvasElement | null>(null);
 const radarRef = ref<HTMLCanvasElement | null>(null);
-const snrIndicatorsRef = ref<HTMLCanvasElement | null>(null);
 const targetParamsRef = ref<HTMLCanvasElement | null>(null);
 const snr = ref<SNR | null>(null);
 const radar = ref<SOC | null>(null);
@@ -160,11 +158,9 @@ onMounted(() => {
   });
   const snrTargetScreen = new SNRTargetScreen(targetScreenRef.value!);
   snrDistanceScreen.value = new SNRDistanceScreen(distanceScreenRef.value!, initialParams.maxDistance, initialParams.distanceDetectRange, initialParams.initialDistance, initialParams.missileMaxDistance);
-  const snrIndicatorsScreen = new SNRIndicatorsScreen(snrIndicatorsRef.value!, initialParams.minVerticalAngle, initialParams.maxVerticalAngle)
   snrTargetParamsScreen.value = new SNRTargetParamsScreen({ indicatorsCanvas: targetParamsRef.value!, maxHeight: 15, maxVelocity: 900, killZoneDistance: initialParams.missileMaxDistance });
   snr.value = new SNR({
     snrTargetScreen,
-    snrIndicatorsScreen,
     snrDistanceScreen: snrDistanceScreen.value! as SNRDistanceScreen,
     eventListener: SNRListener,
     distanceDetectRange: initialParams.distanceDetectRange,
@@ -172,12 +168,30 @@ onMounted(() => {
     initialRayWidth: initialParams.initialRayWidth,
     maxDistance: initialParams.maxDistance,
     missileVelocity: initialParams.missileVelocity,
-    missileMaxDistance: initialParams.missileMaxDistance
+    missileMaxDistance: initialParams.missileMaxDistance,
+    minVerticalAngle: initialParams.minVerticalAngle,
+    maxVerticalAngle: initialParams.maxVerticalAngle
   });
   window.addEventListener('keydown', (event: KeyboardEvent) => {
     const map: Record<string, () => void> = {
-      'KeyA': () => event.shiftKey ? setTargetRayAngle(radar.value!.targetRayAngle - 0.5) : snr.value?.setAzimut(snr.value.azimutDeg - 0.05),
-      'KeyD': () => event.shiftKey ? setTargetRayAngle(radar.value!.targetRayAngle + 0.5) : snr.value?.setAzimut(snr.value.azimutDeg + 0.05),
+      'KeyA': () => {
+        if (event.shiftKey) {
+          setTargetRayAngle(radar.value!.targetRayAngle - 0.5);
+          snr.value?.setAzimut(snr.value.azimutDeg - 0.5)
+        } else {
+          setTargetRayAngle(radar.value!.targetRayAngle - 0.05);
+          snr.value?.setAzimut(snr.value.azimutDeg - 0.05)
+        }
+      },
+      'KeyD': () => {
+        if (event.shiftKey) {
+          setTargetRayAngle(radar.value!.targetRayAngle + 0.5);
+          snr.value?.setAzimut(snr.value.azimutDeg + 0.5)
+        } else {
+          setTargetRayAngle(radar.value!.targetRayAngle + 0.05);
+          snr.value?.setAzimut(snr.value.azimutDeg + 0.05)
+        }
+      },
       'KeyW': () => snr.value?.setVerticalAngle(snr.value.verticalAngleDeg + 0.05),
       'KeyS': () => snr.value?.setVerticalAngle(snr.value.verticalAngleDeg - 0.05),
       'Space': () => {

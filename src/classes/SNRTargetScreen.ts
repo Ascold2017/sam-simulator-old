@@ -3,6 +3,8 @@ export default class SNRTargetScreen {
   private canvasCenter = { x: 0, y: 0 };
   private targets: Record<string, any> = {};
   private missiles: Record<string, any> = {};
+  private azimut = -Math.PI / 2; // rad
+  private verticalAngle = 0; // rad
   constructor(canvas: HTMLCanvasElement) {
     this.ctx = canvas.getContext("2d");
     this.canvasCenter = {
@@ -10,6 +12,23 @@ export default class SNRTargetScreen {
       y: canvas.height / 2,
     };
     this.drawScreen();
+  }
+
+  get azimutDeg() {
+    const azimut = (this.azimut + Math.PI / 2) * (180 / Math.PI);
+    return azimut < 0 ? azimut + 360 : azimut;
+  }
+
+  get verticalAngleDeg() {
+    return this.verticalAngle * (180 / Math.PI);
+  }
+
+  setAzimut(value: number) {
+    this.azimut = value;
+  }
+
+  setVerticalAngle(value: number) {
+    this.verticalAngle = value;
   }
 
   public setTargetParams(
@@ -86,23 +105,53 @@ export default class SNRTargetScreen {
   private drawTargetScreenSite() {
     if (!this.ctx) return;
     this.ctx.strokeStyle = "white";
+    this.ctx.fillStyle = "white";
+    this.ctx.textAlign = "center";
+    this.ctx.font = "16px Russo One, sans-serif";
+    // Draw current azimut
+    this.ctx.fillText(this.azimutDeg.toFixed(2), this.canvasCenter.x, 20);
+    // Draw current vertical angle
+    this.ctx.save();
+    this.ctx.translate(0, this.canvasCenter.y)
+    this.ctx.rotate(-Math.PI/2)
+    this.ctx.fillText(this.verticalAngleDeg.toFixed(2), 0, 20);
+    this.ctx.restore();
+
     this.ctx.beginPath();
     this.ctx.moveTo(
       this.canvasCenter.x,
-      0,
+      40,
     );
     this.ctx.lineTo(
       this.canvasCenter.x,
-      this.ctx.canvas.height,
+      this.canvasCenter.y - 10,
     );
     this.ctx.stroke();
     this.ctx.moveTo(
-      0,
+      40,
       this.canvasCenter.y,
     );
     this.ctx.lineTo(
-      this.ctx.canvas.width,
+      this.canvasCenter.x - 10,
       this.canvasCenter.y,
+    );
+    this.ctx.stroke();
+    this.ctx.moveTo(
+      this.canvasCenter.x + 10,
+      this.canvasCenter.y,
+    );
+    this.ctx.lineTo(
+      this.ctx.canvas.width - 20,
+      this.canvasCenter.y,
+    );
+    this.ctx.stroke();
+    this.ctx.moveTo(
+      this.canvasCenter.x,
+      this.canvasCenter.y + 10,
+    );
+    this.ctx.lineTo(
+      this.canvasCenter.x,
+      this.ctx.canvas.height - 20,
     );
     this.ctx.stroke();
   }
@@ -146,14 +195,14 @@ export default class SNRTargetScreen {
         this.canvasCenter.y;
       this.ctx.strokeStyle = `rgba(255, 0, 0,1)`;
       this.ctx.lineWidth = 4;
-      this.ctx.setLineDash([4, 1])
+      this.ctx.setLineDash([4, 1]);
       this.ctx.beginPath();
       this.ctx.moveTo(canvasX - 8, canvasY);
       this.ctx.lineTo(canvasX + 8, canvasY);
       this.ctx.lineTo(canvasX + 8, canvasY - 8);
       this.ctx.stroke();
       this.ctx.lineWidth = 1;
-      this.ctx.setLineDash([])
+      this.ctx.setLineDash([]);
     });
   }
 }

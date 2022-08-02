@@ -1,14 +1,12 @@
 import type FlightObject from "./FlightObject";
 import type SAMissile from "./SAMissile";
 import type SNRDistanceScreen from "./SNRDistanceScreen";
-import type SNRIndicatorsScreen from "./SNRIndicatorsScreen";
 import type SNRTargetScreen from "./SNRTargetScreen";
 
 type EventListener = (arg0: string, arg1: any) => void;
 
 interface ISNR {
   snrTargetScreen: SNRTargetScreen;
-  snrIndicatorsScreen: SNRIndicatorsScreen;
   snrDistanceScreen: SNRDistanceScreen;
   eventListener: EventListener;
   distanceDetectRange: number;
@@ -17,16 +15,17 @@ interface ISNR {
   maxDistance: number;
   missileVelocity: number;
   missileMaxDistance: number;
+  minVerticalAngle: number;
+  maxVerticalAngle: number;
 }
 export default class SNR {
   private snrTargetScreen: SNRTargetScreen | null = null;
-  private snrIndicatorsScreen: SNRIndicatorsScreen | null = null;
   private snrDistanceScreen: SNRDistanceScreen | null = null;
   private azimut = -Math.PI / 2; // rad
   private verticalAngle = 0; // rad
   private targetDistance = 0; // km
-  private minVerticalAngle = -5; // degree
-  private maxVerticalAngle = 75; // degree
+  private minVerticalAngle = 0; // degree
+  private maxVerticalAngle = 0; // degree
   private maxDistance = 0;
   private flightObjects: FlightObject[] = [];
   private rayWidth = 0; // degree
@@ -42,7 +41,6 @@ export default class SNR {
   private missileMaxDistance = 0;
   constructor({
     snrTargetScreen,
-    snrIndicatorsScreen,
     snrDistanceScreen,
     eventListener,
     distanceDetectRange,
@@ -51,9 +49,10 @@ export default class SNR {
     maxDistance,
     missileVelocity,
     missileMaxDistance,
+    minVerticalAngle,
+    maxVerticalAngle
   }: ISNR) {
     this.snrTargetScreen = snrTargetScreen;
-    this.snrIndicatorsScreen = snrIndicatorsScreen;
     this.snrDistanceScreen = snrDistanceScreen;
     this.eventListener = eventListener;
     this.distanceDetectRange = distanceDetectRange;
@@ -62,6 +61,8 @@ export default class SNR {
     this.maxDistance = maxDistance;
     this.missileVelocity = missileVelocity;
     this.missileMaxDistance = missileMaxDistance;
+    this.minVerticalAngle = minVerticalAngle;
+    this.maxVerticalAngle = maxVerticalAngle;
 
     setInterval(() => {
       this.calculateTargetsParams();
@@ -93,7 +94,7 @@ export default class SNR {
     }
 
     this.azimut = (azimut - 90) * (Math.PI / 180);
-    this.snrIndicatorsScreen!.setAzimut(this.azimut);
+    this.snrTargetScreen!.setAzimut(this.azimut);
   }
 
   get verticalAngleDeg() {
@@ -106,7 +107,7 @@ export default class SNR {
       verticalAngle < this.maxVerticalAngle
     ) {
       this.verticalAngle = verticalAngle * Math.PI / 180;
-      this.snrIndicatorsScreen!.setVerticalAngle(this.verticalAngle);
+      this.snrTargetScreen!.setVerticalAngle(this.verticalAngle);
     }
   }
 
