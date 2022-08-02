@@ -14,9 +14,9 @@
         <v-col cols="4">
           <v-radio-group inline label="Режим дальности СНР" :model-value="distanceScreenScale"
             @update:model-value="setDistanceScreenScale" hide-details class="flex-grow-0 mt-2">
-            <v-radio :value="1" label="150 km"></v-radio>
-            <v-radio :value="0.5" label="75 km"></v-radio>
-            <v-radio :value="0.3" label="45 km"></v-radio>
+            <v-radio :value="1" label="100 km"></v-radio>
+            <v-radio :value="0.5" label="50 km"></v-radio>
+            <v-radio :value="0.3" label="30 km"></v-radio>
           </v-radio-group>
         </v-col>
       </v-row>
@@ -39,14 +39,18 @@
           <v-btn color="red" icon @click="exportAzimut" style="position: absolute; right: 20px; top: 20px;">ЦУ
           </v-btn>
         </v-col>
-        <v-col cols="4" style="position: relative">
-          <canvas ref="distanceScreenRef" width="600" height="600" class="border mx-auto"
-            style="display: block; max-width: 100%; background-color: black"></canvas>
-          <div class="d-flex align-center" style="position: absolute; top: 15px; right: 15px; z-index: 1;"
-            @click.right.prevent="resetCaptureTargetByDistance">
-            <span class="px-3">AC-2</span>
-            <v-icon :color="params.isCapturedByDistance ? 'success' : 'warning'">mdi-checkbox-blank-circle</v-icon>
+        <v-col cols="4">
+          <div style="position: relative" class="mb-3">
+            <canvas ref="distanceScreenRef" width="600" height="275" class="border mx-auto"
+              style="display: block; max-width: 100%; background-color: black"></canvas>
+            <div class="d-flex align-center" style="position: absolute; bottom: 15px; right: 15px; z-index: 1;"
+              @click.right.prevent="resetCaptureTargetByDistance">
+              <span class="px-3">AC-2</span>
+              <v-icon :color="params.isCapturedByDistance ? 'success' : 'warning'">mdi-checkbox-blank-circle</v-icon>
+            </div>
           </div>
+          <v-divider />
+
         </v-col>
       </v-row>
     </v-card>
@@ -54,16 +58,16 @@
       <v-row>
         <v-col cols="4" class="d-flex">
           <canvas ref="snrIndicatorsRef" width="400" height="200" class="mr-3"></canvas>
-          <v-radio-group label="Режим антенны" :model-value="rayWidth" @update:model-value="setRayWidth"
-              hide-details class="flex-grow-0">
-              <v-radio :value="16" label="Широкий луч"></v-radio>
-              <v-radio :value="3" label="Узкий луч"></v-radio>
-              <v-radio :value="1.5" label="Подсвет"></v-radio>
-            </v-radio-group>
+          <v-radio-group label="Режим антенны" :model-value="rayWidth" @update:model-value="setRayWidth" hide-details
+            class="flex-grow-0">
+            <v-radio :value="16" label="Широкий луч"></v-radio>
+            <v-radio :value="3" label="Узкий луч"></v-radio>
+            <v-radio :value="1.5" label="Подсвет"></v-radio>
+          </v-radio-group>
         </v-col>
         <v-col cols="4" class="border" style="border-top: 0!important; border-bottom: 0!important;">
           <div class="d-flex flex-column">
-            
+
             <canvas ref="targetParamsRef" width="600" height="120" style="background-color: black"></canvas>
           </div>
         </v-col>
@@ -89,7 +93,7 @@ import type FlightObject from '@/classes/FlightObject';
 
 const initialParams = {
   initialDistance: 30,
-  maxDistance: 150,
+  maxDistance: 100,
   minVerticalAngle: -5,
   maxVerticalAngle: 75,
   missileVelocity: 900,

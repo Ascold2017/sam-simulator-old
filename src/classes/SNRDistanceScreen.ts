@@ -8,6 +8,7 @@ export default class SNRDistanceScreen {
   private maxKillZoneDistance = 0;
   private distanceDetectRange = 0;
   private trackingDistanceTargetIdentifier: string | null = null;
+  private canvasPadding = 10;
   constructor(
     canvas: HTMLCanvasElement,
     maxDistance: number,
@@ -96,7 +97,7 @@ export default class SNRDistanceScreen {
 
   private drawDistanceScreenSnow() {
     if (!this.ctx) return;
-    for (let i = 0; i < 500; i++) {
+    for (let i = 0; i < 200; i++) {
       const pointX = this.ctx.canvas.width *
         Math.random();
       const pointY = this.ctx.canvas.height *
@@ -119,73 +120,96 @@ export default class SNRDistanceScreen {
     ctx.strokeStyle = "white";
     ctx.fillStyle = "white";
     const maxDistance = this.maxDistance * this.scale;
-    const step = 10 * this.scale;
-    for (let distance = 0; distance <= maxDistance; distance += step) {
-      const pointY = ctx.canvas.height /
-        (maxDistance / distance);
+    for (let distance = 0; distance <= maxDistance; distance += 1) {
+      const pointX = (ctx.canvas.width - this.canvasPadding * 2) /
+          (maxDistance / distance) + this.canvasPadding;
+      const isEvery5 = distance % 5 === 0;
+      const isEvery10 = distance % 10 === 0;
       ctx.beginPath();
-      ctx.moveTo(0, pointY);
-      ctx.lineTo(20, pointY);
+      ctx.moveTo(pointX, 15);
+      ctx.lineTo(pointX, isEvery5 ? 35 : 25);
       ctx.stroke();
-      ctx.beginPath();
-      ctx.moveTo(
-        ctx.canvas.width - 20,
-        pointY,
-      );
-      ctx.lineTo(
-        ctx.canvas.width,
-        pointY,
-      );
-      ctx.stroke();
-      ctx.font = '12px Russo One, sans-serif'
-      ctx.fillText(
-        (maxDistance - distance).toString(),
-        5,
-        pointY + 15,
-      );
+      if (this.scale === 1 ? isEvery10 : isEvery5) {
+        ctx.font = "12px Russo One, sans-serif";
+        ctx.textAlign = "center";
+        ctx.fillText(
+          (distance).toString(),
+          pointX,
+          12,
+        );
+      }
     }
 
     ctx.strokeStyle = "red";
-    const pointY1 = ctx.canvas.height -
-      ctx.canvas.height *
+    const pointX1 = (ctx.canvas.width - this.canvasPadding * 2) *
         ((this.distance - this.distanceDetectRange) /
-          (this.maxDistance * this.scale));
+          (this.maxDistance * this.scale)) + this.canvasPadding;
 
-    const pointY2 = ctx.canvas.height -
-      ctx.canvas.height *
+    const pointX2 = (ctx.canvas.width - this.canvasPadding * 2) *
         ((this.distance + this.distanceDetectRange) /
-          (this.maxDistance * this.scale));
+          (this.maxDistance * this.scale)) + this.canvasPadding;
 
     ctx.beginPath();
-    ctx.moveTo(0, pointY1);
+    ctx.moveTo(pointX1, 15);
     ctx.lineTo(
-      ctx.canvas.width,
-      pointY1,
+      pointX1,
+      ctx.canvas.height,
     );
     ctx.stroke();
 
     ctx.beginPath();
-    ctx.moveTo(0, pointY2);
+    ctx.moveTo(pointX2, 15);
     ctx.lineTo(
-      ctx.canvas.width,
-      pointY2,
+      pointX2,
+      ctx.canvas.height,
     );
     ctx.stroke();
 
     // Draw redline
-    const redlineY1 = ctx.canvas.height -
-      ctx.canvas.height /
-        (maxDistance / this.maxKillZoneDistance);
+    const redlineX1 = (ctx.canvas.width - this.canvasPadding * 2) /
+        (maxDistance / this.maxKillZoneDistance) + this.canvasPadding;
     ctx.fillStyle = `rgba(255, 0, 0,1)`;
     ctx.setLineDash([10, 10]);
     ctx.beginPath();
-    ctx.moveTo(0, redlineY1);
+    ctx.moveTo(redlineX1, 15);
     ctx.lineTo(
-      ctx.canvas.width,
-      redlineY1,
+      redlineX1,
+      ctx.canvas.height,
     );
     ctx.stroke();
     ctx.setLineDash([]);
+  }
+
+  drawTarget(
+    canvasPointX: number,
+    vertexHeightK: number,
+    vertexWidth: number,
+    color: string,
+  ) {
+    if (!this.ctx) return;
+    const heightOffset = this.ctx.canvas.height -
+      (this.ctx.canvas.height - 100) * vertexHeightK;
+    this.ctx.strokeStyle = color;
+    this.ctx.beginPath();
+    this.ctx.bezierCurveTo(
+      canvasPointX - vertexWidth,
+      this.ctx.canvas.height,
+      canvasPointX,
+      this.ctx.canvas.height,
+      canvasPointX,
+      heightOffset,
+    );
+    this.ctx.stroke();
+    this.ctx.beginPath();
+    this.ctx.bezierCurveTo(
+      canvasPointX,
+      heightOffset,
+      canvasPointX,
+      this.ctx.canvas.height,
+      canvasPointX + vertexWidth,
+      this.ctx.canvas.height,
+    );
+    this.ctx.stroke();
   }
 
   private drawDistanceScreenTargets() {
@@ -193,60 +217,43 @@ export default class SNRDistanceScreen {
       if (!this.ctx) return;
       const targetParams = this.targets[targetIdentifier];
       const maxDistance = this.maxDistance * this.scale;
-      const canvasCenterX = this.ctx.canvas.width / 2;
-      const pointX = targetParams.targetOffsetX *
-          canvasCenterX +
-        canvasCenterX;
-      const pointY = this.ctx.canvas.height -
-        this.ctx.canvas.height /
-          (maxDistance / targetParams.distance);
-      const canvasDistanceSpotWidth = this.ctx.canvas.width *
-        targetParams.spotWidth;
-      const canvasDistanceSpotLength = (this.ctx.canvas.width *
-        targetParams.spotLength /
-        this.scale);
-      this.ctx.fillStyle = `rgba(184, 134, 11,${
-        1 - targetParams.targetDistanceK
-      })`;
-      this.ctx.beginPath();
-      this.ctx.ellipse(
+
+      const pointX = (this.ctx.canvas.width - this.canvasPadding * 2) /
+          (maxDistance / targetParams.distance) + this.canvasPadding;
+
+      this.drawTarget(
         pointX,
-        pointY,
-        canvasDistanceSpotLength / 2,
-        canvasDistanceSpotWidth / 2,
-        Math.PI / 2,
-        0,
-        Math.PI * 2,
+        1 - targetParams.targetDistanceK,
+        targetParams.spotLength /
+          this.scale,
+        "rgba(184, 134, 11,1)",
       );
-      this.ctx.fill();
       if (targetIdentifier === this.trackingDistanceTargetIdentifier) {
         // Draw line of missile hit
-        const missileHitY = this.ctx.canvas.height -
-          this.ctx.canvas.height /
-            (maxDistance / targetParams.distanceToHit);
+        const missileHitX = (this.ctx.canvas.width - this.canvasPadding * 2) /
+            (maxDistance / targetParams.distanceToHit) + this.canvasPadding;
 
         this.ctx.fillStyle = `rgba(255, 0, 0,1)`;
         this.ctx.setLineDash([3, 3]);
         this.ctx.beginPath();
-        this.ctx.moveTo(0, missileHitY);
+        this.ctx.moveTo(missileHitX, 15);
         this.ctx.lineTo(
-          this.ctx.canvas.width,
-          missileHitY,
+          missileHitX,
+          this.ctx.canvas.height,
         );
         this.ctx.stroke();
         this.ctx.setLineDash([]);
 
         // Draw redline of minimal kill range
-        const redlineY2 = this.ctx.canvas.height -
-          this.ctx.canvas.height /
-            (maxDistance / targetParams.targetParam);
+        const redlineX2 = (this.ctx.canvas.width - this.canvasPadding * 2) /
+            (maxDistance / targetParams.targetParam) + this.canvasPadding;
         this.ctx.fillStyle = `rgba(255, 0, 0,1)`;
         this.ctx.setLineDash([10, 10]);
         this.ctx.beginPath();
-        this.ctx.moveTo(0, redlineY2);
+        this.ctx.moveTo(redlineX2, 15);
         this.ctx.lineTo(
-          this.ctx.canvas.width,
-          redlineY2,
+          redlineX2,
+          this.ctx.canvas.height,
         );
         this.ctx.stroke();
         this.ctx.setLineDash([]);
@@ -260,20 +267,14 @@ export default class SNRDistanceScreen {
       const missileParams = this.missiles[missileIdentifier];
       if (!this.ctx) return;
       const maxDistance = this.maxDistance * this.scale;
-      const canvasCenterX = this.ctx.canvas.width / 2;
-      const pointY = this.ctx.canvas.height -
-        this.ctx.canvas.height /
-          (maxDistance / missileParams.missileDistance);
-      this.ctx.strokeStyle = `rgba(255, 0, 0,1)`;
-      this.ctx.lineWidth = 4;
-      this.ctx.setLineDash([4, 1]);
-      this.ctx.beginPath();
-      this.ctx.moveTo(canvasCenterX - 8, pointY);
-      this.ctx.lineTo(canvasCenterX + 8, pointY);
-      this.ctx.lineTo(canvasCenterX + 8, pointY - 8);
-      this.ctx.stroke();
-      this.ctx.lineWidth = 1;
-      this.ctx.setLineDash([]);
+      const pointX = (this.ctx.canvas.width - this.canvasPadding * 2) /
+          (maxDistance / missileParams.missileDistance) + this.canvasPadding;
+      this.drawTarget(
+        pointX,
+        0.25,
+        0.5,
+        `rgba(255, 0, 0,1)`,
+      );
     });
   }
 }
