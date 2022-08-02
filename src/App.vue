@@ -1,6 +1,7 @@
 <template>
   <v-layout full-height>
     <v-main dark>
+      
       <v-row class="py-3">
         <v-col></v-col>
         <v-col class="d-flex justify-center">
@@ -39,7 +40,7 @@ enum ScreensEnum {
   Editor = 'Editor'
 }
 
-const activeScreen = ref(ScreensEnum.Editor);
+const activeScreen = ref(ScreensEnum.SNR);
 const acceleration = ref((window as any).__ACCELERATION__ as number);
 const setAcceleration = (value: number) => {
   acceleration.value = value;

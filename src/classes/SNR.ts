@@ -2,12 +2,14 @@ import type FlightObject from "./FlightObject";
 import type SAMissile from "./SAMissile";
 import type SNRDistanceScreen from "./SNRDistanceScreen";
 import type SNRTargetScreen from "./SNRTargetScreen";
+import type SOCScreen from "./SOCScreen";
 
 type EventListener = (arg0: string, arg1: any) => void;
 
 interface ISNR {
   snrTargetScreen: SNRTargetScreen;
   snrDistanceScreen: SNRDistanceScreen;
+  socScreen: SOCScreen;
   eventListener: EventListener;
   distanceDetectRange: number;
   initialDistance: number;
@@ -21,6 +23,7 @@ interface ISNR {
 export default class SNR {
   private snrTargetScreen: SNRTargetScreen | null = null;
   private snrDistanceScreen: SNRDistanceScreen | null = null;
+  private socScreen: SOCScreen | null = null;
   private azimut = -Math.PI / 2; // rad
   private verticalAngle = 0; // rad
   private targetDistance = 0; // km
@@ -39,9 +42,11 @@ export default class SNR {
   private missiles: SAMissile[] = [];
   private missileVelocity = 0;
   private missileMaxDistance = 0;
+  distanceScale = 1;
   constructor({
     snrTargetScreen,
     snrDistanceScreen,
+    socScreen,
     eventListener,
     distanceDetectRange,
     initialDistance,
@@ -50,10 +55,11 @@ export default class SNR {
     missileVelocity,
     missileMaxDistance,
     minVerticalAngle,
-    maxVerticalAngle
+    maxVerticalAngle,
   }: ISNR) {
     this.snrTargetScreen = snrTargetScreen;
     this.snrDistanceScreen = snrDistanceScreen;
+    this.socScreen = socScreen;
     this.eventListener = eventListener;
     this.distanceDetectRange = distanceDetectRange;
     this.targetDistance = initialDistance;
@@ -95,6 +101,7 @@ export default class SNR {
 
     this.azimut = (azimut - 90) * (Math.PI / 180);
     this.snrTargetScreen!.setAzimut(this.azimut);
+    this.socScreen!.setTargetRayAngle(this.azimut);
   }
 
   get verticalAngleDeg() {
@@ -111,6 +118,11 @@ export default class SNR {
     }
   }
 
+  setDistanceScale(value: number) {
+    this.distanceScale = value;
+    this.socScreen!.setScale(this.distanceScale);
+  }
+
   get radarRayWidth() {
     return this.rayWidth;
   }
@@ -123,12 +135,19 @@ export default class SNR {
     this.flightObjects.push(flightObject);
   }
 
+  private getVisibleDistance(flightObject: FlightObject) {
+    const height = flightObject.currentPoint.z;
+    return Math.sqrt(2 * 6371.009 * this.radarHeight) +
+      Math.sqrt(2 * 6371.009 * height);
+  }
+
   private calculateTargetsParams() {
     for (const flightObject of this.flightObjects) {
       const isCapturedByDirection =
         flightObject.identifier! === this.trackingDirectionTargetIdentifier;
       const isCapturedByDistance =
         flightObject.identifier! === this.trackingDistanceTargetIdentifier;
+
       if (flightObject.isLaunched && !flightObject.isDestroyed) {
         // Distance from SNR to target
         const targetDistance = Math.hypot(
@@ -162,17 +181,32 @@ export default class SNR {
 
         // Target param
         const targetParam = Math.abs(targetDistance * Math.tan(targetAngle));
+        const visibleDistance = this.getVisibleDistance(flightObject);
+        const targetSize = 2 * Math.sqrt(flightObject.rcs / Math.PI) / 1000; // Size in km; rcs converted to diameter of circle with same scale
+        const isTargetVisible = visibleDistance >= targetDistance;
+        if (isTargetVisible) {
+          this.socScreen?.setTargetParams(
+            flightObject.identifier!,
+            targetDistance,
+            targetSize,
+            flightObject.currentPoint.x,
+            flightObject.currentPoint.y,
+          );
+        } else {
+          this.socScreen?.removeTarget(flightObject.identifier!);
+        }
+
         // If target inside of SNR ray
         if (
           Math.abs(targetAzimutOffset) < (rayWidthRad / 2) &&
-          Math.abs(targetVerticalOffset) < (rayWidthRad / 2)
+          Math.abs(targetVerticalOffset) < (rayWidthRad / 2) && isTargetVisible
         ) {
           // Calculate target position on canvas
           const targetOffsetX = -(targetAzimutOffset / rayWidthRad * 2);
           const targetOffsetY = -(targetVerticalOffset / rayWidthRad * 2);
 
           const rayWidth = ((Math.PI * rayWidthRad * targetDistance) / 180);
-          const targetSize = 2 * Math.sqrt(flightObject.rcs / Math.PI) / 1000; // Size in km; rcs converted to diameter of circle with same scale
+
           const targetSpotSize = targetSize / rayWidth;
           const targetVisibilityK = targetDistance / this.maxDistance;
           this.snrTargetScreen!.setTargetParams(
@@ -241,13 +275,18 @@ export default class SNR {
           this.eventListener("targetParam", targetParam);
         }
       } else if (
-        flightObject.isDestroyed &&
-        this.trackingDirectionTargetIdentifier === flightObject.identifier
+        flightObject.isDestroyed
       ) {
-        this.resetCaptureTargetByDirection();
-        this.resetCaptureTargetByDistance();
+        if (
+          this.trackingDirectionTargetIdentifier === flightObject.identifier
+        ) {
+          this.resetCaptureTargetByDirection();
+          this.resetCaptureTargetByDistance();
+        }
+
         this.snrTargetScreen!.removeTarget(flightObject.identifier!);
         this.snrDistanceScreen!.removeTarget(flightObject.identifier!);
+        this.socScreen?.removeTarget(flightObject.identifier!);
       }
     }
   }
