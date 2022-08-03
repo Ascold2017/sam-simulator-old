@@ -91,6 +91,7 @@ export default class SAM {
       this.isEnabled = false;
       this.snrDistanceScreen!.isEnabled = false;
       this.snrTargetScreen!.isEnabled = false;
+      this.socScreen!.isEnabled = false;
       this.eventListener!("isEnabled", false);
       this.eventListener!("isEnabledSOC", false);
       this.eventListener!("isEnabledSNR", false);
