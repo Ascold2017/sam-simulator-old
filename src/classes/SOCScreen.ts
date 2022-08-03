@@ -65,13 +65,27 @@ export default class SOCScreen {
       this.ctx!.canvas.width,
       this.ctx!.canvas.height,
     );
+    this.drawBackground();
     if (this.isEnabled) {
       this.drawSnow();
       this.drawTargets();
     }
-
     this.drawRadarSite();
     this.drawTargetRay();
+  }
+
+  private drawBackground() {
+    if (!this.ctx) return;
+    this.ctx?.beginPath();
+    this.ctx.fillStyle = this.isEnabled ? "rgba(184, 134, 11, 0.1)" : "black";
+    this.ctx?.arc(
+      this.canvasCenter.x,
+      this.canvasCenter.y,
+      this.ctx.canvas.width / 2 - 25,
+      0,
+      Math.PI * 2,
+    );
+    this.ctx.fill();
   }
 
   private drawRadarSite() {
@@ -91,51 +105,64 @@ export default class SOCScreen {
     );
     this.ctx!.fill();
 
-    // Draw 25 km circle killzone
-    this.ctx!.strokeStyle = "red";
+    this.ctx!.strokeStyle = "white";
     this.ctx!.beginPath();
     this.ctx!.arc(
       centerOfCanvas.x,
       centerOfCanvas.y,
-      25 / this.scale * this.canvasScale,
+      this.canvasCenter.x - 25,
       0,
       2 * Math.PI,
     );
     this.ctx!.stroke();
 
-    this.ctx!.strokeStyle = "white";
-    // Draw 30 km circle
-    if (this.scale === 0.3) {
+    if (this.isEnabled) {
+      // Draw 25 km circle killzone
+      this.ctx!.strokeStyle = "red";
       this.ctx!.beginPath();
       this.ctx!.arc(
         centerOfCanvas.x,
         centerOfCanvas.y,
-        30 / this.scale * this.canvasScale,
+        25 / this.scale * this.canvasScale,
+        0,
+        2 * Math.PI,
+      );
+      this.ctx!.stroke();
+
+      this.ctx!.strokeStyle = "white";
+      // Draw 30 km circle
+      if (this.scale === 0.3) {
+        this.ctx!.beginPath();
+        this.ctx!.arc(
+          centerOfCanvas.x,
+          centerOfCanvas.y,
+          30 / this.scale * this.canvasScale,
+          0,
+          2 * Math.PI,
+        );
+        this.ctx!.stroke();
+      }
+      // Draw 50 km circle
+      this.ctx!.beginPath();
+      this.ctx!.arc(
+        centerOfCanvas.x,
+        centerOfCanvas.y,
+        50 / this.scale * this.canvasScale,
+        0,
+        2 * Math.PI,
+      );
+      this.ctx!.stroke();
+      // Draw 100 km circle
+      this.ctx!.beginPath();
+      this.ctx!.arc(
+        centerOfCanvas.x,
+        centerOfCanvas.y,
+        100 / this.scale * this.canvasScale,
         0,
         2 * Math.PI,
       );
       this.ctx!.stroke();
     }
-    // Draw 50 km circle
-    this.ctx!.beginPath();
-    this.ctx!.arc(
-      centerOfCanvas.x,
-      centerOfCanvas.y,
-      50 / this.scale * this.canvasScale,
-      0,
-      2 * Math.PI,
-    );
-    this.ctx!.stroke();
-    // Draw 100 km circle
-    this.ctx!.beginPath();
-    this.ctx!.arc(
-      centerOfCanvas.x,
-      centerOfCanvas.y,
-      100 / this.scale * this.canvasScale,
-      0,
-      2 * Math.PI,
-    );
-    this.ctx!.stroke();
 
     // Draw radial lines and degrees
     for (let deg = 0; deg < 360; deg += 5) {
@@ -158,11 +185,12 @@ export default class SOCScreen {
       const outerY = centerOfCanvas.y +
         ((linesDistances.end / this.scale) * this.canvasScale) *
           Math.sin(radians);
-
-      this.ctx!.beginPath();
-      this.ctx!.moveTo(innerX, innerY);
-      this.ctx!.lineTo(outerX, outerY);
-      this.ctx!.stroke();
+      if (this.isEnabled) {
+        this.ctx!.beginPath();
+        this.ctx!.moveTo(innerX, innerY);
+        this.ctx!.lineTo(outerX, outerY);
+        this.ctx!.stroke();
+      }
       this.ctx!.font = "12px Russo One, sans-serif";
       this.ctx!.fillStyle = "white";
       this.ctx!.save();

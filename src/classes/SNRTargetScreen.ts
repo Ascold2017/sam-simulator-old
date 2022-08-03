@@ -79,13 +79,22 @@ export default class SNRTargetScreen {
       this.ctx.canvas.width,
       this.ctx.canvas.height,
     );
+    this.drawBackground();
     if (this.isEnabled) {
       this.drawTargetScreenSnow();
       this.drawTargetScreenTargets();
       this.drawMissiles();
+      this.drawTargetScreenSite();
     }
 
-    this.drawTargetScreenSite();
+    
+  }
+
+  private drawBackground() {
+    if (!this.ctx) return;
+    this.ctx?.beginPath();
+    this.ctx.fillStyle = this.isEnabled ? 'rgba(184, 134, 11, 0.1)' : 'black'
+    this.ctx?.fillRect(0, 0, this.ctx.canvas.width, this.ctx.canvas.height)
   }
 
   private drawTargetScreenSnow() {

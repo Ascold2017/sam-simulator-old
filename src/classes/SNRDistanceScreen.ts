@@ -90,13 +90,20 @@ export default class SNRDistanceScreen {
       this.ctx.canvas.width,
       this.ctx.canvas.height,
     );
+    this.drawBackground();
     if (this.isEnabled) {
       this.drawDistanceScreenSnow();
       this.drawDistanceScreenTargets();
       this.drawDistanceScreenMissiles();
+      this.drawDistanceScreenSite();
     }
+  }
 
-    this.drawDistanceScreenSite();
+  private drawBackground() {
+    if (!this.ctx) return;
+    this.ctx?.beginPath();
+    this.ctx.fillStyle = this.isEnabled ? "rgba(184, 134, 11, 0.1)" : "black";
+    this.ctx?.fillRect(0, 0, this.ctx.canvas.width, this.ctx.canvas.height);
   }
 
   private drawDistanceScreenSnow() {

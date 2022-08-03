@@ -79,25 +79,54 @@ export default class SAM {
   }
 
   setIsEnabled(value: boolean) {
-    this.isEnabled = value;
-    value ? Sounds.startEngine() : Sounds.stopEngine();
-    if (!value) {
+    if (value) {
+      Sounds.startEngine();
+      const t = setTimeout(() => {
+        this.isEnabled = true;
+        this.eventListener!("isEnabled", true);
+        clearTimeout(t);
+      }, 3000);
+    } else {
+      Sounds.stopEngine();
+      this.isEnabled = false;
       this.snrDistanceScreen!.isEnabled = false;
       this.snrTargetScreen!.isEnabled = false;
+      this.eventListener!("isEnabled", false);
+      this.eventListener!("isEnabledSOC", false);
+      this.eventListener!("isEnabledSNR", false);
     }
   }
 
   setIsEnabledSOC(value: boolean) {
     if (!this.isEnabled) return;
     Sounds.click(value);
-    this.socScreen!.isEnabled = value;
+    if (value) {
+      const t = setTimeout(() => {
+        this.socScreen!.isEnabled = true;
+        this.eventListener!("isEnabledSOC", true);
+        clearTimeout(t);
+      }, 2000);
+    } else {
+      this.socScreen!.isEnabled = false;
+      this.eventListener!("isEnabledSOC", false);
+    }
   }
 
   setIsEnabledSNR(value: boolean) {
     if (!this.isEnabled) return;
     Sounds.click(value);
-    this.snrDistanceScreen!.isEnabled = value;
-    this.snrTargetScreen!.isEnabled = value;
+    if (value) {
+      const t = setTimeout(() => {
+        this.snrDistanceScreen!.isEnabled = true;
+        this.snrTargetScreen!.isEnabled = true;
+        this.eventListener!("isEnabledSNR", true);
+        clearTimeout(t);
+      }, 2000);
+    } else {
+      this.snrDistanceScreen!.isEnabled = false;
+      this.snrTargetScreen!.isEnabled = false;
+      this.eventListener!("isEnabledSNR", false);
+    }
   }
 
   get trackedTarget(): FlightObject | null {
