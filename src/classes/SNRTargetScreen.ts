@@ -93,7 +93,7 @@ export default class SNRTargetScreen {
   private drawBackground() {
     if (!this.ctx) return;
     this.ctx?.beginPath();
-    this.ctx.fillStyle = this.isEnabled ? 'rgba(184, 134, 11, 0.1)' : 'black'
+    this.ctx.fillStyle = this.isEnabled ? 'rgb(15, 33, 19)' : 'black'
     this.ctx?.fillRect(0, 0, this.ctx.canvas.width, this.ctx.canvas.height)
   }
 
@@ -104,7 +104,7 @@ export default class SNRTargetScreen {
       const pointX = canvasSize * Math.random();
       const pointY = canvasSize * Math.random();
       this.ctx.beginPath();
-      this.ctx.fillStyle = `rgba(184, 134, 11,${1 - Math.random()})`;
+      this.ctx.fillStyle = `rgba(150, 249, 123,${1 - Math.random()})`;
       this.ctx.rect(
         pointX,
         pointY,
@@ -181,7 +181,7 @@ export default class SNRTargetScreen {
       if (!this.ctx) return;
       const canvasSpotSize = this.ctx.canvas.width *
         targetParams.targetSpotSize;
-      this.ctx.fillStyle = `rgba(184, 134, 11,${
+      this.ctx.fillStyle = `rgba(150, 249, 123,${
         1 - targetParams.targetDistanceK
       })`;
       this.ctx.beginPath();

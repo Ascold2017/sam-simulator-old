@@ -102,7 +102,7 @@ export default class SNRDistanceScreen {
   private drawBackground() {
     if (!this.ctx) return;
     this.ctx?.beginPath();
-    this.ctx.fillStyle = this.isEnabled ? "rgba(184, 134, 11, 0.1)" : "black";
+    this.ctx.fillStyle = this.isEnabled ? "rgb(15, 33, 19)" : "black";
     this.ctx?.fillRect(0, 0, this.ctx.canvas.width, this.ctx.canvas.height);
   }
 
@@ -114,7 +114,7 @@ export default class SNRDistanceScreen {
       const pointY = this.ctx.canvas.height *
         Math.random();
       this.ctx.beginPath();
-      this.ctx.fillStyle = `rgba(184, 134, 11,${1 - Math.random()})`;
+      this.ctx.fillStyle = `rgba(150, 249, 123,${1 - Math.random()})`;
       this.ctx.rect(
         pointX,
         pointY,
@@ -239,7 +239,7 @@ export default class SNRDistanceScreen {
         1 - targetParams.targetDistanceK,
         targetParams.spotLength /
           this.scale,
-        "rgba(184, 134, 11,1)",
+        "rgba(150, 249, 123,1)",
       );
       if (targetIdentifier === this.trackingDistanceTargetIdentifier) {
         // Draw line of missile hit

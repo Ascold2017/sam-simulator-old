@@ -77,7 +77,7 @@ export default class SOCScreen {
   private drawBackground() {
     if (!this.ctx) return;
     this.ctx?.beginPath();
-    this.ctx.fillStyle = this.isEnabled ? "rgba(184, 134, 11, 0.1)" : "black";
+    this.ctx.fillStyle = this.isEnabled ? "rgb(15, 33, 19)" : "black";
     this.ctx?.arc(
       this.canvasCenter.x,
       this.canvasCenter.y,
@@ -167,23 +167,18 @@ export default class SOCScreen {
     // Draw radial lines and degrees
     for (let deg = 0; deg < 360; deg += 5) {
       const radians = deg * Math.PI / 180 - Math.PI / 2;
-      const map: Record<number, { start: number; end: number }> = {
-        1: { start: 30, end: 100 },
-        0.5: { start: 30, end: 50 },
-        0.3: { start: 20, end: 30 },
-      };
-      const linesDistances = map[this.scale];
+
       const innerX = centerOfCanvas.x +
-        ((linesDistances.start / this.scale) * this.canvasScale) *
+        (this.ctx!.canvas.width / 2 - 50) *
           Math.cos(radians);
       const innerY = centerOfCanvas.y +
-        ((linesDistances.start / this.scale) * this.canvasScale) *
+        (this.ctx!.canvas.width / 2 - 50) *
           Math.sin(radians);
       const outerX = centerOfCanvas.x +
-        ((linesDistances.end / this.scale) * this.canvasScale) *
+        (this.ctx!.canvas.width / 2 - 25) *
           Math.cos(radians);
       const outerY = centerOfCanvas.y +
-        ((linesDistances.end / this.scale) * this.canvasScale) *
+        (this.ctx!.canvas.width / 2 - 25) *
           Math.sin(radians);
       if (this.isEnabled) {
         this.ctx!.beginPath();
@@ -228,7 +223,7 @@ export default class SOCScreen {
       const targetSpotSize = targetParams.targetSize / rayWidth * 10;
       const targetVisibilityK = targetParams.targetDistance /
         this.maxLocateDistance;
-      this.ctx.strokeStyle = `rgba(184, 134, 11,${1 - targetVisibilityK})`;
+      this.ctx.strokeStyle = `rgba(150, 249, 123,${1 - targetVisibilityK})`;
       this.ctx.arc(
         this.canvasCenter.x,
         this.canvasCenter.y,
@@ -257,7 +252,7 @@ export default class SOCScreen {
       );
       const k = distanceFromCenter /
         (this.maxLocateDistance * this.canvasScale);
-      this.ctx!.strokeStyle = `rgba(184, 134, 11,${1 - k})`;
+      this.ctx!.strokeStyle = `rgba(150, 249, 123,${1 - k})`;
       this.ctx!.stroke();
     }
   }
