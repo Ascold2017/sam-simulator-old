@@ -265,12 +265,12 @@ export default class SOCScreen {
   }
 
   private drawSnow() {
-    for (let i = 0; i < 500 * this.gain; i++) {
+    for (let i = 0; i < 500; i++) {
       const distanceFromCenter = this.maxLocateDistance * this.canvasScale *
         Math.random();
 
       const angle = Math.PI * 2 * Math.random();
-      const snowWidth = 1 * this.gain * Math.PI / 180;
+      const snowWidth = 1 * Math.PI / 180;
       this.ctx!.beginPath();
       this.ctx!.arc(
         this.canvasCenter.x,

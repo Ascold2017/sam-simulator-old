@@ -62,38 +62,37 @@
     <div class="mb-6  mx-auto " max-width="1900">
       <v-row>
 
-        <!-- TARGET INDICATOR -->
+        <!-- AZIMUT-DISTANCE INDICATOR -->
         <v-col cols="4" style="position: relative">
           <v-card class="py-3 px-3">
-            <canvas ref="targetScreenRef" width="600" height="600" class="border mx-auto"
+            <canvas ref="targetAzimutDistanceScreenRef" width="400" height="650" class="border mx-auto"
               style="display: block; max-width: 100%"></canvas>
           </v-card>
         </v-col>
         <!-- SOC INDICATOR -->
         <v-col cols="4" style="position: relative;">
-          <v-card class="py-3 px-3">
-            <div class="d-flex align-center" style="position: absolute; top: 15px; left: 15px; z-index: 1;"
-              @click.right.prevent="resetCaptureTargetByDirection">
-              <v-icon :color="params.isCapturedByDirection ? 'success' : 'warning'">mdi-checkbox-blank-circle</v-icon>
-              <span class="px-3">AC-1</span>
-            </div>
+          <v-card class="py-3 px-3 mb-3">
+
             <canvas ref="radarRef" width=650 height=650 class="mx-auto"
               style="display: block; max-width: 100%;"></canvas>
-            <div class="d-flex align-center" style="position: absolute; top: 15px; right: 15px; z-index: 1;"
-              @click.right.prevent="resetCaptureTargetByDistance">
-              <span class="px-3">AC-2</span>
+
+          </v-card>
+          <v-card class="px-3 py-3 mb-3 d-flex">
+            <div class="d-flex align-center" @click.right.prevent="resetCaptureTargetByAzimutElevation">
+              <v-icon :color="params.isCapturedByAzimut ? 'success' : 'warning'">mdi-checkbox-blank-circle</v-icon>
+              <span class="px-3">AC-Aзимут</span>
+            </div>
+            <div class="d-flex align-center" @click.right.prevent="resetCaptureTargetByAzimutElevation">
+
+              <v-icon :color="params.isCapturedByElevation ? 'success' : 'warning'">mdi-checkbox-blank-circle</v-icon>
+              <span class="px-3">AC-Угол</span>
+            </div>
+            <div class="d-flex align-center" @click.right.prevent="resetCaptureTargetByDistance">
+
               <v-icon :color="params.isCapturedByDistance ? 'success' : 'warning'">mdi-checkbox-blank-circle</v-icon>
+              <span class="px-3">AC-Дистанция</span>
             </div>
           </v-card>
-        </v-col>
-        <!-- DISTANCE INDICATOR -->
-        <v-col cols="4" class="d-flex flex-column">
-          <v-card class="px-3 py-3 mb-3">
-            <canvas ref="distanceScreenRef" width="600" height="275" class="border mx-auto"
-              style="display: block; max-width: 100%"></canvas>
-
-          </v-card>
-
           <v-card class="px-3 py-3 d-flex align-center flex-nowrap">
             <div class="mx-3" v-for="missile in missiles">
               <div class="text-center">{{ missile.id + 1 }}</div>
@@ -105,6 +104,16 @@
             <v-btn color="error" @click="launchMissile">Пуск
             </v-btn>
           </v-card>
+        </v-col>
+        <!-- ELEVATION-DISTANCE INDICATOR -->
+        <v-col cols="4" class="d-flex flex-column">
+          <v-card class="px-3 py-3 ">
+            <canvas ref="targetElevationDistanceScreenRef" width="400" height="650" class="border mx-auto"
+              style="display: block; max-width: 100%"></canvas>
+
+          </v-card>
+
+
 
 
         </v-col>
@@ -117,9 +126,6 @@
 import SAMissile from '@/classes/SAMissile';
 
 import SAM from '@/classes/SAM';
-import SOCScreen from '@/classes/SOCScreen.js';
-import SNRTargetScreen from '@/classes/SNRTargetScreen';
-import SNRDistanceScreen from '@/classes/SNRDistanceScreen'
 import SNRTargetParamsScreen from '@/classes/SNRTargetParamsScreen';
 import { onMounted, ref, reactive, computed } from 'vue';
 import type FlightObject from '@/classes/FlightObject';
@@ -143,18 +149,16 @@ const initialParams = {
   initialRayWidth: 16,
 }
 
-const targetScreenRef = ref<HTMLCanvasElement | null>(null);
-const distanceScreenRef = ref<HTMLCanvasElement | null>(null);
+const targetAzimutDistanceScreenRef = ref<HTMLCanvasElement | null>(null);
+const targetElevationDistanceScreenRef = ref<HTMLCanvasElement | null>(null);
 const radarRef = ref<HTMLCanvasElement | null>(null);
 const targetParamsRef = ref<HTMLCanvasElement | null>(null);
 const sam = ref<SAM | null>(null);
-const socScreen = ref<SOCScreen | null>(null);
-const snrDistanceScreen = ref<SNRDistanceScreen | null>(null);
-const snrTargetScreen = ref<SNRTargetScreen | null>(null);
 const snrTargetParamsScreen = ref<SNRTargetParamsScreen | null>(null);
 
 const params = reactive<Record<string, boolean | number>>({
-  isCapturedByDirection: false,
+  isCapturedByAzimut: false,
+  isCapturedByElevation: false,
   isCapturedByDistance: false,
   isEnabled: false,
   isEnabledSOC: false,
@@ -167,11 +171,9 @@ let rayWidth = computed(() => sam.value?.radarRayWidth)
 let distanceScale = computed(() => sam.value?.distanceScale);
 
 const setRayWidth = (v: number) => sam.value!.setRadarRayWidth(v);
-const resetCaptureTargetByDirection = () => sam.value?.resetCaptureTargetByDirection();
+const resetCaptureTargetByAzimutElevation = () => sam.value?.resetCaptureTargetByDirection();
 const resetCaptureTargetByDistance = () => sam.value?.resetCaptureTargetByDistance();
-const setDistanceScale = (v: number) => {
-  sam.value?.setDistanceScale(v);
-}
+const setDistanceScale = (v: number) => sam.value?.setDistanceScale(v);
 
 const setIsEnabled = (value: boolean) => sam.value?.setIsEnabled(value)
 const setIsEnabledSNR = (value: boolean) => sam.value?.setIsEnabledSNR(value)
@@ -180,7 +182,8 @@ const setIsEnabledSOC = (value: boolean) => sam.value?.setIsEnabledSOC(value)
 
 
 function SNRListener(property: string, value: number | boolean) {
-  property === 'isCapturedByDirection' && (params.isCapturedByDirection = value)
+  property === 'isCapturedByAzimut' && (params.isCapturedByAzimut = value)
+  property === 'isCapturedByElevation' && (params.isCapturedByElevation = value)
   property === 'isCapturedByDistance' && (params.isCapturedByDistance = value)
   property === 'isEnabled' && (params.isEnabled = value)
   property === 'isEnabledSNR' && (params.isEnabledSNR = value)
@@ -207,25 +210,18 @@ function addFlightObject(flightObject: FlightObject) {
 }
 
 onMounted(() => {
-  socScreen.value = new SOCScreen({
-    scale: initialParams.initialScale,
-    canvasRadar: radarRef.value!,
-    rayWidth: 8
-  });
-  snrTargetScreen.value = new SNRTargetScreen(targetScreenRef.value!);
-  snrDistanceScreen.value = new SNRDistanceScreen(distanceScreenRef.value!, initialParams.maxDistance, initialParams.distanceDetectRange, initialParams.initialDistance, initialParams.missileMaxDistance);
+
   snrTargetParamsScreen.value = new SNRTargetParamsScreen({ indicatorsCanvas: targetParamsRef.value!, maxHeight: 15, maxVelocity: 900, killZoneDistance: initialParams.missileMaxDistance });
   sam.value = new SAM({
-    snrTargetScreen: snrTargetScreen.value! as SNRTargetScreen,
-    snrDistanceScreen: snrDistanceScreen.value! as SNRDistanceScreen,
-    socScreen: socScreen.value! as SOCScreen,
+    azimutDistanceScreenCanvas: targetAzimutDistanceScreenRef.value!,
+    elevationDistanceScreenCanvas: targetElevationDistanceScreenRef.value!,
+    socScreenCanvas: radarRef.value!,
     eventListener: SNRListener,
     distanceDetectRange: initialParams.distanceDetectRange,
     initialDistance: initialParams.initialDistance,
     initialRayWidth: initialParams.initialRayWidth,
     maxDistance: initialParams.maxDistance,
     missileVelocity: initialParams.missileVelocity,
-    missileMaxDistance: initialParams.missileMaxDistance,
     minVerticalAngle: initialParams.minVerticalAngle,
     maxVerticalAngle: initialParams.maxVerticalAngle
   });
@@ -248,7 +244,8 @@ onMounted(() => {
       'KeyW': () => sam.value?.setVerticalAngle(sam.value.verticalAngleDeg + 0.05),
       'KeyS': () => sam.value?.setVerticalAngle(sam.value.verticalAngleDeg - 0.05),
       'Space': () => {
-        sam.value?.captureTargetByDirection()
+        sam.value?.captureTargetByAzimut()
+        sam.value?.captureTargetByElevation()
         sam.value?.captureTargetByDistance()
       },
       'KeyQ': () => sam.value?.setIndicatorTargetDistance(sam.value.indicatorTargetDistance - 0.2),

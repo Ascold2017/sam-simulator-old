@@ -1,28 +1,39 @@
 import type FlightObject from "./FlightObject";
 import type SAMissile from "./SAMissile";
-import type SNRDistanceScreen from "./SNRDistanceScreen";
-import type SNRTargetScreen from "./SNRTargetScreen";
-import type SOCScreen from "./SOCScreen";
+import SNRTargetScreen from "./SNRTargetScreen";
+import SOCScreen from "./SOCScreen";
 import Sounds from "@/classes/Sounds";
+
+const initialParams = {
+  initialScale: 1,
+  initialDistance: 30,
+  maxDistance: 100,
+  minVerticalAngle: -5,
+  maxVerticalAngle: 75,
+  missileVelocity: 900,
+  missileMaxDistance: 25,
+  distanceDetectRange: 0.5,
+  initialRayWidth: 16,
+}
+
 type EventListener = (arg0: string, arg1: any) => void;
 
 interface ISAM {
-  snrTargetScreen: SNRTargetScreen;
-  snrDistanceScreen: SNRDistanceScreen;
-  socScreen: SOCScreen;
+  azimutDistanceScreenCanvas: HTMLCanvasElement;
+  elevationDistanceScreenCanvas: HTMLCanvasElement;
+  socScreenCanvas: HTMLCanvasElement;
   eventListener: EventListener;
   distanceDetectRange: number;
   initialDistance: number;
   initialRayWidth: number;
   maxDistance: number;
-  missileVelocity: number;
-  missileMaxDistance: number;
+  missileVelocity: number
   minVerticalAngle: number;
   maxVerticalAngle: number;
 }
 export default class SAM {
-  private snrTargetScreen: SNRTargetScreen | null = null;
-  private snrDistanceScreen: SNRDistanceScreen | null = null;
+  private azimutDistanceScreen: SNRTargetScreen | null = null;
+  private elevationDistanceScreen: SNRTargetScreen | null = null;
   private socScreen: SOCScreen | null = null;
   private azimut = -Math.PI / 2; // rad
   private verticalAngle = 0; // rad
@@ -41,34 +52,35 @@ export default class SAM {
   private eventListener: EventListener | null = null;
   private missiles: SAMissile[] = [];
   private missileVelocity = 0;
-  private missileMaxDistance = 0;
   distanceScale = 1;
   private isEnabled = false;
 
   constructor({
-    snrTargetScreen,
-    snrDistanceScreen,
-    socScreen,
+    azimutDistanceScreenCanvas,
+    elevationDistanceScreenCanvas,
+    socScreenCanvas,
     eventListener,
     distanceDetectRange,
     initialDistance,
     initialRayWidth,
     maxDistance,
     missileVelocity,
-    missileMaxDistance,
     minVerticalAngle,
     maxVerticalAngle,
   }: ISAM) {
-    this.snrTargetScreen = snrTargetScreen;
-    this.snrDistanceScreen = snrDistanceScreen;
-    this.socScreen = socScreen;
+    this.azimutDistanceScreen = new SNRTargetScreen({ canvas: azimutDistanceScreenCanvas, initialAngle: -Math.PI/2, maxDistance: initialParams.maxDistance, maxKillZoneDistance: initialParams.missileMaxDistance });
+    this.elevationDistanceScreen = new SNRTargetScreen({ canvas: elevationDistanceScreenCanvas, initialAngle: 0, maxDistance: initialParams.maxDistance,  maxKillZoneDistance: initialParams.missileMaxDistance })
+    this.socScreen = new SOCScreen({
+      scale: initialParams.initialScale,
+      canvasRadar: socScreenCanvas,
+      rayWidth: 8
+    });
     this.eventListener = eventListener;
     this.distanceDetectRange = distanceDetectRange;
     this.targetDistance = initialDistance;
     this.rayWidth = initialRayWidth;
     this.maxDistance = maxDistance;
     this.missileVelocity = missileVelocity;
-    this.missileMaxDistance = missileMaxDistance;
     this.minVerticalAngle = minVerticalAngle;
     this.maxVerticalAngle = maxVerticalAngle;
 
@@ -89,8 +101,8 @@ export default class SAM {
     } else {
       Sounds.stopEngine();
       this.isEnabled = false;
-      this.snrDistanceScreen!.isEnabled = false;
-      this.snrTargetScreen!.isEnabled = false;
+      this.azimutDistanceScreen!.isEnabled = false;
+      this.elevationDistanceScreen!.isEnabled = false;
       this.socScreen!.isEnabled = false;
       this.eventListener!("isEnabled", false);
       this.eventListener!("isEnabledSOC", false);
@@ -118,14 +130,14 @@ export default class SAM {
     Sounds.click(value);
     if (value) {
       const t = setTimeout(() => {
-        this.snrDistanceScreen!.isEnabled = true;
-        this.snrTargetScreen!.isEnabled = true;
+        this.azimutDistanceScreen!.isEnabled = true;
+        this.elevationDistanceScreen!.isEnabled = true;
         this.eventListener!("isEnabledSNR", true);
         clearTimeout(t);
       }, 2000);
     } else {
-      this.snrDistanceScreen!.isEnabled = false;
-      this.snrTargetScreen!.isEnabled = false;
+      this.azimutDistanceScreen!.isEnabled = false;
+      this.elevationDistanceScreen!.isEnabled = false;
       this.eventListener!("isEnabledSNR", false);
     }
   }
@@ -157,7 +169,7 @@ export default class SAM {
     }
 
     this.azimut = (azimut - 90) * (Math.PI / 180);
-    this.snrTargetScreen!.setAzimut(this.azimut);
+    this.azimutDistanceScreen!.setAngle(this.azimut);
     this.socScreen!.setTargetRayAngle(this.azimut);
     Sounds.turnStart();
     this.soundTimeout && clearTimeout(this.soundTimeout);
@@ -178,7 +190,7 @@ export default class SAM {
       verticalAngle < this.maxVerticalAngle
     ) {
       this.verticalAngle = verticalAngle * Math.PI / 180;
-      this.snrTargetScreen!.setVerticalAngle(this.verticalAngle);
+      this.elevationDistanceScreen!.setAngle(this.verticalAngle);
     }
   }
 
@@ -186,7 +198,9 @@ export default class SAM {
     this.distanceScale = value;
     Sounds.click();
     this.socScreen!.setScale(this.distanceScale);
-    this.snrDistanceScreen!.setScale(this.distanceScale);
+    this.azimutDistanceScreen!.setScale(this.distanceScale);
+    this.elevationDistanceScreen!.setScale(this.distanceScale);
+
   }
 
   get radarRayWidth() {
@@ -274,35 +288,34 @@ export default class SAM {
 
           const rayWidth = ((Math.PI * rayWidthRad * targetDistance) / 180);
 
-          const targetSpotSize = targetSize / rayWidth;
+          const targetSpotWidth = targetSize / rayWidth;
+          const targetSpotLength = this.distanceTrackingAccuracy * Math.random();
           const targetVisibilityK = (Math.abs(targetOffsetX) + Math.abs(targetOffsetY));
-          this.snrTargetScreen!.setTargetParams(
-            flightObject.identifier!,
-            targetVisibilityK,
-            targetSpotSize,
-            targetOffsetX,
-            targetOffsetY,
-          );
-          const targetSpotLength = (targetSpotSize +
-            (this.distanceTrackingAccuracy * Math.random())) * rayWidth;
-
           // Draw point of missile hit
           const timeToHit = targetDistance /
             ((radialVelocity + this.missileVelocity) / 1000);
           const distanceToHit = (timeToHit * this.missileVelocity) / 1000;
-          this.snrDistanceScreen!.setTargetParams(
-            flightObject.identifier!,
+          this.azimutDistanceScreen!.setTargetParams({
+            identifier: flightObject.identifier!,
             targetVisibilityK,
-            targetOffsetX,
-            targetDistance,
-            targetSpotSize,
+            targetSpotWidth,
             targetSpotLength,
-            distanceToHit,
-            targetParam,
-          );
+            targetOffset: targetOffsetX,
+            targetDistance,
+            distanceToHit
+          });
+          this.elevationDistanceScreen!.setTargetParams({
+            identifier: flightObject.identifier!,
+            targetVisibilityK,
+            targetSpotWidth,
+            targetSpotLength,
+            targetOffset: targetOffsetY,
+            targetDistance,
+            distanceToHit
+          });
         } else {
-          this.snrTargetScreen!.removeTarget(flightObject.identifier!);
-          this.snrDistanceScreen!.removeTarget(flightObject.identifier!);
+          this.azimutDistanceScreen!.removeTarget(flightObject.identifier!);
+          this.elevationDistanceScreen!.removeTarget(flightObject.identifier!);
         }
 
         if (isCapturedByDirection) {
@@ -315,6 +328,7 @@ export default class SAM {
           }
           this.azimut = targetAzimutAngle;
           this.verticalAngle = targetVerticalAngle;
+          this.socScreen?.setTargetRayAngle(this.azimut)
         }
 
         if (isCapturedByDistance) {
@@ -326,7 +340,8 @@ export default class SAM {
           }
 
           this.targetDistance = targetDistance;
-          this.snrDistanceScreen!.setDistance(targetDistance);
+          this.azimutDistanceScreen!.setDistance(targetDistance);
+          this.elevationDistanceScreen!.setDistance(targetDistance);
         }
 
         if (
@@ -351,14 +366,14 @@ export default class SAM {
           this.resetCaptureTargetByDistance();
         }
 
-        this.snrTargetScreen!.removeTarget(flightObject.identifier!);
-        this.snrDistanceScreen!.removeTarget(flightObject.identifier!);
+        this.azimutDistanceScreen!.removeTarget(flightObject.identifier!);
+        this.elevationDistanceScreen!.removeTarget(flightObject.identifier!);
         this.socScreen?.removeTarget(flightObject.identifier!);
       }
     }
   }
 
-  captureTargetByDirection() {
+  captureTargetByAzimut() {
     Sounds.click();
     this.flightObjects.forEach((flightObject) => {
       // Azimut from SNR to target
@@ -382,6 +397,31 @@ export default class SAM {
       const isCapturedByAzimut = Math.abs(this.azimut - targetAzimutAngle) <
         Math.abs(targetSpotAngle) * 2;
 
+      if (isCapturedByAzimut) {
+        this.trackingDirectionTargetIdentifier = flightObject.identifier!;
+
+        this.eventListener &&
+          this.eventListener("isCapturedByAzimut", true);
+      }
+    });
+  }
+  captureTargetByElevation() {
+    Sounds.click();
+    this.flightObjects.forEach((flightObject) => {
+      // Distance from SNR to target
+      const targetDistance = Math.hypot(
+        flightObject.currentPoint.x,
+        flightObject.currentPoint.y,
+      );
+      // Angle of ray of SNR
+      const rayWidthRad = this.rayWidth * Math.PI / 180;
+      const rayWidth = ((Math.PI * rayWidthRad * targetDistance) / 180);
+      // Azimut of target spot
+      const targetSpotAngle = ((2 * Math.sqrt(flightObject.rcs / Math.PI) /
+        1000) /
+        targetDistance) / rayWidth;
+
+
       // Difference from SNR and target heights
       const targetHeightOffset = flightObject.currentPoint.z -
         this.radarHeight / 1000;
@@ -390,11 +430,11 @@ export default class SAM {
       const isCapturedByVerticalAngle =
         Math.abs(this.verticalAngle - targetVerticalAngle) <
           Math.abs(targetSpotAngle);
-      if (isCapturedByAzimut && isCapturedByVerticalAngle) {
+      if (isCapturedByVerticalAngle) {
         this.trackingDirectionTargetIdentifier = flightObject.identifier!;
 
         this.eventListener &&
-          this.eventListener("isCapturedByDirection", true);
+          this.eventListener("isCapturedByElevation", true);
       }
     });
   }
@@ -402,7 +442,10 @@ export default class SAM {
   resetCaptureTargetByDirection() {
     Sounds.click();
     this.trackingDirectionTargetIdentifier = null;
-    this.eventListener && this.eventListener("isCapturedByDirection", false);
+    if (this.eventListener) {
+      this.eventListener("isCapturedByAzimut", false);
+      this.eventListener("isCapturedByElevation", false);
+    }
     this.missiles.forEach((missile) => missile.destroyMissile());
     this.resetCaptureTargetByDistance();
   }
@@ -414,7 +457,8 @@ export default class SAM {
   setIndicatorTargetDistance(distance: number) {
     if (distance > 0 && distance < this.maxDistance) {
       this.targetDistance = distance;
-      this.snrDistanceScreen?.setDistance(distance);
+      this.azimutDistanceScreen?.setDistance(distance);
+      this.elevationDistanceScreen?.setDistance(distance);
     }
   }
 
@@ -433,7 +477,10 @@ export default class SAM {
         this.trackingDirectionTargetIdentifier === flightObject.identifier
       ) {
         this.trackingDistanceTargetIdentifier = flightObject.identifier!;
-        this.snrDistanceScreen!.setTrackingTargetByDistance(
+        this.azimutDistanceScreen!.setTrackingTargetByDistance(
+          flightObject.identifier!,
+        );
+        this.elevationDistanceScreen!.setTrackingTargetByDistance(
           flightObject.identifier!,
         );
         this.eventListener &&
@@ -445,7 +492,8 @@ export default class SAM {
   resetCaptureTargetByDistance() {
     Sounds.click();
     this.trackingDistanceTargetIdentifier = null;
-    this.snrDistanceScreen!.setTrackingTargetByDistance(null);
+    this.azimutDistanceScreen!.setTrackingTargetByDistance(null);
+    this.elevationDistanceScreen!.setTrackingTargetByDistance(null);
     this.eventListener && this.eventListener("isCapturedByDistance", false);
   }
 
@@ -483,18 +531,19 @@ export default class SAM {
         // Calculate missile offsets
         const missileOffsetX = -(missileAzimutOffset / rayWidthRad * 2);
         const missileOffsetY = -(missileVerticalOffset / rayWidthRad * 2);
-        this.snrTargetScreen?.setMissileParams(
+        this.azimutDistanceScreen?.setMissileParams(
           missile.indentifier!,
           missileOffsetX,
-          missileOffsetY,
+          missileDistance,
         );
-        this.snrDistanceScreen?.setMissileParams(
+        this.elevationDistanceScreen?.setMissileParams(
           missile.indentifier!,
+          missileOffsetY,
           missileDistance,
         );
       } else {
-        this.snrTargetScreen?.removeMissile(missile.indentifier!);
-        this.snrDistanceScreen?.removeMissile(missile.indentifier!);
+        this.azimutDistanceScreen?.removeMissile(missile.indentifier!);
+        this.elevationDistanceScreen?.removeMissile(missile.indentifier!);
       }
     }
   }

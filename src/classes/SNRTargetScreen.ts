@@ -1,59 +1,90 @@
+interface ISNRTargetScreen {
+  canvas: HTMLCanvasElement;
+  initialAngle: number;
+  maxDistance: number;
+  maxKillZoneDistance: number;
+}
+
+interface ITargetParams {
+  identifier: string;
+  targetVisibilityK: number;
+  targetSpotWidth: number;
+  targetSpotLength: number;
+  targetOffset: number;
+  targetDistance: number;
+  distanceToHit: number;
+}
+
 export default class SNRTargetScreen {
   private ctx: CanvasRenderingContext2D | null = null;
   private canvasCenter = { x: 0, y: 0 };
   private targets: Record<string, any> = {};
   private missiles: Record<string, any> = {};
-  private azimut = -Math.PI / 2; // rad
-  private verticalAngle = 0; // rad
+  private angle = 0; // rad
+  private distance = 0;
+  private scale = 1;
+  private maxDistance = 0;
+  private maxKillZoneDistance = 0;
+  private trackingDistanceTargetIdentifier: string | null = null;
+  private gain = 10;
   isEnabled = false;
-  constructor(canvas: HTMLCanvasElement) {
+  constructor(
+    { canvas, initialAngle, maxDistance, maxKillZoneDistance }:
+      ISNRTargetScreen,
+  ) {
     this.ctx = canvas.getContext("2d");
     this.canvasCenter = {
       x: canvas.width / 2,
       y: canvas.height / 2,
     };
+    this.angle = initialAngle;
+    this.maxDistance = maxDistance;
+    this.maxKillZoneDistance = maxKillZoneDistance;
     this.drawScreen();
   }
 
-  get azimutDeg() {
-    const azimut = (this.azimut + Math.PI / 2) * (180 / Math.PI);
-    return azimut < 0 ? azimut + 360 : azimut;
+  setDistance(value: number) {
+    this.distance = value;
   }
 
-  get verticalAngleDeg() {
-    return this.verticalAngle * (180 / Math.PI);
+  setAngle(value: number) {
+    this.angle = value;
   }
 
-  setAzimut(value: number) {
-    this.azimut = value;
+  setScale(scale: number) {
+    this.scale = scale;
   }
 
-  setVerticalAngle(value: number) {
-    this.verticalAngle = value;
+  public setTrackingTargetByDistance(identifier: string | null) {
+    this.trackingDistanceTargetIdentifier = identifier;
   }
 
-  public setTargetParams(
-    targetIdentifier: string,
-    targetVisibilityK: number,
-    targetSpotSize: number,
-    targetOffsetX: number,
-    targetOffsetY: number,
-  ) {
-    this.targets[targetIdentifier] = {
+  public setTargetParams({
+    identifier,
+    targetVisibilityK,
+    targetSpotWidth,
+    targetSpotLength,
+    targetOffset,
+    targetDistance,
+    distanceToHit,
+  }: ITargetParams) {
+    this.targets[identifier] = {
       targetVisibilityK,
-      targetSpotSize,
-      targetOffsetX,
-      targetOffsetY,
+      targetSpotWidth,
+      targetSpotLength,
+      targetOffset,
+      targetDistance,
+      distanceToHit,
     };
   }
   public setMissileParams(
     missileIdentifier: string,
-    missileOffsetX: number,
-    missileOffsetY: number,
+    missileOffset: number,
+    missileDistance: number,
   ) {
     this.missiles[missileIdentifier] = {
-      missileOffsetX,
-      missileOffsetY,
+      missileOffset,
+      missileDistance,
     };
   }
   public removeTarget(targetIdentifier: string) {
@@ -97,10 +128,9 @@ export default class SNRTargetScreen {
 
   private drawTargetScreenSnow() {
     if (!this.ctx) return;
-    const canvasSize = this.ctx.canvas.width;
     for (let i = 0; i < 500; i++) {
-      const pointX = canvasSize * Math.random();
-      const pointY = canvasSize * Math.random();
+      const pointX = this.ctx.canvas.width * Math.random();
+      const pointY = this.ctx.canvas.height * Math.random();
       this.ctx.beginPath();
       this.ctx.fillStyle = `rgba(150, 249, 123,${1 - Math.random()})`;
       this.ctx.rect(
@@ -117,80 +147,104 @@ export default class SNRTargetScreen {
     if (!this.ctx) return;
     this.ctx.strokeStyle = "white";
     this.ctx.fillStyle = "white";
-    this.ctx.textAlign = "center";
-    this.ctx.font = "16px Russo One, sans-serif";
-    // Draw current azimut
-    this.ctx.fillText(this.azimutDeg.toFixed(2), this.canvasCenter.x, 20);
-    // Draw current vertical angle
-    this.ctx.save();
-    this.ctx.translate(0, this.canvasCenter.y);
-    this.ctx.rotate(-Math.PI / 2);
-    this.ctx.fillText(this.verticalAngleDeg.toFixed(2), 0, 20);
-    this.ctx.restore();
+    this.ctx.font = "14px Russo One, sans-serif";
+    this.ctx.lineWidth = 1;
+    this.ctx.beginPath();
+    this.ctx.moveTo(this.canvasCenter.x, 0);
+    this.ctx.lineTo(this.canvasCenter.x, this.ctx.canvas.height);
+    this.ctx.stroke();
+
+    const maxDistance = this.maxDistance * this.scale;
+    for (let distance = maxDistance; distance >= 0; distance -= 1) {
+      const pointY = (distance / maxDistance) * this.ctx.canvas.height;
+      const isEvery5 = distance % 5 === 0;
+      const isEvery10 = distance % 10 === 0;
+
+      if (this.scale === 1 ? isEvery10 : isEvery5) {
+        this.ctx.lineWidth = 0.5;
+        this.ctx.beginPath();
+        this.ctx.moveTo(0, pointY);
+        this.ctx.lineTo(this.ctx.canvas.width, pointY);
+        this.ctx.stroke();
+        this.ctx.fillText(
+          (maxDistance - distance).toString(),
+          1,
+          pointY + 15,
+        );
+        this.ctx.lineWidth = 1;
+      }
+    }
+    // Distance line
+    this.ctx.strokeStyle = "red";
+    const pointY = this.ctx.canvas.height - this.ctx.canvas.height *
+        (this.distance /
+          maxDistance);
 
     this.ctx.beginPath();
-    this.ctx.moveTo(
-      this.canvasCenter.x,
-      40,
-    );
+    this.ctx.moveTo(0, pointY);
     this.ctx.lineTo(
-      this.canvasCenter.x,
-      this.canvasCenter.y - 10,
+      this.ctx.canvas.width,
+      pointY,
     );
     this.ctx.stroke();
-    this.ctx.moveTo(
-      40,
-      this.canvasCenter.y,
-    );
+
+    // Draw redline
+    const redlineY = this.ctx.canvas.height - this.ctx.canvas.height *
+        (this.maxKillZoneDistance /
+          maxDistance);
+    this.ctx.fillStyle = `rgba(255, 0, 0,1)`;
+    this.ctx.setLineDash([10, 10]);
+    this.ctx.beginPath();
+    this.ctx.moveTo(0, redlineY);
     this.ctx.lineTo(
-      this.canvasCenter.x - 10,
-      this.canvasCenter.y,
+      this.ctx.canvas.width,
+      redlineY,
     );
     this.ctx.stroke();
-    this.ctx.moveTo(
-      this.canvasCenter.x + 10,
-      this.canvasCenter.y,
-    );
-    this.ctx.lineTo(
-      this.ctx.canvas.width - 20,
-      this.canvasCenter.y,
-    );
-    this.ctx.stroke();
-    this.ctx.moveTo(
-      this.canvasCenter.x,
-      this.canvasCenter.y + 10,
-    );
-    this.ctx.lineTo(
-      this.canvasCenter.x,
-      this.ctx.canvas.height - 20,
-    );
-    this.ctx.stroke();
+    this.ctx.setLineDash([]);
   }
 
   private drawTargetScreenTargets() {
     Object.keys(this.targets).forEach((targetIdentifier) => {
       const targetParams = this.targets[targetIdentifier];
+      if (!this.ctx) return;
+      const maxDistance = this.maxDistance * this.scale;
       // Calculate target position on canvas
-      const canvasX = targetParams.targetOffsetX *
+      const canvasX = targetParams.targetOffset *
           this.canvasCenter.x + this.canvasCenter.x;
-      const canvasY = targetParams.targetOffsetY *
-          this.canvasCenter.y + this.canvasCenter.y;
+      const canvasY = this.ctx.canvas.height - this.ctx.canvas.height /
+          (maxDistance / targetParams.targetDistance);
 
       if (!this.ctx) return;
       const canvasSpotSize = this.ctx.canvas.width *
-        targetParams.targetSpotSize / 2;
-      this.ctx.fillStyle = `rgba(150, 249, 123,${
+        targetParams.targetSpotWidth * this.gain;
+      this.ctx.strokeStyle = `rgba(150, 249, 123,${
         1 - targetParams.targetVisibilityK
       })`;
+      this.ctx.lineWidth = this.ctx.canvas.height *
+        (targetParams.targetSpotLength / maxDistance) * this.gain;
       this.ctx.beginPath();
-      this.ctx.arc(
-        canvasX,
-        canvasY,
-        canvasSpotSize,
-        0,
-        2*Math.PI,
-      );
-      this.ctx.fill();
+      this.ctx.moveTo(canvasX - canvasSpotSize / 2, canvasY);
+      this.ctx.lineTo(canvasX + canvasSpotSize / 2, canvasY);
+      this.ctx.stroke();
+      this.ctx.lineWidth = 1;
+
+      if (targetIdentifier === this.trackingDistanceTargetIdentifier) {
+        // Draw line of missile hit
+        const missileHitY = this.ctx.canvas.height - this.ctx.canvas.height /
+            (maxDistance / targetParams.distanceToHit);
+
+        this.ctx.fillStyle = `rgba(255, 0, 0,1)`;
+        this.ctx.setLineDash([3, 3]);
+        this.ctx.beginPath();
+        this.ctx.moveTo(0, missileHitY);
+        this.ctx.lineTo(
+          this.ctx.canvas.width,
+          missileHitY,
+        );
+        this.ctx.stroke();
+        this.ctx.setLineDash([]);
+      }
     });
   }
 
@@ -198,10 +252,14 @@ export default class SNRTargetScreen {
     Object.keys(this.missiles).forEach((missileIdentifier) => {
       const missileParams = this.missiles[missileIdentifier];
       if (!this.ctx) return;
-      const canvasX = missileParams.missileOffsetX * this.ctx.canvas.width +
-        this.canvasCenter.x;
-      const canvasY = missileParams.missileOffsetY * this.ctx.canvas.height +
-        this.canvasCenter.y;
+
+      const maxDistance = this.maxDistance * this.scale;
+      // Calculate target position on canvas
+      const canvasX = missileParams.missileOffset *
+          this.canvasCenter.x + this.canvasCenter.x;
+      const canvasY = this.ctx.canvas.height - this.ctx.canvas.height /
+          (maxDistance / missileParams.missileDistance);
+
       this.ctx.strokeStyle = `rgba(255, 0, 0,1)`;
       this.ctx.lineWidth = 4;
       this.ctx.setLineDash([4, 1]);

@@ -2,7 +2,12 @@
   <v-layout full-height>
     <v-main dark >
       
-      <v-row class="py-3">
+      
+      <BIP ref="bipRef" v-show="activeScreen === 'BIP'" />
+      <SNR ref="snrRef" v-show="activeScreen === 'SNR'" />
+      <Editor v-show="activeScreen === 'Editor'" @addFlightObject="onCreateFlightObject" />
+
+      <v-row class="py-3" style="position: fixed; bottom: 0; left: 0; right: 0;">
         <v-col></v-col>
         <v-col class="d-flex justify-center">
           <v-btn-toggle v-model="activeScreen" mandatory column>
@@ -12,7 +17,7 @@
           </v-btn-toggle>
         </v-col>
         <v-col class="d-flex justify-end">
-          <v-btn-toggle :model-value="acceleration" @update:model-value="setAcceleration">
+          <v-btn-toggle mandatory :model-value="acceleration" @update:model-value="setAcceleration">
             <v-btn :value="1">1X</v-btn>
             <v-btn :value="2">2X</v-btn>
             <v-btn :value="4">4X</v-btn>
@@ -20,9 +25,6 @@
           </v-btn-toggle>
         </v-col>
       </v-row>
-      <BIP ref="bipRef" v-show="activeScreen === 'BIP'" />
-      <SNR ref="snrRef" v-show="activeScreen === 'SNR'" />
-      <Editor v-show="activeScreen === 'Editor'" @addFlightObject="onCreateFlightObject" />
     </v-main>
   </v-layout>
 </template>
