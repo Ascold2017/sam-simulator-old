@@ -1,7 +1,7 @@
 <template>
   <v-container fluid class="px-6">
     <!-- TOP PANEL -->
-    <v-card class="mb-6 py-3 px-3 mx-auto custom-background" max-width="1900">
+    <v-card class="mb-6 py-3 px-3 mx-auto" max-width="1900">
       <v-row>
         <v-col cols="4" class="d-flex">
           <div>
@@ -64,14 +64,14 @@
 
         <!-- TARGET INDICATOR -->
         <v-col cols="4" style="position: relative">
-          <v-card class="custom-background py-3 px-3">
+          <v-card class="py-3 px-3">
             <canvas ref="targetScreenRef" width="600" height="600" class="border mx-auto"
               style="display: block; max-width: 100%"></canvas>
           </v-card>
         </v-col>
         <!-- SOC INDICATOR -->
         <v-col cols="4" style="position: relative;">
-          <v-card class="custom-background py-3 px-3">
+          <v-card class="py-3 px-3">
             <div class="d-flex align-center" style="position: absolute; top: 15px; left: 15px; z-index: 1;"
               @click.right.prevent="resetCaptureTargetByDirection">
               <v-icon :color="params.isCapturedByDirection ? 'success' : 'warning'">mdi-checkbox-blank-circle</v-icon>
@@ -88,13 +88,13 @@
         </v-col>
         <!-- DISTANCE INDICATOR -->
         <v-col cols="4" class="d-flex flex-column">
-          <v-card class="custom-background px-3 py-3 mb-3">
+          <v-card class="px-3 py-3 mb-3">
             <canvas ref="distanceScreenRef" width="600" height="275" class="border mx-auto"
               style="display: block; max-width: 100%"></canvas>
 
           </v-card>
 
-          <v-card class="px-3 py-3 custom-background d-flex align-center flex-nowrap">
+          <v-card class="px-3 py-3 d-flex align-center flex-nowrap">
             <div class="mx-3" v-for="missile in missiles">
               <div class="text-center">{{ missile.id + 1 }}</div>
               <v-icon :color="missile.isLaunched || !params.isEnabled ? 'warning' : 'success'">

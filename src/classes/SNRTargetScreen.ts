@@ -34,13 +34,13 @@ export default class SNRTargetScreen {
 
   public setTargetParams(
     targetIdentifier: string,
-    targetDistanceK: number,
+    targetVisibilityK: number,
     targetSpotSize: number,
     targetOffsetX: number,
     targetOffsetY: number,
   ) {
     this.targets[targetIdentifier] = {
-      targetDistanceK,
+      targetVisibilityK,
       targetSpotSize,
       targetOffsetX,
       targetOffsetY,
@@ -86,15 +86,13 @@ export default class SNRTargetScreen {
       this.drawMissiles();
       this.drawTargetScreenSite();
     }
-
-    
   }
 
   private drawBackground() {
     if (!this.ctx) return;
     this.ctx?.beginPath();
-    this.ctx.fillStyle = this.isEnabled ? 'rgb(15, 33, 19)' : 'black'
-    this.ctx?.fillRect(0, 0, this.ctx.canvas.width, this.ctx.canvas.height)
+    this.ctx.fillStyle = this.isEnabled ? "rgb(15, 33, 19)" : "black";
+    this.ctx?.fillRect(0, 0, this.ctx.canvas.width, this.ctx.canvas.height);
   }
 
   private drawTargetScreenSnow() {
@@ -180,19 +178,17 @@ export default class SNRTargetScreen {
 
       if (!this.ctx) return;
       const canvasSpotSize = this.ctx.canvas.width *
-        targetParams.targetSpotSize;
+        targetParams.targetSpotSize / 2;
       this.ctx.fillStyle = `rgba(150, 249, 123,${
-        1 - targetParams.targetDistanceK
+        1 - targetParams.targetVisibilityK
       })`;
       this.ctx.beginPath();
-      this.ctx.ellipse(
+      this.ctx.arc(
         canvasX,
         canvasY,
-        canvasSpotSize / 2,
         canvasSpotSize,
-        Math.PI / 2,
         0,
-        Math.PI * 2,
+        2*Math.PI,
       );
       this.ctx.fill();
     });

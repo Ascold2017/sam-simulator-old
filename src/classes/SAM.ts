@@ -275,7 +275,7 @@ export default class SAM {
           const rayWidth = ((Math.PI * rayWidthRad * targetDistance) / 180);
 
           const targetSpotSize = targetSize / rayWidth;
-          const targetVisibilityK = targetDistance / this.maxDistance;
+          const targetVisibilityK = (Math.abs(targetOffsetX) + Math.abs(targetOffsetY));
           this.snrTargetScreen!.setTargetParams(
             flightObject.identifier!,
             targetVisibilityK,

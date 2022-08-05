@@ -13,6 +13,10 @@ export default class SOCScreen {
   private rayWidth = 0;
   private maxLocateDistance = 100;
   private targetRayAngle = -Math.PI / 2;
+  private distanceDetectAccuracy = 0.2; // km
+  private azimutDetectAccuracy = 1; // deg
+  private currentRotation = 0;
+  private gain = 2;
   isEnabled = false;
   constructor({
     scale,
@@ -69,9 +73,28 @@ export default class SOCScreen {
     if (this.isEnabled) {
       this.drawSnow();
       this.drawTargets();
+      this.rotateAntenna();
     }
     this.drawRadarSite();
     this.drawTargetRay();
+  }
+
+  private rotateAntenna() {
+    this.currentRotation = 2 * Math.PI * ((+new Date() % 10000) / 10000);
+    this.ctx!.strokeStyle = "rgba(150, 249, 123,1)";
+    this.ctx!.beginPath();
+    this.ctx!.moveTo(
+      this.canvasCenter.x,
+      this.canvasCenter.y,
+    );
+    const radius = this.maxLocateDistance * this.canvasScale;
+    this.ctx!.lineTo(
+      radius *
+          Math.cos(this.currentRotation) + this.canvasCenter.x,
+      radius *
+          Math.sin(this.currentRotation) + this.canvasCenter.y,
+    );
+    this.ctx!.stroke();
   }
 
   private drawBackground() {
@@ -167,12 +190,13 @@ export default class SOCScreen {
     // Draw radial lines and degrees
     for (let deg = 0; deg < 360; deg += 5) {
       const radians = deg * Math.PI / 180 - Math.PI / 2;
+      const isEvery10 = deg % 10 === 0;
 
       const innerX = centerOfCanvas.x +
-        (this.ctx!.canvas.width / 2 - 50) *
+        (this.ctx!.canvas.width / 2 - (isEvery10 ? 40 : 30)) *
           Math.cos(radians);
       const innerY = centerOfCanvas.y +
-        (this.ctx!.canvas.width / 2 - 50) *
+        (this.ctx!.canvas.width / 2 - (isEvery10 ? 40 : 30)) *
           Math.sin(radians);
       const outerX = centerOfCanvas.x +
         (this.ctx!.canvas.width / 2 - 25) *
@@ -186,14 +210,16 @@ export default class SOCScreen {
         this.ctx!.lineTo(outerX, outerY);
         this.ctx!.stroke();
       }
-      this.ctx!.font = "12px Russo One, sans-serif";
-      this.ctx!.fillStyle = "white";
-      this.ctx!.save();
-      this.ctx!.translate(outerX, outerY);
-      this.ctx!.rotate(radians + Math.PI / 2);
-      this.ctx!.textAlign = "center";
-      this.ctx!.fillText(deg.toString(), 0, -5);
-      this.ctx!.restore();
+      if (isEvery10) {
+        this.ctx!.font = "14px Russo One, sans-serif";
+        this.ctx!.fillStyle = "white";
+        this.ctx!.save();
+        this.ctx!.translate(outerX, outerY);
+        this.ctx!.rotate(radians + Math.PI / 2);
+        this.ctx!.textAlign = "center";
+        this.ctx!.fillText(deg.toString(), 0, -5);
+        this.ctx!.restore();
+      }
     }
   }
 
@@ -216,32 +242,35 @@ export default class SOCScreen {
         targetParams.targetY,
         targetParams.targetX,
       );
-      // Angle of ray of SOC
-      const rayWidthRad = this.rayWidth * Math.PI / 180;
-      const rayWidth =
-        ((Math.PI * rayWidthRad * targetParams.targetDistance) / 180);
-      const targetSpotSize = targetParams.targetSize / rayWidth * 10;
-      const targetVisibilityK = targetParams.targetDistance /
-        this.maxLocateDistance;
-      this.ctx.strokeStyle = `rgba(150, 249, 123,${1 - targetVisibilityK})`;
+      const targetAzimutSize = (targetParams.targetSize / 2 * Math.PI +
+        this.azimutDetectAccuracy * (Math.PI / 180) * 2) * this.gain;
+      const targetDistanceSize = this.distanceDetectAccuracy * this.gain /
+        this.scale *
+        this.canvasScale;
+
+      const targetVisibilityK = 1 / (targetParams.targetDistance /
+        this.maxLocateDistance);
+      this.ctx.strokeStyle = `rgba(150, 249, 123,${targetVisibilityK})`;
+      this.ctx.lineWidth = targetDistanceSize;
       this.ctx.arc(
         this.canvasCenter.x,
         this.canvasCenter.y,
         canvasDistance,
-        targetAngle - targetSpotSize / 2,
-        targetAngle + targetSpotSize / 2,
+        targetAngle - targetAzimutSize / 2,
+        targetAngle + targetAzimutSize / 2,
       );
       this.ctx.stroke();
+      this.ctx.lineWidth = 1;
     });
   }
 
   private drawSnow() {
-    for (let i = 0; i < 500; i++) {
+    for (let i = 0; i < 500 * this.gain; i++) {
       const distanceFromCenter = this.maxLocateDistance * this.canvasScale *
         Math.random();
 
       const angle = Math.PI * 2 * Math.random();
-      const snowWidth = 1 * Math.PI / 180;
+      const snowWidth = 1 * this.gain * Math.PI / 180;
       this.ctx!.beginPath();
       this.ctx!.arc(
         this.canvasCenter.x,
