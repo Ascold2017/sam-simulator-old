@@ -1,27 +1,45 @@
-import type FlightObject from "./FlightObject";
 interface ISOC {
   scale: number;
+  distanceDetectRange: number;
   canvasRadar: HTMLCanvasElement;
-  rayWidth: number;
+}
+interface ITargetParams {
+  identifier: string;
+  targetDistance: number;
+  targetSize: number;
+  targetX: number;
+  targetY: number;
+  targetRotation: number;
+  hitX: number;
+  hitY: number;
+  isCaptured: boolean;
+}
+
+interface IMissileParams {
+  identifier: string;
+  missileX: number;
+  missileY: number;
 }
 export default class SOCScreen {
   private scale = 1;
   private ctx: CanvasRenderingContext2D | null = null;
   private canvasCenter = { x: 0, y: 0 };
-  private canvasScale = 3;
-  private targets: Record<string, any> = {};
-  private rayWidth = 0;
+  private canvasScale = 4;
+  private targets: Record<string, ITargetParams> = {};
+  private missiles: Record<string, IMissileParams> = {};
   private maxLocateDistance = 100;
   private targetRayAngle = -Math.PI / 2;
-  private distanceDetectAccuracy = 0.2; // km
+  private targetDistance = 0;
+  private distanceDetectRange = 1; // km
+  private distanceDetectAccuracy = 0.15;
   private azimutDetectAccuracy = 1; // deg
   private currentRotation = 0;
-  private gain = 2;
+  gain = 1;
   isEnabled = false;
   constructor({
     scale,
+    distanceDetectRange,
     canvasRadar,
-    rayWidth, // in degrees
   }: ISOC) {
     this.ctx = canvasRadar.getContext("2d");
     this.canvasCenter = {
@@ -29,7 +47,8 @@ export default class SOCScreen {
       y: this.ctx!.canvas.height / 2,
     };
     this.scale = scale;
-    this.rayWidth = rayWidth;
+    this.distanceDetectRange = distanceDetectRange;
+    this.targetDistance = 30;
 
     this.draw();
   }
@@ -38,28 +57,56 @@ export default class SOCScreen {
     this.targetRayAngle = value;
   }
 
+  get distanceScale() {
+    return this.scale;
+  }
+
   setScale(value: number) {
     this.scale = value;
   }
 
-  public setTargetParams(
-    targetIdentifier: string,
-    targetDistance: number,
-    targetSize: number,
-    targetX: number,
-    targetY: number,
-  ) {
-    this.targets[targetIdentifier] = {
+  setTargetDistance(value: number) {
+    this.targetDistance = value;
+  }
+
+  public setTargetParams({
+    identifier,
+    targetDistance,
+    targetSize,
+    targetX,
+    targetY,
+    targetRotation,
+    isCaptured,
+    hitX,
+    hitY,
+  }: ITargetParams) {
+    this.targets[identifier] = {
+      identifier,
       targetDistance,
       targetSize,
       targetX,
       targetY,
+      targetRotation,
+      isCaptured,
+      hitX,
+      hitY,
     };
   }
+
+ 
 
   public removeTarget(targetIdentifier: string) {
     delete this.targets[targetIdentifier];
   }
+
+  setMissileParams({ identifier,
+    missileX, missileY}: IMissileParams) {
+      this.missiles[identifier] = { identifier, missileX, missileY}
+    }
+
+    removeMissile(missileIdentifier: string) {
+      delete this.missiles[missileIdentifier]
+    }
 
   private draw() {
     requestAnimationFrame(this.draw.bind(this));
@@ -73,7 +120,8 @@ export default class SOCScreen {
     if (this.isEnabled) {
       this.drawSnow();
       this.drawTargets();
-      this.rotateAntenna();
+      this.drawMissiles();
+      // this.rotateAntenna();
     }
     this.drawRadarSite();
     this.drawTargetRay();
@@ -191,6 +239,7 @@ export default class SOCScreen {
     for (let deg = 0; deg < 360; deg += 5) {
       const radians = deg * Math.PI / 180 - Math.PI / 2;
       const isEvery10 = deg % 10 === 0;
+      const isEvery5 = deg % 5 === 0;
 
       const innerX = centerOfCanvas.x +
         (this.ctx!.canvas.width / 2 - (isEvery10 ? 40 : 30)) *
@@ -210,8 +259,8 @@ export default class SOCScreen {
         this.ctx!.lineTo(outerX, outerY);
         this.ctx!.stroke();
       }
-      if (isEvery10) {
-        this.ctx!.font = "14px Russo One, sans-serif";
+      if (isEvery5) {
+        this.ctx!.font = "12px Russo One, sans-serif";
         this.ctx!.fillStyle = "white";
         this.ctx!.save();
         this.ctx!.translate(outerX, outerY);
@@ -261,7 +310,56 @@ export default class SOCScreen {
       );
       this.ctx.stroke();
       this.ctx.lineWidth = 1;
+
+      const canvasTargetX =
+        targetParams.targetX * (this.canvasScale / this.scale) +
+        this.canvasCenter.x;
+      const canvasTargetY =
+        targetParams.targetY * (this.canvasScale / this.scale) +
+        this.canvasCenter.y;
+      const canvasHitX = targetParams.hitX * (this.canvasScale / this.scale) +
+      this.canvasCenter.x;;
+      const canvasHitY = targetParams.hitY * (this.canvasScale / this.scale) +
+      this.canvasCenter.y;;
+
+      // Draw captured target legend
+      if (targetParams.isCaptured) {
+        this.ctx.strokeStyle = `rgb(150, 249, 123)`;
+        this.ctx.beginPath();
+        this.ctx.rect(
+          canvasTargetX - 10,
+          canvasTargetY - 10,
+          20,
+          20,
+        );
+        this.ctx.stroke();
+        // Draw hit point
+        this.ctx.save();
+        this.ctx.fillStyle = "white";
+        this.ctx.beginPath();
+        this.ctx.arc(canvasHitX, canvasHitY, 2, 0, 2 * Math.PI);
+        this.ctx.fill();
+
+        this.ctx.restore();
+      }
     });
+  }
+
+  private drawMissiles() {
+   
+
+    Object.keys(this.missiles).forEach((identifier) => {
+      const { missileX, missileY } = this.missiles[identifier];
+      const canvasX =  missileX * (this.canvasScale / this.scale) +
+      this.canvasCenter.x;
+      const canvasY =  missileY * (this.canvasScale / this.scale) +
+      this.canvasCenter.y;
+      if (!this.ctx) return;
+      this.ctx.fillStyle = "red";
+      this.ctx.beginPath();
+      this.ctx.arc(canvasX, canvasY, 2, 0, Math.PI*2)
+      this.ctx.fill();
+    })
   }
 
   private drawSnow() {
@@ -287,17 +385,38 @@ export default class SOCScreen {
   }
 
   private drawTargetRay() {
+    const radiusToTarget = (this.targetDistance - this.distanceDetectRange) *
+      this.canvasScale / this.scale;
+    const radiusFromTarget = (this.targetDistance + this.distanceDetectRange) *
+      this.canvasScale / this.scale;
+    const radiusToMaxDistance = (this.maxLocateDistance) *
+      this.canvasScale;
     this.ctx!.strokeStyle = "rgba(255,0,0,1)";
     this.ctx!.beginPath();
     this.ctx!.moveTo(
       this.canvasCenter.x,
       this.canvasCenter.y,
     );
-    const radius = this.maxLocateDistance * this.canvasScale;
+
     this.ctx!.lineTo(
-      radius *
+      radiusToTarget *
           Math.cos(this.targetRayAngle) + this.canvasCenter.x,
-      radius *
+      radiusToTarget *
+          Math.sin(this.targetRayAngle) + this.canvasCenter.y,
+    );
+    this.ctx!.stroke();
+    this.ctx!.beginPath();
+    this.ctx!.moveTo(
+      radiusFromTarget *
+          Math.cos(this.targetRayAngle) + this.canvasCenter.x,
+      radiusFromTarget *
+          Math.sin(this.targetRayAngle) + this.canvasCenter.y,
+    );
+
+    this.ctx!.lineTo(
+      radiusToMaxDistance *
+          Math.cos(this.targetRayAngle) + this.canvasCenter.x,
+      radiusToMaxDistance *
           Math.sin(this.targetRayAngle) + this.canvasCenter.y,
     );
     this.ctx!.stroke();

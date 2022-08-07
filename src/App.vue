@@ -1,21 +1,17 @@
 <template>
   <v-layout full-height>
     <v-main dark >
-      
-      
-      <BIP ref="bipRef" v-show="activeScreen === 'BIP'" />
       <SNR ref="snrRef" v-show="activeScreen === 'SNR'" />
       <Editor v-show="activeScreen === 'Editor'" @addFlightObject="onCreateFlightObject" />
 
       <v-row class="py-3" style="position: fixed; bottom: 0; left: 0; right: 0;">
-        <v-col></v-col>
-        <v-col class="d-flex justify-center">
+        <v-col class="d-flex justify-start">
           <v-btn-toggle v-model="activeScreen" mandatory column>
-            <v-btn value="BIP">БИП</v-btn>
             <v-btn value="SNR">СНР</v-btn>
             <v-btn value="Editor">Редактор</v-btn>
           </v-btn-toggle>
         </v-col>
+        <v-spacer />
         <v-col class="d-flex justify-end">
           <v-btn-toggle mandatory :model-value="acceleration" @update:model-value="setAcceleration">
             <v-btn :value="1">1X</v-btn>
@@ -31,7 +27,6 @@
 
 <script setup lang="ts">
 import { ref } from 'vue'
-import BIP from '@/components/BIP.vue'
 import SNR from '@/components/SNR.vue';
 import Editor from '@/components/Editor.vue'
 import type FlightObject from './classes/FlightObject';
@@ -49,11 +44,9 @@ const setAcceleration = (value: number) => {
   (window as any).__ACCELERATION__ = value;
 }
 
-const bipRef = ref<InstanceType<typeof BIP> | null>(null);
 const snrRef = ref<InstanceType<typeof SNR> | null>(null);
 function onCreateFlightObject(flightObject: FlightObject) {
   flightObject.launch()
-  bipRef.value!.addFlightObject(flightObject);
   snrRef.value?.addFlightObject(flightObject);
 
 }

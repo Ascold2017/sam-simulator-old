@@ -147,9 +147,13 @@ export default class Editor {
   addFlightMission() {
     this.points[this.points.length - 1].z = 0;
     this.flightMissions.push({
-      points: [...this.points],
+      points: [
+        ...this.points.map((p) => ({ x: p.x, y: p.y, z: +p.z, v: +p.v })),
+      ],
       rcs: this._rcs,
-      identifier: `----Flight object ${this.flightMissions.length + 1} -${Date.now()}----`,
+      identifier: `----Flight object ${
+        this.flightMissions.length + 1
+      } -${Date.now()}----`,
       time: this._timeOffset,
     });
 
@@ -169,14 +173,14 @@ export default class Editor {
     let flightMissions = [...this.flightMissions];
     this.clear();
     let currentTimeOffset = 0;
-    let timer = 0
+    let timer = 0;
     this.startingInterval = setInterval(() => {
       const acc = (window as any).__ACCELERATION__;
       const tt = +new Date() - startTime;
       const dt = (tt - timer) * acc;
       currentTimeOffset += dt;
       timer = tt;
-      
+
       flightMissions = flightMissions.filter((fm) => {
         if (currentTimeOffset / 1000 >= fm.time) {
           const flightObject = new FlightObject({

@@ -1,13 +1,16 @@
 <template>
   <v-container fluid class="px-6">
-    <!-- TOP PANEL -->
-    <v-card class="mb-6 py-3 px-3 mx-auto" max-width="1900">
-      <v-row>
-        <v-col cols="4" class="d-flex">
-          <div>
+    <!-- MIDDLE PANEL -->
+    <div class="mx-auto">
+      <v-row align="start">
+        <v-col cols="3">
+
+          <v-card class="px-3 py-3">
+
             <div class="mb-3">
               <span class="v-label" style="width: 70px">Питание</span>
-              <v-icon :color="params.isEnabled ? 'success' : 'warning'" class="mx-3">mdi-checkbox-blank-circle</v-icon>
+              <v-icon :color="params.isEnabled ? 'success' : 'warning'" class="mx-3">mdi-checkbox-blank-circle
+              </v-icon>
               <v-btn-toggle density="compact" :model-value="params.isEnabled" @update:model-value="setIsEnabled" divided
                 mandatory variant="outlined">
                 <v-btn size="x-small" :value="true">Вкл</v-btn>
@@ -24,98 +27,81 @@
                 <v-btn size="x-small" :value="false">Выкл</v-btn>
               </v-btn-toggle>
             </div>
-            <div>
-              <span class="v-label" style="width: 70px">CНР</span>
-              <v-icon :color="params.isEnabledSNR ? 'success' : 'warning'" class="mx-3">mdi-checkbox-blank-circle
-              </v-icon>
-              <v-btn-toggle density="compact" :disabled="!params.isEnabled" mandatory :model-value="params.isEnabledSNR"
-                @update:model-value="setIsEnabledSNR" divided variant="outlined">
-                <v-btn size="x-small" :value="true">Вкл</v-btn>
-                <v-btn size="x-small" :value="false">Выкл</v-btn>
-              </v-btn-toggle>
-            </div>
-          </div>
-          <v-divider vertical class="mx-6" />
-          <v-radio-group label="Режим антенны" :model-value="rayWidth" @update:model-value="setRayWidth" hide-details
-            class="flex-grow-0">
-            <v-radio :value="16" label="Широкий луч"></v-radio>
-            <v-radio :value="3" label="Узкий луч"></v-radio>
-            <v-radio :value="1.5" label="Подсвет"></v-radio>
-          </v-radio-group>
-
-        </v-col>
-        <v-col cols="4" class="border" style="border-top: 0!important; border-bottom: 0!important;">
-          <canvas ref="targetParamsRef" width="600" height="120" class="mt-6"
-            style="display: block; max-width: 100%"></canvas>
-        </v-col>
-        <v-col cols="4" class="d-flex">
-          <v-radio-group label="Режим дальности СНР" :model-value="distanceScale" @update:model-value="setDistanceScale"
-            hide-details class="flex-grow-0">
-            <v-radio :value="1" label="100 km"></v-radio>
-            <v-radio :value="0.5" label="50 km"></v-radio>
-            <v-radio :value="0.3" label="30 km"></v-radio>
-          </v-radio-group>
-        </v-col>
-      </v-row>
-    </v-card>
-    <!-- MIDDLE PANEL -->
-    <div class="mb-6  mx-auto " max-width="1900">
-      <v-row>
-
-        <!-- AZIMUT-DISTANCE INDICATOR -->
-        <v-col cols="4" style="position: relative">
-          <v-card class="py-3 px-3">
-            <canvas ref="targetAzimutDistanceScreenRef" width="400" height="650" class="border mx-auto"
-              style="display: block; max-width: 100%"></canvas>
+            <v-radio-group density="compact" inline label="Режим дальности, км" :model-value="distanceScale"
+              @update:model-value="setDistanceScale" hide-details>
+              <v-radio :value="1" label="100"></v-radio>
+              <v-radio :value="0.5" label="50"></v-radio>
+              <v-radio :value="0.3" label="30"></v-radio>
+            </v-radio-group>
+            <v-radio-group density="compact" inline small label="Усиление" :model-value="gain"
+              @update:model-value="setGain" hide-details>
+              <v-radio :value="1" label="1"></v-radio>
+              <v-radio :value="2" label="2"></v-radio>
+              <v-radio :value="3" label="3"></v-radio>
+            </v-radio-group>
+             <v-radio-group label="Отображение" density="compact" small inline v-model="viewMode" hide-details>
+              <v-radio value="bip" label="БИП"></v-radio>
+              <v-radio value="radar" label="РЛС"></v-radio>
+            </v-radio-group>
           </v-card>
         </v-col>
-        <!-- SOC INDICATOR -->
-        <v-col cols="4" style="position: relative;">
+
+        <!-- MAIN INDICATOR -->
+        <v-col cols="6" style="position: relative;">
           <v-card class="py-3 px-3 mb-3">
-
-            <canvas ref="radarRef" width=650 height=650 class="mx-auto"
-              style="display: block; max-width: 100%;"></canvas>
-
-          </v-card>
-          <v-card class="px-3 py-3 mb-3 d-flex">
-            <div class="d-flex align-center" @click.right.prevent="resetCaptureTargetByAzimutElevation">
-              <v-icon :color="params.isCapturedByAzimut ? 'success' : 'warning'">mdi-checkbox-blank-circle</v-icon>
-              <span class="px-3">AC-Aзимут</span>
+           
+            <canvas v-show="viewMode === 'bip'" ref="bipRef" width="1000" height="1000" class="map-image border"
+              style="background-size: contain; display: block; max-width: 100%;"></canvas>
+            <div style="position: relative" v-show="viewMode === 'radar'">
+              <canvas ref="radarRef" width=850 height=850 class="mx-auto mb-3"
+                style="display: block; max-width: 100%;"></canvas>
             </div>
-            <div class="d-flex align-center" @click.right.prevent="resetCaptureTargetByAzimutElevation">
-
-              <v-icon :color="params.isCapturedByElevation ? 'success' : 'warning'">mdi-checkbox-blank-circle</v-icon>
-              <span class="px-3">AC-Угол</span>
-            </div>
-            <div class="d-flex align-center" @click.right.prevent="resetCaptureTargetByDistance">
-
-              <v-icon :color="params.isCapturedByDistance ? 'success' : 'warning'">mdi-checkbox-blank-circle</v-icon>
-              <span class="px-3">AC-Дистанция</span>
-            </div>
-          </v-card>
-          <v-card class="px-3 py-3 d-flex align-center flex-nowrap">
-            <div class="mx-3" v-for="missile in missiles">
-              <div class="text-center">{{ missile.id + 1 }}</div>
-              <v-icon :color="missile.isLaunched || !params.isEnabled ? 'warning' : 'success'">
-                mdi-checkbox-blank-circle</v-icon>
-            </div>
-
-            <v-divider vertical class="ml-3 mr-6" />
-            <v-btn color="error" @click="launchMissile">Пуск
-            </v-btn>
           </v-card>
         </v-col>
-        <!-- ELEVATION-DISTANCE INDICATOR -->
-        <v-col cols="4" class="d-flex flex-column">
-          <v-card class="px-3 py-3 ">
-            <canvas ref="targetElevationDistanceScreenRef" width="400" height="650" class="border mx-auto"
-              style="display: block; max-width: 100%"></canvas>
 
+        <v-col cols="3">
+          <v-card class="px-3 py-3">
+            <div>
+              <v-table density="compact">
+                <thead>
+                  <th class="text-left pl-4">ID</th>
+                  <th class="text-left pl-4">Д, км</th>
+                  <th class="text-left pl-4">P, км</th>
+                  <th class="text-left pl-4">H, км</th>
+                  <th class="text-left pl-4">V, км</th>
+                  <th class="text-left pl-4">Выбор</th>
+                </thead>
+                <tbody>
+                  <tr v-for="capturedTarget in params.capturedTargets">
+                    <td>{{ capturedTarget.number }}</td>
+                    <td>{{ capturedTarget.distance }}</td>
+                    <td>{{ capturedTarget.param }}</td>
+                    <td>{{ capturedTarget.height }}</td>
+                    <td>{{ capturedTarget.velocity }}</td>
+                    <td>{{ capturedTarget.radialVelocity }}</td>
+                    <td>
+                      <v-radio v-show="capturedTarget.identifier" :value="capturedTarget.identifier"
+                        v-model="targetToFire" />
+                    </td>
+                  </tr>
+                </tbody>
+              </v-table>
+              <div class="flex-grow-0">
+                <v-row class="mx-0 mb-6">
+                  <v-col cols="4" v-for="(launcher, i) in launchers"
+                    class="d-flex flex-column align-center text-center">
+                    <span>ПУ-{{ launcher.id }}</span>
+                    <v-radio :value="launcher.id" v-model="selectedLauncher" />
+
+                    <v-icon :color="missile.isLaunched || !params.isEnabled ? 'warning' : 'success'"
+                      v-for="missile in launcher.missiles">
+                      mdi-checkbox-blank-circle</v-icon>
+                  </v-col>
+                </v-row>
+                <v-btn block color="error" @click="launchMissile" :disabled="!targetToFire">Пуск</v-btn>
+              </div>
+            </div>
           </v-card>
-
-
-
-
         </v-col>
       </v-row>
     </div>
@@ -124,12 +110,16 @@
 
 <script setup lang="ts">
 import SAMissile from '@/classes/SAMissile';
-
+import Bip from "@/classes/Bip";
 import SAM from '@/classes/SAM';
-import SNRTargetParamsScreen from '@/classes/SNRTargetParamsScreen';
 import { onMounted, ref, reactive, computed } from 'vue';
 import type FlightObject from '@/classes/FlightObject';
 import Sounds from '@/classes/Sounds.js';
+interface IParams {
+  capturedTargets: any[];
+  isEnabled: boolean;
+  isEnabledSOC: boolean
+}
 interface IMissileParams {
   id: number;
   isLaunched: boolean;
@@ -145,111 +135,145 @@ const initialParams = {
   maxVerticalAngle: 75,
   missileVelocity: 900,
   missileMaxDistance: 25,
-  distanceDetectRange: 0.5,
+  distanceDetectRange: 1,
+  azimutDetectRange: 1,
   initialRayWidth: 16,
 }
-
-const targetAzimutDistanceScreenRef = ref<HTMLCanvasElement | null>(null);
-const targetElevationDistanceScreenRef = ref<HTMLCanvasElement | null>(null);
+const bipRef = ref<HTMLCanvasElement | null>(null);
 const radarRef = ref<HTMLCanvasElement | null>(null);
-const targetParamsRef = ref<HTMLCanvasElement | null>(null);
 const sam = ref<SAM | null>(null);
-const snrTargetParamsScreen = ref<SNRTargetParamsScreen | null>(null);
+const bip = ref<Bip | null>(null);
 
-const params = reactive<Record<string, boolean | number>>({
-  isCapturedByAzimut: false,
-  isCapturedByElevation: false,
-  isCapturedByDistance: false,
+const viewMode = ref<string>('bip')
+const targetToFire = ref<string | null>(null);
+const selectedLauncher = ref<number>(1);
+const params = reactive<IParams>({
+  capturedTargets: Array(12).fill(0).map((_, i) => ({
+    identifier: null,
+    number: '--',
+    distance: '--.-',
+    height: '--.-',
+    velocity: '---',
+    radialVelocity: '---',
+    param: '--.--'
+  })),
   isEnabled: false,
-  isEnabledSOC: false,
-  isEnabledSNR: false
-})
+  isEnabledSOC: false
+});
 
-const missiles = ref<IMissileParams[]>(Array(6).fill(0).map((_, i) => ({ id: i, isLaunched: false, velocity: 900, maxDistance: 25, initialPoint: { x: 0, y: 0, z: 0.03 } })))
+const launchers = ref([
+  {
+    id: 1,
+    missiles: Array(4)
+      .fill(0)
+      .map((_, i) => ({
+        id: i,
+        isLaunched: false,
+        velocity: 900,
+        maxDistance: 25,
+        initialPoint: { x: 2, y: 0, z: 0.03 }
+      }))
+  },
+  {
+    id: 2,
+    missiles: Array(4)
+      .fill(0)
+      .map((_, i) => ({
+        id: i,
+        isLaunched: false,
+        velocity: 900,
+        maxDistance: 25,
+        initialPoint: { x: -2, y: 0, z: 0.03 }
+      }))
+  },
+  {
+    id: 3,
+    missiles: Array(4)
+      .fill(0)
+      .map((_, i) => ({
+        id: i,
+        isLaunched: false,
+        velocity: 900,
+        maxDistance: 25,
+        initialPoint: { x: 2, y: 2, z: 0.03 }
+      }))
+  },
+]);
 
-let rayWidth = computed(() => sam.value?.radarRayWidth)
+
 let distanceScale = computed(() => sam.value?.distanceScale);
+const gain = computed(() => sam.value?.gain)
 
-const setRayWidth = (v: number) => sam.value!.setRadarRayWidth(v);
-const resetCaptureTargetByAzimutElevation = () => sam.value?.resetCaptureTargetByDirection();
-const resetCaptureTargetByDistance = () => sam.value?.resetCaptureTargetByDistance();
 const setDistanceScale = (v: number) => sam.value?.setDistanceScale(v);
+const setGain = (v: number) => sam.value?.setGain(v)
 
 const setIsEnabled = (value: boolean) => sam.value?.setIsEnabled(value)
-const setIsEnabledSNR = (value: boolean) => sam.value?.setIsEnabledSNR(value)
 
 const setIsEnabledSOC = (value: boolean) => sam.value?.setIsEnabledSOC(value)
 
+const refillCapturedTargets = (capturedTargets: any[]) => {
+  params.capturedTargets = [...capturedTargets].concat(Array(12 - capturedTargets.length).fill(0).map((_, i) => ({
+    identifier: null,
+    number: '--',
+    distance: '--.-',
+    height: '--.-',
+    velocity: '---',
+    radialVelocity: '---',
+    param: '--.--'
+  })))
+}
 
-function SNRListener(property: string, value: number | boolean) {
-  property === 'isCapturedByAzimut' && (params.isCapturedByAzimut = value)
-  property === 'isCapturedByElevation' && (params.isCapturedByElevation = value)
-  property === 'isCapturedByDistance' && (params.isCapturedByDistance = value)
-  property === 'isEnabled' && (params.isEnabled = value)
-  property === 'isEnabledSNR' && (params.isEnabledSNR = value)
-  property === 'isEnabledSOC' && (params.isEnabledSOC = value)
-  property === 'targetHeight' && snrTargetParamsScreen.value?.setParam('targetHeight', value as number)
-  property === 'targetVelocity' && snrTargetParamsScreen.value?.setParam('targetVelocity', value as number)
-  property === 'targetParam' && snrTargetParamsScreen.value?.setParam('targetParam', value as number)
+
+function SNRListener(property: string, value: number | boolean | any[]) {
+  property === 'capturedTargets' && refillCapturedTargets(params.capturedTargets = value as any[])
+  property === 'isEnabled' && (params.isEnabled = value as boolean)
+  property === 'isEnabledSOC' && (params.isEnabledSOC = value as boolean)
 }
 
 function launchMissile() {
-  const missileParams = missiles.value.find(m => !m.isLaunched);
+  const launcher = launchers.value.find(l => l.id === selectedLauncher.value)!
+  const missileParams = launcher.missiles.find(m => !m.isLaunched);
+  console.log(missileParams)
   if (!missileParams) return;
-  if (sam.value!.trackedTarget) {
-    const missile = new SAMissile(sam.value!.trackedTarget as FlightObject, missileParams.maxDistance, missileParams.velocity, missileParams.initialPoint)
-    missile.launch();
-    missiles.value = missiles.value.map(m => m.id === missileParams.id ? { ...m, isLaunched: true } : m)
-    sam.value!.addMissile(missile);
-    Sounds.click();
-  }
+
+  const missile = new SAMissile(sam.value!.getTracketTarget(targetToFire.value!), missileParams.maxDistance, missileParams.velocity, missileParams.initialPoint)
+  missile.launch();
+  launcher.missiles = launcher.missiles.map(m => m.id === missileParams.id ? { ...m, isLaunched: true } : m)
+  sam.value!.addMissile(missile);
+  Sounds.click();
+
+
 }
 
 function addFlightObject(flightObject: FlightObject) {
   sam.value?.addFlightObject(flightObject);
+  bip.value?.addFlightObject(flightObject);
 }
 
 onMounted(() => {
-
-  snrTargetParamsScreen.value = new SNRTargetParamsScreen({ indicatorsCanvas: targetParamsRef.value!, maxHeight: 15, maxVelocity: 900, killZoneDistance: initialParams.missileMaxDistance });
+  bip.value = new Bip({
+    canvasBip: bipRef.value!
+  });
   sam.value = new SAM({
-    azimutDistanceScreenCanvas: targetAzimutDistanceScreenRef.value!,
-    elevationDistanceScreenCanvas: targetElevationDistanceScreenRef.value!,
-    socScreenCanvas: radarRef.value!,
+    mainScreenCanvas: radarRef.value!,
     eventListener: SNRListener,
     distanceDetectRange: initialParams.distanceDetectRange,
+    azimutDetectRange: initialParams.azimutDetectRange,
     initialDistance: initialParams.initialDistance,
     initialRayWidth: initialParams.initialRayWidth,
     maxDistance: initialParams.maxDistance,
     missileVelocity: initialParams.missileVelocity,
     minVerticalAngle: initialParams.minVerticalAngle,
-    maxVerticalAngle: initialParams.maxVerticalAngle
+    maxVerticalAngle: initialParams.maxVerticalAngle,
+    scale: initialParams.initialScale
   });
   window.addEventListener('keydown', (event: KeyboardEvent) => {
     const map: Record<string, () => void> = {
-      'KeyA': () => {
-        if (event.shiftKey) {
-          sam.value?.setAzimut(sam.value.azimutDeg - 0.5)
-        } else {
-          sam.value?.setAzimut(sam.value.azimutDeg - 0.05)
-        }
-      },
-      'KeyD': () => {
-        if (event.shiftKey) {
-          sam.value?.setAzimut(sam.value.azimutDeg + 0.5)
-        } else {
-          sam.value?.setAzimut(sam.value.azimutDeg + 0.05)
-        }
-      },
-      'KeyW': () => sam.value?.setVerticalAngle(sam.value.verticalAngleDeg + 0.05),
-      'KeyS': () => sam.value?.setVerticalAngle(sam.value.verticalAngleDeg - 0.05),
-      'Space': () => {
-        sam.value?.captureTargetByAzimut()
-        sam.value?.captureTargetByElevation()
-        sam.value?.captureTargetByDistance()
-      },
-      'KeyQ': () => sam.value?.setIndicatorTargetDistance(sam.value.indicatorTargetDistance - 0.2),
-      'KeyE': () => sam.value?.setIndicatorTargetDistance(sam.value.indicatorTargetDistance + 0.2),
+      'KeyA': () => sam.value?.setAzimut(sam.value.azimutDeg - 0.5),
+      'KeyD': () => sam.value?.setAzimut(sam.value.azimutDeg + 0.5),
+      'KeyW': () => sam.value?.setIndicatorTargetDistance(sam.value.indicatorTargetDistance + 0.4),
+      'KeyS': () => sam.value?.setIndicatorTargetDistance(sam.value.indicatorTargetDistance - 0.4),
+      'Space': () => sam.value?.captureTarget()
     }
     map[event.code] && map[event.code]();
   }, false)
