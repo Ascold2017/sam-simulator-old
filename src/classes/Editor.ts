@@ -1,9 +1,4 @@
 import FlightObject from "./FlightObject";
-const defaultParams = {
-  altitude: 0.5,
-  velocity: 280,
-  time: 0,
-};
 interface IPoint {
   x: number;
   y: number;
@@ -15,16 +10,17 @@ interface IFlightMission {
   rcs: number;
   time: number;
   identifier: string;
+  flightObjectTypeId: number;
 }
 export default class Editor {
   private ctx: CanvasRenderingContext2D | null = null;
   private canvasCenter = { x: 0, y: 0 };
-  private scale = 2;
+  private scale = 1.25;
   private _points: IPoint[] = [];
-  private _rcs: number = 0.5;
   private _timeOffset: number = 0;
-  private flightMissions: IFlightMission[] = [];
+  private _flightMissions: IFlightMission[] = [];
   private startingInterval: number | null = null;
+  private flightObjectTypeId: number | null = null;
 
   constructor(canvasElement: HTMLCanvasElement) {
     this.ctx = canvasElement.getContext("2d");
@@ -33,6 +29,74 @@ export default class Editor {
       y: this.ctx!.canvas.height / 2,
     };
     this._drawSite();
+  }
+
+  static get flightObjectTypes() {
+    return [
+      {
+        id: 1,
+        name: "Су-25",
+        rcs: 10,
+        maxVelocity: 208,
+        altitude: () => Math.floor(Math.random() * 0.02) + 0.5, // From 20 m to 500 m
+      },
+      {
+        id: 2,
+        name: "Су-34/35",
+        rcs: 1,
+        maxVelocity: 600,
+        altitude: () => Math.floor(Math.random() * 0.05) + 5, // From 50 m to 5000 m
+      },
+      {
+        id: 3,
+        name: "МиГ-29",
+        rcs: 4,
+        maxVelocity: 600,
+        altitude: () => Math.floor(Math.random() * 0.5) + 5, // From 500 m to 5000 m
+      },
+      {
+        id: 4,
+        name: "Чайка (птица)",
+        rcs: 0.01,
+        maxVelocity: 13.9,
+        altitude: () => Math.floor(Math.random() * 0.005) + 0.5, // From 5 m to 500 m
+      },
+      {
+        id: 5,
+        name: "X-101",
+        rcs: 0.01,
+        maxVelocity: 200,
+        altitude: () => Math.floor(Math.random() * 0.025) + 0.05, // From 25 m to 50 m
+      },
+      {
+        id: 6,
+        name: "П-800 Оникс",
+        rcs: 0.3,
+        maxVelocity: 680,
+        altitude: () => Math.floor(Math.random() * 0.01) + 0.015, // From 10 m to 15 m
+      },
+      {
+        id: 7,
+        name: "X-555",
+        rcs: 0.5,
+        maxVelocity: 200,
+        altitude: () => Math.floor(Math.random() * 0.03) + 0.05, // From 30 m to 50 m
+      },
+      {
+        id: 8,
+        name: "ОТРК Точка-У",
+        rcs: 1.5,
+        maxVelocity: 1100,
+        altitude: () => Math.floor(Math.random() * 6) + 26, // From 6000 m to 26000 m
+      },
+      {
+        id: 9,
+        name: "ОТРК Искандер",
+        rcs: 0.15,
+        maxVelocity: 2100,
+        altitude: () => Math.floor(Math.random() * 6) + 100, // From 6000 m to  100000 m
+      },
+    ];
   }
 
   _drawSite() {
@@ -54,6 +118,16 @@ export default class Editor {
     return this._points;
   }
 
+  get flightObjectType() {
+    return Editor.flightObjectTypes.find((fo) =>
+      fo.id === this.flightObjectTypeId
+    )!;
+  }
+
+  setFlightObjectType(id: number) {
+    this.flightObjectTypeId = id;
+  }
+
   setParamAtPoint(index: number, paramName: string, paramValue: number) {
     this._points = this._points.map((point, i) => {
       if (i === index) {
@@ -61,14 +135,6 @@ export default class Editor {
       }
       return point;
     });
-  }
-
-  get rcs(): number {
-    return this._rcs;
-  }
-
-  set rcs(value: number) {
-    this._rcs = value;
   }
 
   get timeOffset(): number {
@@ -94,14 +160,22 @@ export default class Editor {
     return { range: range.toFixed(1), time: time.toFixed(1) };
   }
 
+  get flightObjectMissions() {
+    return this._flightMissions.map((fm) => ({
+      id: fm.identifier,
+      startFrom: fm.time,
+      flightObjectTypeId: fm.flightObjectTypeId,
+    }));
+  }
+
   addPoint(event: MouseEvent) {
     if (!this.ctx) return;
     const canvasPoint = { x: event.offsetX, y: event.offsetY };
     const currentPoint = {
       x: (canvasPoint.x - this.canvasCenter.x) / this.scale,
       y: (canvasPoint.y - this.canvasCenter.y) / this.scale,
-      z: defaultParams.altitude,
-      v: defaultParams.velocity,
+      z: this.flightObjectType.altitude(),
+      v: this.flightObjectType.maxVelocity,
     };
     const prevPoint = this._points.length
       ? this._points[this._points.length - 1]
@@ -126,12 +200,12 @@ export default class Editor {
 
   reset() {
     this._points = [];
-    this._rcs = 0.5;
+    this.flightObjectTypeId = null;
     this._timeOffset = 0;
   }
 
   clear() {
-    this.flightMissions = [];
+    this._flightMissions = [];
     this.startingInterval && clearInterval(this.startingInterval);
     this.startingInterval = null;
     this.reset();
@@ -146,13 +220,14 @@ export default class Editor {
 
   addFlightMission() {
     this.points[this.points.length - 1].z = 0;
-    this.flightMissions.push({
+    this._flightMissions.push({
+      flightObjectTypeId: this.flightObjectTypeId!,
       points: [
         ...this.points.map((p) => ({ x: p.x, y: p.y, z: +p.z, v: +p.v })),
       ],
-      rcs: this._rcs,
+      rcs: this.flightObjectType.rcs,
       identifier: `----Flight object ${
-        this.flightMissions.length + 1
+        this._flightMissions.length + 1
       } -${Date.now()}----`,
       time: this._timeOffset,
     });
@@ -161,16 +236,32 @@ export default class Editor {
   }
 
   exportFlightMissions() {
-    console.log(btoa(JSON.stringify(this.flightMissions)));
+    const element = document.createElement("a");
+    element.setAttribute(
+      "href",
+      "data:text/plain;base64," +
+        encodeURIComponent(btoa(JSON.stringify(this._flightMissions))),
+    );
+    element.setAttribute("download", "SAM-Mission.mission");
+
+    element.style.display = "none";
+    document.body.appendChild(element);
+
+    element.click();
+
+    document.body.removeChild(element);
   }
-  importFlightMissions(string: string) {
-    if (!string.length) return;
-    this.flightMissions = JSON.parse(atob(string));
+  importFlightMissions(file: File) {
+    const reader = new FileReader();
+    reader.onload = () => {
+      this._flightMissions = JSON.parse(reader.result as string);
+    };
+    reader.readAsText(file);
   }
 
   startFlightMissions(listener: (arg0: FlightObject) => void) {
     const startTime = Date.now();
-    let flightMissions = [...this.flightMissions];
+    let flightMissions = [...this._flightMissions];
     this.clear();
     let currentTimeOffset = 0;
     let timer = 0;
