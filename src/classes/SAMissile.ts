@@ -5,9 +5,9 @@ export default class SAMissile {
   private _identifier: string | null = null;
   private targetObject: FlightObject | null = null;
   private maxDistance: number = 0;
-  private velocity: number = 0;
+  private _velocity: number = 0;
   private interval: number | null = null;
-  currentPoint: { x: number; y: number; z: number } = {
+  private currentPoint: { x: number; y: number; z: number } = {
     x: 0,
     y: 0,
     z: 0,
@@ -26,12 +26,16 @@ export default class SAMissile {
     this._identifier = new Date().toString();
     this.targetObject = targetObject;
     this.maxDistance = maxDistance;
-    this.velocity = velocity;
+    this._velocity = velocity;
     this.currentPoint = initialPoint;
   }
 
-  get indentifier() {
+  get identifier() {
     return this._identifier;
+  }
+
+  get velocity() {
+    return this._velocity
   }
 
   public get isDestroyedMissile() {
@@ -50,7 +54,7 @@ export default class SAMissile {
     // Запускаем рассчет текущей позиции ракеты
     this.interval = setInterval(() => {
       if (!this.targetObject) return;
-      const vectorVelocity = Math.abs(Math.cos(this.currentRotation)) * this.velocity;
+      const vectorVelocity = Math.abs(Math.cos(this.currentRotation)) * this._velocity;
       // Время в воздухе с прошлого тика
       const acc = (window as any).__ACCELERATION__;
       const tt = +new Date() - this.launchTime;

@@ -1,10 +1,10 @@
 <template>
   <v-layout full-height>
     <v-main dark>
-      <SNR ref="snrRef" v-show="activeScreen === 'SNR'" />
-      <Editor v-show="activeScreen === 'Editor'" @addFlightObject="onCreateFlightObject" />
+      <SNR v-show="activeScreen === 'SNR'" />
+      <Editor v-show="activeScreen === 'Editor'" />
 
-      <AppMenu :missions="missions" @open-screen="openScreen" />
+      <AppMenu :missions="missions" @open-screen="openScreen" @load-mission="" />
     </v-main>
   </v-layout>
 </template>
@@ -14,7 +14,6 @@ import { ref } from 'vue'
 import AppMenu from '@/components/AppMenu.vue'
 import SNR from '@/components/SNR.vue';
 import Editor from '@/components/Editor.vue'
-import type FlightObject from './classes/FlightObject';
 
 enum ScreensEnum {
   BIP = 'BIP',
@@ -26,13 +25,6 @@ const missions: never[] = []
 
 const activeScreen = ref(ScreensEnum.SNR);
 const openScreen = (screen: string) => activeScreen.value = screen as ScreensEnum;
-
-const snrRef = ref<InstanceType<typeof SNR> | null>(null);
-function onCreateFlightObject(flightObject: FlightObject) {
-  flightObject.launch()
-  snrRef.value?.addFlightObject(flightObject);
-
-}
 </script>
 
 <style>

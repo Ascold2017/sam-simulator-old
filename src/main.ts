@@ -5,6 +5,10 @@ import App from "./App.vue";
 
 import { createVuetify } from "vuetify";
 import * as components from 'vuetify/components'
+import mitt from 'mitt'
+import SAM from "./classes/SAM2";
+
+const bus = mitt();
 (window as any).__ACCELERATION__ = 1;
 const vuetify = createVuetify({
   components,
@@ -14,4 +18,6 @@ const vuetify = createVuetify({
 });
 const app = createApp(App);
 app.use(vuetify);
+app.provide('samEventBus', bus)
+app.provide('sam', new SAM((e: any) => bus.emit('update', e)))
 app.mount("#app");

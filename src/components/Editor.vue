@@ -85,15 +85,13 @@
 
 <script setup lang="ts">
 import Editor from '@/classes/Editor';
-import type FlightObject from '@/classes/FlightObject';
+import type SAM from '@/classes/SAM2';
 import { computed } from '@vue/reactivity';
-import { onMounted, ref } from 'vue';
+import { onMounted, ref, inject } from 'vue';
 
-const flightObjectTypes = Editor.flightObjectTypes;
-
-const emit = defineEmits<{ (e: 'addFlightObject', flightObject: FlightObject): void }>()
+const sam = inject<SAM>('sam')
 const editorRef = ref<HTMLCanvasElement | null>(null);
-
+const flightObjectTypes = Editor.flightObjectTypes;
 
 const editor = ref<Editor | null>(null);
 onMounted(() => {
@@ -136,7 +134,10 @@ const importFlightMissions = (e: Event) => {
   editor.value?.importFlightMissions(file);
 }
 const startFlightMissions = () => {
-  editor.value?.startFlightMissions(flightObject => emit('addFlightObject', flightObject))
+  editor.value?.startFlightMissions(flightObject => {
+    flightObject.launch()
+    sam?.addFlightObject(flightObject)
+  });
 }
 function addFlightMission() {
   if (points.value.length < 2) return

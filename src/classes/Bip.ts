@@ -2,11 +2,6 @@ import type FlightObject from "./FlightObject";
 interface IBip {
   canvasBip: HTMLCanvasElement;
 }
-interface IRect {
-  i: number;
-  j: number;
-  flightObjectIdentifiers: string[];
-}
 export default class Bip {
   private flightObjects: FlightObject[] = [];
   private scale = 2;
@@ -161,8 +156,6 @@ export default class Bip {
   }
 
   private drawFlightObjectStartPoint(flightObject: FlightObject) {
-    const i = Math.round(flightObject.currentPoint.x / 50) + 5;
-    const j = Math.round(flightObject.currentPoint.y / 50) + 5;
     const currentCanvasPoint = this.getCanvasCoordinates(
       flightObject.currentPoint,
     );
