@@ -4,24 +4,14 @@
       <SNR ref="snrRef" v-show="activeScreen === 'SNR'" />
       <Editor v-show="activeScreen === 'Editor'" @addFlightObject="onCreateFlightObject" />
 
-      <v-btn-toggle v-model="activeScreen" mandatory column style="position: fixed; bottom: 0; left: 0;">
-        <v-btn value="SNR">СНР</v-btn>
-        <v-btn value="Editor">Редактор</v-btn>
-      </v-btn-toggle>
-
-      <v-btn-toggle mandatory :model-value="acceleration" @update:model-value="setAcceleration"
-        style="position: fixed; bottom: 0; right: 0;">
-        <v-btn :value="1">1X</v-btn>
-        <v-btn :value="2">2X</v-btn>
-        <v-btn :value="4">4X</v-btn>
-        <v-btn :value="8">8X</v-btn>
-      </v-btn-toggle>
+      <AppMenu :missions="missions" @open-screen="openScreen" />
     </v-main>
   </v-layout>
 </template>
 
 <script setup lang="ts">
 import { ref } from 'vue'
+import AppMenu from '@/components/AppMenu.vue'
 import SNR from '@/components/SNR.vue';
 import Editor from '@/components/Editor.vue'
 import type FlightObject from './classes/FlightObject';
@@ -32,12 +22,10 @@ enum ScreensEnum {
   Editor = 'Editor'
 }
 
+const missions: never[] = []
+
 const activeScreen = ref(ScreensEnum.SNR);
-const acceleration = ref((window as any).__ACCELERATION__ as number);
-const setAcceleration = (value: number) => {
-  acceleration.value = value;
-  (window as any).__ACCELERATION__ = value;
-}
+const openScreen = (screen: string) => activeScreen.value = screen as ScreensEnum;
 
 const snrRef = ref<InstanceType<typeof SNR> | null>(null);
 function onCreateFlightObject(flightObject: FlightObject) {
