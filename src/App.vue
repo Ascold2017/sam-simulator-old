@@ -1,7 +1,7 @@
 <template>
   <v-layout full-height>
     <v-main dark>
-      <SNR v-show="activeScreen === 'SNR'" />
+      <SAM v-show="activeScreen === 'SAM'" />
       <Editor v-show="activeScreen === 'Editor'" />
 
       <AppMenu :missions="missions" @open-screen="openScreen" @load-mission="" />
@@ -12,18 +12,18 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import AppMenu from '@/components/AppMenu.vue'
-import SNR from '@/components/SNR.vue';
+import SAM from '@/components/SAM.vue';
 import Editor from '@/components/Editor.vue'
 
 enum ScreensEnum {
   BIP = 'BIP',
-  SNR = 'SNR',
+  SAM = 'SAM',
   Editor = 'Editor'
 }
 
 const missions: never[] = []
 
-const activeScreen = ref(ScreensEnum.SNR);
+const activeScreen = ref(ScreensEnum.SAM);
 const openScreen = (screen: string) => activeScreen.value = screen as ScreensEnum;
 </script>
 
