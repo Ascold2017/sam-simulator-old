@@ -85,7 +85,7 @@
 
 <script setup lang="ts">
 import Editor from '@/classes/Editor';
-import type SAM from '@/classes/SAM2';
+import type SAM from '@/classes/SAM';
 import { computed } from '@vue/reactivity';
 import { onMounted, ref, inject } from 'vue';
 

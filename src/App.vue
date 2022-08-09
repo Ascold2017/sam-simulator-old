@@ -12,7 +12,7 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import AppMenu from '@/components/AppMenu.vue'
-import SAM from '@/components/SAM.vue';
+import SAM from '@/components/SAM/SAM.vue';
 import Editor from '@/components/Editor.vue'
 
 enum ScreensEnum {
