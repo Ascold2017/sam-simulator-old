@@ -17,18 +17,20 @@
       name: 'display',
       x: 20,
       y: 20,
-      width: 500,
+      width: 510,
       height: 500,
       fill: isEnabled ? 'rgb(15, 33, 19)' : 'black',
     }" />
 
-    <SAMButton :x="530" :y="20" name="scale50km" label="50 км" :value="scale === 50" @click="scale = 50" />
-    <SAMButton :x="530" :y="85" name="scale30km" label="30 км" :value="scale === 30" @click="scale = 30" />
-    <SAMButton :x="530" :y="150" name="scale15km" label="15 км" :value="scale === 15" @click="scale = 15" />
+    <SAMButton :x="540" :y="20" name="scale50km" label="50 км" :value="scale === 50" @click="scale = 50" />
+    <SAMButton :x="540" :y="85" name="scale30km" label="30 км" :value="scale === 30" @click="scale = 30" />
+    <SAMButton :x="540" :y="150" name="scale15km" label="15 км" :value="scale === 15" @click="scale = 15" />
+
+    <SAMButton :x="540" :y="250" name="asc" label="АСЦ" :value="false" />
 
 
     <v-text :config="{
-      x: 530,
+      x: 540,
       y: 330,
       width: 60,
       text: 'β',
@@ -40,7 +42,7 @@
     }" />
     <v-circle :config="{
       name: 'captureIndicator',
-      x: 560,
+      x: 570,
       y: 370,
       width: 20,
       height: 20,
@@ -48,8 +50,8 @@
       shadowBlur: 5
     }" />
 
-    <SAMButton :x="530" :y="395" name="capture" :value="isCaptured" @click="isCaptured = true" label="АС" />
-    <SAMButton :x="530" :y="460" name="resetCapture" :value="!isCaptured" @click="isCaptured = false" label="Сброс" />
+    <SAMButton :x="540" :y="395" name="capture" :value="isCaptured" @click="isCaptured = true" label="АС" />
+    <SAMButton :x="540" :y="460" name="resetCapture" :value="!isCaptured" @click="isCaptured = false" label="Сброс" />
   </v-group>
 </template>
 

@@ -99,8 +99,8 @@
         fontSize: 12,
         verticalAlign: 'middle'
       }" />
-      <SAMButton :x="95" :y="80" name="detonatorAuto" label="Авто" :value="false" small />
-      <SAMButton :x="140" :y="80" name="detonator2Sec" label="2 сек" :value="false" small />
+      <SAMButton :x="95" :y="80" name="detonatorAuto" label="Авто" :value="detonatorMode === 'auto'" @click="detonatorMode = 'auto'" small />
+      <SAMButton :x="140" :y="80" name="detonator2Sec" label="2 сек" :value="detonatorMode === '2sec'" @click="detonatorMode = '2sec'" small />
     </v-group>
   </v-group>
 </template>
@@ -109,4 +109,5 @@
 import { ref } from "vue";
 import SAMButton from "./SAMButton.vue";
 const currentMissile = ref<number | null>(null);
+const detonatorMode = ref('auto')
 </script>

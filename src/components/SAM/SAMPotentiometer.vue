@@ -16,7 +16,9 @@
       numPoints: 30,
       fill: '#222222',
       shadowBlur: 15,
-    }" />
+      rotation
+      
+    }" @wheel="onWheel"/>
     <v-text :config="{
       x: -3,
       y: props.small ? 34 : 43,
@@ -41,5 +43,13 @@
 </template>
 
 <script setup lang="ts">
+import Sounds from '@/classes/Sounds'
+import { ref } from 'vue';
 const props = defineProps<{ x: number; y: number; small?: boolean; }>();
+const rotation = ref(0)
+const onWheel = ({ evt }: { evt: WheelEvent }) => {
+  const delta = evt.deltaY < 0 ? 1 : -1;
+  Sounds.rotateClick()
+  rotation.value += delta*2
+}
 </script>
