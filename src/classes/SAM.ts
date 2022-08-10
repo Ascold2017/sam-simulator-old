@@ -1,14 +1,19 @@
 import type FlightObject from "./FlightObject";
 import type SAMissile from "./SAMissile";
 
-const SAM_PARAMS = {
+export const SAM_PARAMS = {
   RADAR_HEIGHT: 0.025, // 25 meters
   MIN_ELEVATION: 0,
-  MAX_ELEVATION: 50 * (Math.PI / 180),
-  MAX_DISTANCE: 50, // 50 km
+  MAX_ELEVATION: 75 * (Math.PI / 180),
+  MAX_DISTANCE: 80, // 80 km
+  MIN_CAPTURE_RANGE: 5,
+  RADAR_AZIMUT_DETECT_ACCURACY: 0.2, // deg
+  RADAR_DISTANCE_DETECT_ACCURACY: 0.1,
+  RADAR_SPOT_AZIMUT_GAIN: 20,
+  RADAR_SPOT_DISTANCE_GAIN: 2
 };
 
-interface IRecognizedTargets {
+export interface IRecognizedTargets {
   distance: number;
   azimut: number;
   elevation: number;
@@ -22,12 +27,15 @@ interface IRecognizedTargets {
   size: number;
 }
 
-interface IFlightMissiles {
+export interface IFlightMissiles {
   x: number;
   y: number;
   z: number;
   velocity: number;
 }
+
+export interface IEventListenerPayload { targets: Record<string, IRecognizedTargets>, missiles: Record<string, IFlightMissiles> }
+type EventListener = (arg: IEventListenerPayload) => void;
 
 export default class SAM {
   private isEnabled = false;
@@ -38,7 +46,7 @@ export default class SAM {
   private recognizedTargets: Record<string, IRecognizedTargets> = {};
   private flightMissiles: Record<string, IFlightMissiles> = {};
 
-  constructor(eventListener: Function) {
+  constructor(eventListener: EventListener) {
     this.tick(eventListener);
   }
 
@@ -50,7 +58,7 @@ export default class SAM {
     this.flightObjects.push(flightObject);
   }
 
-  private tick(eventListener: Function) {
+  private tick(eventListener: EventListener) {
     setInterval(() => {
       if (this.isEnabled) {
         this.recalculateTargets();

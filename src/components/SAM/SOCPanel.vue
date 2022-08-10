@@ -13,18 +13,11 @@
       shadowBlur: 10,
       cornerRadius: 6,
     }" />
-    <v-rect :config="{
-      name: 'display',
-      x: 20,
-      y: 20,
-      width: 510,
-      height: 500,
-      fill: isEnabled ? 'rgb(15, 33, 19)' : 'black',
-    }" />
+    <SOCDisplay />
 
-    <SAMButton :x="540" :y="20" name="scale50km" label="50 км" :value="scale === 50" @click="scale = 50" />
-    <SAMButton :x="540" :y="85" name="scale30km" label="30 км" :value="scale === 30" @click="scale = 30" />
-    <SAMButton :x="540" :y="150" name="scale15km" label="15 км" :value="scale === 15" @click="scale = 15" />
+    <SAMButton :x="540" :y="20" name="scale80km" label="80 км" :value="mainRadar.maxDisplayedDistance === 80" @click="mainRadar.setMaxDisplayedDistance(80)" />
+    <SAMButton :x="540" :y="85" name="scale50km" label="50 км" :value="mainRadar.maxDisplayedDistance === 50" @click="mainRadar.setMaxDisplayedDistance(50)" />
+    <SAMButton :x="540" :y="150" name="scale30km" label="30 км" :value="mainRadar.maxDisplayedDistance === 30" @click="mainRadar.setMaxDisplayedDistance(30)" />
 
     <SAMButton :x="540" :y="250" name="asc" label="АСЦ" :value="false" />
 
@@ -46,21 +39,20 @@
       y: 370,
       width: 20,
       height: 20,
-      fill: isCaptured ? 'rgb(150, 249, 123)': 'red',
+      fill: false ? 'rgb(150, 249, 123)': 'red',
       shadowBlur: 5
     }" />
 
-    <SAMButton :x="540" :y="395" name="capture" :value="isCaptured" @click="isCaptured = true" label="АС" />
-    <SAMButton :x="540" :y="460" name="resetCapture" :value="!isCaptured" @click="isCaptured = false" label="Сброс" />
+    <SAMButton :x="540" :y="395" name="capture" :value="false"  label="АС" />
+    <SAMButton :x="540" :y="460" name="resetCapture" :value="false" label="Сброс" />
   </v-group>
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
+import { useMainRadarStore } from '@/store//mainRadarPanel';
 import SAMButton from './SAMButton.vue'
+import SOCDisplay from './SOCDisplay.vue'
 
-const isEnabled = ref(false)
-const isCaptured = ref(false)
-const scale = ref(50)
+const mainRadar = useMainRadarStore()
 
 </script>

@@ -1,8 +1,8 @@
 <template>
   <v-layout full-height>
     <v-main dark>
-      <SAM v-show="activeScreen === 'SAM'" />
-      <Editor v-show="activeScreen === 'Editor'" />
+      <SAMScreen v-show="activeScreen === 'SAM'" />
+      <EditorScreen v-show="activeScreen === 'Editor'" />
 
       <AppMenu :missions="missions" @open-screen="openScreen" @load-mission="" />
     </v-main>
@@ -10,10 +10,11 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { onMounted, ref } from 'vue'
+import { useMainRadarStore } from '@/store/mainRadarPanel'
 import AppMenu from '@/components/AppMenu.vue'
-import SAM from '@/components/SAM/SAM.vue';
-import Editor from '@/components/Editor.vue'
+import SAMScreen from '@/components/SAM/SAM.vue';
+import EditorScreen from '@/components/Editor.vue'
 
 enum ScreensEnum {
   BIP = 'BIP',
@@ -25,6 +26,22 @@ const missions: never[] = []
 
 const activeScreen = ref(ScreensEnum.SAM);
 const openScreen = (screen: string) => activeScreen.value = screen as ScreensEnum;
+
+const mainRadar = useMainRadarStore();
+
+const keyMapHandlers: Record<string, Function> = {
+  'KeyA': () => mainRadar.incrementTargetCursorAngle(-0.5),
+  'KeyD': () => mainRadar.incrementTargetCursorAngle(0.5),
+  'KeyW': () => mainRadar.incrementTargetCursorDistance(0.5),
+  'KeyS': () => mainRadar.incrementTargetCursorDistance(-0.5),
+}
+onMounted(() => {
+  window.addEventListener('keydown', (e: KeyboardEvent) => {
+    const handler = keyMapHandlers[e.code];
+    handler && handler();
+  })
+})
+
 </script>
 
 <style>

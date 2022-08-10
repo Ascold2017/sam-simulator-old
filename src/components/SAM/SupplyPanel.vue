@@ -28,12 +28,13 @@
         y: 30,
         width: 20,
         height: 20,
-        fill: isPowerEnabled ? 'rgb(150, 249, 123)' : 'red',
+        fill: supplyPanel.isEnabledPower ? 'rgb(150, 249, 123)' : 'red',
         shadowBlur: 5
       }" />
-      <SAMButton label="Вкл" :x="235" :y="0" name="powerOn" :value="isPowerEnabled" @click="isPowerEnabled = true" />
-      <SAMButton label="Выкл" :x="300" :y="0" name="powerOff" :value="!isPowerEnabled"
-        @click="isPowerEnabled = false" />
+      <SAMButton label="Вкл" :x="235" :y="0" name="powerOn" :value="supplyPanel.isEnabledPower"
+        @click="supplyPanel.setEnabledPower(true)" />
+      <SAMButton label="Выкл" :x="300" :y="0" name="powerOff" :value="!supplyPanel.isEnabledPower"
+        @click="supplyPanel.setEnabledPower(false)" />
     </v-group>
 
     <!-- SOC mechanization -->
@@ -49,18 +50,18 @@
         fontSize: 13
       }" />
       <v-circle :config="{
-        name: 'mechanizationIndicator',
+        name: 'rotationIndicator',
         x: 180,
         y: 30,
         width: 20,
         height: 20,
-        fill: isMechanizationEnabled ? 'rgb(150, 249, 123)' : 'red',
+        fill: supplyPanel.isEnabledRotation ? 'rgb(150, 249, 123)' : 'red',
         shadowBlur: 5
       }" />
-      <SAMButton label="Вкл" :x="235" :y="0" name="mechanizationOn" :value="isMechanizationEnabled"
-        @click="isMechanizationEnabled = true" />
-      <SAMButton label="Выкл" :x="300" :y="0" name="mechanizationOff" :value="!isMechanizationEnabled"
-        @click="isMechanizationEnabled = false" />
+      <SAMButton label="Вкл" :x="235" :y="0" name="rotationOn" :value="supplyPanel.isEnabledRotation"
+        @click="supplyPanel.setEnablerRotation(true)" />
+      <SAMButton label="Выкл" :x="300" :y="0" name="rotationOff" :value="!supplyPanel.isEnabledRotation"
+        @click="supplyPanel.setEnablerRotation(false)" />
     </v-group>
 
     <!-- SOC antenna -->
@@ -76,16 +77,18 @@
         fontSize: 13
       }" />
       <v-circle :config="{
-        name: 'socIndicator',
+        name: 'mainRadarIndicator',
         x: 180,
         y: 30,
         width: 20,
         height: 20,
-        fill: isSOCEnabled ? 'rgb(150, 249, 123)' : 'red',
+        fill: supplyPanel.isEnabledMainRadarTransmitter ? 'rgb(150, 249, 123)' : 'red',
         shadowBlur: 5
       }" />
-      <SAMButton label="Вкл" :x="235" :y="0" name="socOn" :value="isSOCEnabled" @click="isSOCEnabled = true" />
-      <SAMButton label="Выкл" :x="300" :y="0" name="socOff" :value="!isSOCEnabled" @click="isSOCEnabled = false" />
+      <SAMButton label="Вкл" :x="235" :y="0" name="mainRadarOn" :value="supplyPanel.isEnabledMainRadarTransmitter"
+        @click="supplyPanel.setIsEnabledMainRadarTransmitter(true)" />
+      <SAMButton label="Выкл" :x="300" :y="0" name="mainRadarOff" :value="!supplyPanel.isEnabledMainRadarTransmitter"
+        @click="supplyPanel.setIsEnabledMainRadarTransmitter(false)" />
     </v-group>
 
     <!-- SNR antenna -->
@@ -101,16 +104,18 @@
         fontSize: 13
       }" />
       <v-circle :config="{
-        name: 'snrIndicator',
+        name: 'targetRadarIndicator',
         x: 180,
         y: 30,
         width: 20,
         height: 20,
-        fill: isSNREnabled ? 'rgb(150, 249, 123)' : 'red',
+        fill: supplyPanel.isEnabledTargetRadarTransmitter ? 'rgb(150, 249, 123)' : 'red',
         shadowBlur: 5
       }" />
-      <SAMButton label="Вкл" :x="235" :y="0" name="snrOn" :value="isSNREnabled" @click="isSNREnabled = true" />
-      <SAMButton label="Выкл" :x="300" :y="0" name="snrOff" :value="!isSNREnabled" @click="isSNREnabled = false" />
+      <SAMButton label="Вкл" :x="235" :y="0" name="snrOn" :value="supplyPanel.isEnabledTargetRadarTransmitter"
+        @click="supplyPanel.setIsEnabledTargetRadarTransmitter(true)" />
+      <SAMButton label="Выкл" :x="300" :y="0" name="snrOff" :value="!supplyPanel.isEnabledTargetRadarTransmitter"
+        @click="supplyPanel.setIsEnabledTargetRadarTransmitter(false)" />
     </v-group>
     <!-- OLS power -->
     <v-group :config="{ x: 20, y: 280 }">
@@ -125,36 +130,41 @@
         fontSize: 13
       }" />
       <v-circle :config="{
-        name: 'olsIndicator',
+        name: 'thermalCameraIndicator',
         x: 180,
         y: 30,
         width: 20,
         height: 20,
-        fill: isOLSEnabled ? 'rgb(150, 249, 123)' : 'red',
+        fill: supplyPanel.isEnabledThermalCamera ? 'rgb(150, 249, 123)' : 'red',
         shadowBlur: 5
       }" />
-      <SAMButton label="Вкл" :x="235" :y="0" name="olsOn" :value="isOLSEnabled" @click="isOLSEnabled = true" />
-      <SAMButton label="Выкл" :x="300" :y="0" name="olsOff" :value="!isOLSEnabled" @click="isOLSEnabled = false" />
+      <SAMButton label="Вкл" :x="235" :y="0" name="thermalCameraOn" :value="supplyPanel.isEnabledThermalCamera"
+        @click="supplyPanel.setIsEnabledThermalCamera(true)" />
+      <SAMButton label="Выкл" :x="300" :y="0" name="thermalCameraOff" :value="!supplyPanel.isEnabledThermalCamera"
+        @click="supplyPanel.setIsEnabledThermalCamera(false)" />
     </v-group>
 
-    <v-line :config="{ points: [20, 390, 50, 390 ], stroke: '#181818' }"/>
+    <v-line :config="{ points: [20, 390, 50, 390], stroke: '#181818' }" />
     <v-text :config="{
-      x: 60,
-      y: 380,
-      width: 120,
-      height: 20,
-      verticalAlign: 'middle',
-      align: 'center',
+  x: 60,
+  y: 380,
+  width: 120,
+  height: 20,
+  verticalAlign: 'middle',
+  align: 'center',
       text: 'Режим дисплея',
       fill: '#181818',
       fontFamily: 'Russo One, sans-serif',
       fontSize: 13
     }" />
-    <v-line :config="{ points: [190, 390, 220, 390 ], stroke: '#181818' }"/>
+    <v-line :config="{ points: [190, 390, 220, 390 ], stroke: '#181818' }" />
 
-    <SAMButton :x="20" :y="420" name="SOC" :value="viewMode === 'SOC'" label="СОЦ" @click="viewMode = 'SOC'"/>
-    <SAMButton :x="90" :y="420" name="BIP" :value="viewMode === 'BIP'" label="БИП" @click="viewMode = 'BIP'"/>
-    <SAMButton :x="160" :y="420" name="LOGS" :value="viewMode === 'LOGS'" label="Логи" @click="viewMode = 'LOGS'"/>
+    <SAMButton :x="20" :y="420" name="SOC" :value="mainRadar.viewMode === ViewModes.MainRadar" label="СОЦ"
+      @click="mainRadar.viewMode = ViewModes.MainRadar" />
+    <SAMButton :x="90" :y="420" name="BIP" :value="mainRadar.viewMode === ViewModes.BIP" label="БИП"
+      @click="mainRadar.viewMode = ViewModes.BIP" />
+    <SAMButton :x="160" :y="420" name="LOGS" :value="mainRadar.viewMode === ViewModes.LOGS" label="Логи"
+      @click="mainRadar.viewMode = ViewModes.LOGS" />
 
     <v-rect :config="{
       x: 255,
@@ -179,14 +189,12 @@
 
 <script setup lang="ts">
 import type Konva from "konva";
-import { ref } from "vue";
+import { useSupplyPanelStore } from '@/store/supplyPanel';
+import { useMainRadarStore, ViewModes } from '@/store/mainRadarPanel'
 import SAMButton from "./SAMButton.vue";
-const isPowerEnabled = ref(false)
-const isMechanizationEnabled = ref(false)
-const isSOCEnabled = ref(false);
-const isSNREnabled = ref(false);
-const isOLSEnabled = ref(false);
-const viewMode = ref('SOC')
+
+const supplyPanel = useSupplyPanelStore();
+const mainRadar = useMainRadarStore();
 
 const drawClock = (ctx: CanvasRenderingContext2D, shape: Konva.Shape) => {
   const d = new Date()

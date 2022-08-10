@@ -8,8 +8,15 @@ import mitt from 'mitt'
 
 import App from "./App.vue";
 import SAM from "./classes/SAM";
+import { createPinia } from "pinia";
+
+const pinia = createPinia();
 
 const bus = mitt();
+const sam = new SAM((e: any) => bus.emit('update', e));
+
+pinia.use(() => ({ sam }));
+
 (window as any).__ACCELERATION__ = 1;
 
 const vuetify = createVuetify({
@@ -19,8 +26,9 @@ const vuetify = createVuetify({
   },
 });
 const app = createApp(App);
+app.use(pinia);
 app.use(vuetify);
 app.use(VueKonva)
 app.provide('samEventBus', bus)
-app.provide('sam', new SAM((e: any) => bus.emit('update', e)))
+app.provide('sam', sam)
 app.mount("#app");
