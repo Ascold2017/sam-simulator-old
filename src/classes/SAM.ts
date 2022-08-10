@@ -120,7 +120,7 @@ export default class SAM {
             x: flightObject.currentPoint.x,
             y: flightObject.currentPoint.y,
             rotation: flightObject.currentRotation,
-            size: targetSize
+            size: targetSize,
           };
         } else {
           delete this.recognizedTargets[flightObject.identifier!];
@@ -140,6 +140,26 @@ export default class SAM {
           z: missile.missileCurrentPoint.z,
           velocity: missile.velocity,
         };
+
+        // Если цель в радиусе поражения
+        if (missile.missileTargetDistance <= missile.missileKillRadius) {
+          missile.destroyMissile();
+          this.flightObjects.filter((fo) => {
+            const x = fo.currentPoint.x;
+            const y = fo.currentPoint.y;
+            const z = fo.currentPoint.z;
+
+            const distanceToMissile = Math.sqrt(
+              (x - missile.missileCurrentPoint.x) ^
+                2 + (y - missile.missileCurrentPoint.y) ^
+                2 + (z - missile.missileCurrentPoint.z) ^ 2,
+            );
+
+            return distanceToMissile <= missile.missileKillRadius
+              ? true
+              : false;
+          }).map((fo) => fo.kill());
+        }
       } else {
         delete this.flightMissiles[missile.identifier!];
       }
