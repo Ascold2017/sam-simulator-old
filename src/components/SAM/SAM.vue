@@ -10,6 +10,7 @@
           <TVPanel />
           <SOCPanel />
           <WeaponPanel />
+          <CapturePanel />
         </v-layer>
       </v-stage>
     </div>
@@ -25,4 +26,5 @@ import SupplyPanel from './SupplyPanel.vue';
 import WeaponPanel from './WeaponPanel.vue';
 import ElevationPanel from './ElevationPanel.vue';
 import DistancePanel from './DistancePanel.vue';
+import CapturePanel from './CapturePanel.vue';
 </script>

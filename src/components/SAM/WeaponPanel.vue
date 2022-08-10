@@ -13,16 +13,7 @@
       shadowBlur: 10,
       cornerRadius: 6,
     }" />
-    <v-rect :config="{
-      name: 'panelCapture',
-      x: 610,
-      y: 0,
-      width: 400,
-      height: 120,
-      fill: 'grey',
-      shadowBlur: 10,
-      cornerRadius: 6,
-    }" />
+    
 
     <!-- Missile indicators-->
     <v-group :config="{ x: 20, y: 0 }">
@@ -111,33 +102,6 @@
       <SAMButton :x="95" :y="80" name="detonatorAuto" label="Авто" :value="false" small />
       <SAMButton :x="140" :y="80" name="detonator2Sec" label="2 сек" :value="false" small />
     </v-group>
-
-    <v-group :config="{
-      x: 630,
-      y: 20
-    }">
-      <v-line :config="{ points: [0, 0, 110, 0], stroke: '#181818', shadowBlur: 2 }" />
-      <v-text :config="{
-        x: 120,
-        y: -10,
-        width: 130,
-        height: 20,
-      
-        text: 'Режим автозахвата',
-        fontFamily: 'Russo One, sans-serif',
-        fill: '#181818',
-        fontSize: 12,
-        align: 'center',
-        verticalAlign: 'middle',
-      }" />
-      <v-line :config="{ points: [260, 0, 360, 0], stroke: '#181818', shadowBlur: 2 }" />
-      <SAMButton :x="0" :y="15" name="manual" label="Ручн" :value="false" />
-      <v-circle :config="{ y: 45, x: 115, width: 20, height: 20, shadowBlur: 5, fill: 'red' }" />
-      <SAMButton :x="170" :y="15" name="rls" label="РЛС" :value="false" />
-      <SAMButton :x="235" :y="15" name="ols" label="ОЛС" :value="false" />
-      <SAMButton :x="300" :y="15" name="jamming" label="Помеха" :value="false" />
-    </v-group>
-
   </v-group>
 </template>
 

@@ -24,8 +24,7 @@
     <v-line :config="{ points: [180, 30, 180, 190], stroke: 'white' }" />
     <v-line :config="{ points: [220, 30, 220, 190], stroke: 'white' }" />
 
-    <SAMButton :x="20" :y="220" small :value="false" label="-2 км" name="distanceMinus" />
-    <SAMButton :x="65" :y="220" small :value="false" label="+2 км" name="distancePlus" />
+    <SAMPotentiometer :x="20" :y="215" />
 
     <v-text :config="{
       x: 180,
@@ -56,5 +55,6 @@
 <script setup lang="ts">
 import { ref } from "vue";
 import SAMButton from "./SAMButton.vue";
+import SAMPotentiometer from "./SAMPotentiometer.vue";
 const isCaptured = ref(false)
 </script>

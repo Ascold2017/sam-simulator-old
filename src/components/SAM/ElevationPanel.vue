@@ -27,8 +27,7 @@
     <v-line :config="{ points: [30, 160, 310, 160], stroke: 'white' }" />
     <v-line :config="{ points: [30, 200, 310, 200], stroke: 'white' }" />
 
-    <SAMButton :x="340" :y="20" small :value="false" label="+0.5°" name="elevationPlus" />
-    <SAMButton :x="340" :y="65" small :value="false" label="-0.5°" name="elevationMinus" />
+    <SAMPotentiometer :x="335" :y="20" />
 
     <v-text :config="{
       x: 330,
@@ -61,5 +60,6 @@
 <script setup lang="ts">
 import { ref } from "vue";
 import SAMButton from "./SAMButton.vue";
+import SAMPotentiometer from "./SAMPotentiometer.vue";
 const isCaptured = ref(false)
 </script>
