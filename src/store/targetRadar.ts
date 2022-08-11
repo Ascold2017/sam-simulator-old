@@ -33,11 +33,27 @@ export const useTargetRadarStore = defineStore("targetRadar", {
       );
       this.isCapturedAzimut = !!this.capturedTargetId;
     },
+
+    captureByDistance() {
+      const supply = useSupplyPanelStore();
+      const mainRadar = useMainRadarStore();
+      if (!supply.isEnabledTargetRadarTransmitter || this.isCapturedDistance) return;
+      // @ts-ignore
+      this.isCapturedDistance = !!this.sam.isTargetOnDistance(
+        this.capturedTargetId,
+        mainRadar.targetCursorDistance,
+      );
+    },
+
     resetCaptureAll() {
       this.isCapturedAzimut = false;
       this.isCapturedDistance = false;
       this.isCapturedElevation = false;
       this.capturedTargetId = null;
+    },
+
+    resetCaptureDistance() {
+      this.isCapturedDistance = false;
     },
     resetCaptureTarget(id: string) {
       if (this.capturedTargetId === id) this.resetCaptureAll();

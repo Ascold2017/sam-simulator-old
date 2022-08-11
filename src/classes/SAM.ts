@@ -3,7 +3,7 @@ import type SAMissile from "./SAMissile";
 
 export const SAM_PARAMS = {
   RADAR_HEIGHT: 0.025, // 25 meters
-  MIN_ELEVATION: 0,
+  MIN_ELEVATION: -5,
   MAX_ELEVATION: 75 * (Math.PI / 180),
   MAX_DISTANCE: 80, // 80 km
   MIN_CAPTURE_RANGE: 5,
@@ -186,11 +186,16 @@ export default class SAM {
     }
   }
 
-  private getTargetOnAzimutAndDistanceWindow(azimut: number, distance: number) {
+  getTargetOnAzimutAndDistanceWindow(azimut: number, distance: number) {
     return Object.keys(this.recognizedTargets).find(id => {
       const target = this.recognizedTargets[id];
       return Math.abs(target.azimut - azimut) <= SAM_PARAMS.RADAR_AZIMUT_DETECT_ACCURACY/2 &&
         Math.abs(target.distance - distance) <= SAM_PARAMS.RADAR_DISTANCE_WINDOW/2
     })
+  }
+
+  isTargetOnDistance(identifier: string, distance: number) {
+    const target = this.recognizedTargets[identifier];
+    return Math.abs(target.distance - distance) <= SAM_PARAMS.RADAR_DISTANCE_DETECT_ACCURACY / 2;
   }
 }

@@ -99,8 +99,13 @@ const targetCursorLine = computed(() => {
   const azimut = targetRadarStore.isCapturedAzimut && targetRadarStore.capturedTarget
     ? targetRadarStore.capturedTarget.azimut
     : mainRadar.targetCursorAngle;
-  const distanceToWindow = mainRadar.targetCursorDistance * mainRadar.scale - SAM_PARAMS.RADAR_DISTANCE_WINDOW * mainRadar.scale/2;
-  const distanceFromWindow = (mainRadar.maxDisplayedDistance - mainRadar.targetCursorDistance - SAM_PARAMS.RADAR_DISTANCE_WINDOW/2) * mainRadar.scale
+  
+  const distance = targetRadarStore.isCapturedDistance && targetRadarStore.capturedTarget
+    ? targetRadarStore.capturedTarget.distance
+    : mainRadar.targetCursorDistance;
+
+  const distanceToWindow = distance * mainRadar.scale- SAM_PARAMS.RADAR_DISTANCE_WINDOW * mainRadar.scale/2;
+  const distanceFromWindow = (mainRadar.maxDisplayedDistance - distance - SAM_PARAMS.RADAR_DISTANCE_WINDOW/2) * mainRadar.scale
   return {
     x0: 255,
     y0: 250,

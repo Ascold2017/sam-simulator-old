@@ -39,7 +39,7 @@
       y: 370,
       width: 20,
       height: 20,
-      fill: false ? 'rgb(150, 249, 123)': 'red',
+      fill: targetRadar.isCapturedAzimut ? 'rgb(150, 249, 123)': 'red',
       shadowBlur: 5
     }" />
 
