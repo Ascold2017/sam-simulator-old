@@ -38,10 +38,10 @@ const targetRadar = useTargetRadarStore()
 const targetLinePoints = computed(() => {
   if (!targetRadar.capturedTarget) return [];
   // Out of window
-  if (!targetRadar.isCapturedDistance && Math.abs(targetRadar.capturedTarget.distance - mainRadar.targetCursorDistance) > SAM_PARAMS.RADAR_DISTANCE_WINDOW) return [];
+  if (!targetRadar.isCapturedDistance && Math.abs(targetRadar.capturedTarget.distance - targetRadar.targetCursorDistance) > SAM_PARAMS.RADAR_DISTANCE_WINDOW) return [];
   const offsetDistance = targetRadar.isCapturedDistance
     ? 0
-    : (targetRadar.capturedTarget.distance - mainRadar.targetCursorDistance);
+    : (targetRadar.capturedTarget.distance - targetRadar.targetCursorDistance);
   const offsetDistanceK = 2 *offsetDistance / SAM_PARAMS.RADAR_DISTANCE_WINDOW;
   const offsetDistanceCanvas = offsetDistanceK * 180 + 180;
   const canvasDistanceAccuracy = 360 * SAM_PARAMS.RADAR_DISTANCE_DETECT_ACCURACY / 2;

@@ -174,13 +174,13 @@
       fill: 'white',
       stroke: '#181818',
     }" />
-    <v-circle :config="{
+    <v-circle ref="clocksRef"  :config="{
       x: 317.5,
       y: 422.5,
       width: 125,
       height: 125,
       stroke: '#181818',
-      
+      strokeWidth: 2,
       sceneFunc: drawClock
     }" />
 
@@ -188,19 +188,25 @@
 </template>
 
 <script setup lang="ts">
+import { onMounted, ref } from "vue";
 import type Konva from "konva";
 import { useSupplyPanelStore } from '@/store/supplyPanel';
 import { useMainRadarStore, ViewModes } from '@/store/mainRadarPanel'
 import SAMButton from "./SAMButton.vue";
-
+const clocksRef = ref();
 const supplyPanel = useSupplyPanelStore();
 const mainRadar = useMainRadarStore();
 
 const drawClock = (ctx: CanvasRenderingContext2D, shape: Konva.Shape) => {
+  shape.clearCache()
   const d = new Date()
   const hour = d.getHours();
   const minutes = d.getMinutes();
   const seconds = d.getSeconds();
+
+  const hoursAngle = (hour / 24) * 2 * Math.PI - Math.PI/2
+  const minutesAngle = (minutes/60)* 2 * Math.PI - Math.PI/2
+  const secondsAngle = (seconds/60)* 2 * Math.PI - Math.PI/2
 
   const radius = shape.width() / 2 - 8;
   ctx.beginPath();
@@ -215,5 +221,34 @@ const drawClock = (ctx: CanvasRenderingContext2D, shape: Konva.Shape) => {
     ctx.font = '11px Russo One, sans-serif';
     ctx.fillText((h === 0 ? 12 : h).toString(), outerX, outerY + 4)
   }
+  ctx.beginPath();
+  ctx.moveTo(0, 0)
+  ctx.lineTo(
+    30 * Math.cos(hoursAngle),
+    30 * Math.sin(hoursAngle),
+  )
+  ctx.stroke()
+  ctx.beginPath();
+  ctx.moveTo(0, 0)
+  ctx.lineTo(
+    40 * Math.cos(minutesAngle),
+    40 * Math.sin(minutesAngle),
+  )
+  ctx.stroke()
+  ctx.beginPath();
+  ctx.strokeStyle = 'red';
+  ctx.moveTo(0, 0)
+  ctx.lineTo(
+    38 * Math.cos(secondsAngle),
+    38 * Math.sin(secondsAngle),
+  )
+  ctx.stroke()
 }
+
+onMounted(() => {
+  setInterval(() => {
+    clocksRef.value.getNode().draw()
+  }, 500)
+})
+
 </script>

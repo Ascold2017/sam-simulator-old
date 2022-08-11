@@ -6,7 +6,7 @@
       </v-btn>
     </template>
     <v-card class="px-3 py-3">
-      <v-btn variant="text" @click="openScreen('SAM')">ЗРК</v-btn>
+      <v-btn variant="text" @click="openScreen('SAM')">В игру</v-btn>
       <v-btn variant="text" v-for="mission in missions" @click="loadMission(mission.id)">{{ mission.name }}</v-btn>
       <v-btn variant="text" @click="openScreen('Editor')">Редактор миссий</v-btn>
       <v-btn-toggle mandatory :model-value="acceleration" @update:model-value="setAcceleration">

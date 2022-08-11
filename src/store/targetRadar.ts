@@ -1,8 +1,7 @@
-import type { IRecognizedTargets } from "@/classes/SAM";
+import { SAM_PARAMS, type IRecognizedTargets } from "@/classes/SAM";
 import { defineStore } from "pinia";
 import { useMainRadarStore } from "./mainRadarPanel";
 import { useSupplyPanelStore } from "./supplyPanel";
-import { useTargetsStore } from "./targets";
 
 export const useTargetRadarStore = defineStore("targetRadar", {
   state: () => ({
@@ -10,38 +9,50 @@ export const useTargetRadarStore = defineStore("targetRadar", {
     isCapturedAzimut: false,
     isCapturedDistance: false,
     isCapturedElevation: false,
+    capturedTarget: null as IRecognizedTargets | null,
+    targetCursorAngle: 1.5 * Math.PI,
+    targetCursorDistance: 30,
   }),
-  getters: {
-    capturedTarget(): IRecognizedTargets | null {
-      const targetsStore = useTargetsStore();
-      if (!this.capturedTargetId) return null;
-      return targetsStore.targets.find((t) =>
-        t.identifier === this.capturedTargetId
-      ) || null;
-    },
-  },
 
   actions: {
+    incrementTargetCursorAngle(value: number) {
+      if (this.isCapturedAzimut) return;
+      value *= Math.PI / 180;
+      let newAngle = this.targetCursorAngle + value < 0
+        ? 2 * Math.PI + value
+        : this.targetCursorAngle + value;
+      newAngle = newAngle >= 2 * Math.PI ? value : newAngle;
+      this.targetCursorAngle = newAngle;
+    },
+    incrementTargetCursorDistance(value: number) {
+      const mainRadarStore = useMainRadarStore();
+      if (
+        this.targetCursorDistance + value < SAM_PARAMS.MIN_CAPTURE_RANGE ||
+        this.targetCursorDistance + value >= mainRadarStore.maxDisplayedDistance ||
+        this.isCapturedDistance
+      ) {
+        return;
+      }
+      this.targetCursorDistance += value;
+    },
     captureByAzimut() {
       const supply = useSupplyPanelStore();
-      const mainRadar = useMainRadarStore();
       if (!supply.isEnabledTargetRadarTransmitter) return;
       // @ts-ignore
       this.capturedTargetId = this.sam.getTargetOnAzimutAndDistanceWindow(
-        mainRadar.targetCursorAngle,
-        mainRadar.targetCursorDistance,
+        this.targetCursorAngle,
+        this.targetCursorDistance,
       );
       this.isCapturedAzimut = !!this.capturedTargetId;
     },
 
     captureByDistance() {
       const supply = useSupplyPanelStore();
-      const mainRadar = useMainRadarStore();
       if (!supply.isEnabledTargetRadarTransmitter || this.isCapturedDistance) return;
       // @ts-ignore
       this.isCapturedDistance = !!this.sam.isTargetOnDistance(
         this.capturedTargetId,
-        mainRadar.targetCursorDistance,
+        this.targetCursorDistance,
       );
     },
 

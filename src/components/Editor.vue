@@ -144,4 +144,11 @@ function addFlightMission() {
   editor.value!.addFlightMission();
   resetFlightMission();
 }
+
+defineExpose({
+  loadMission(missionString: string) {
+    editor.value?.importFlightMissionsString(missionString);
+    startFlightMissions();
+  }
+})
 </script>

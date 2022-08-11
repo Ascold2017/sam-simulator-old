@@ -259,6 +259,10 @@ export default class Editor {
     reader.readAsText(file);
   }
 
+  importFlightMissionsString(string: string) {
+    this._flightMissions = JSON.parse(string);
+  }
+
   startFlightMissions(listener: (arg0: FlightObject) => void) {
     const startTime = Date.now();
     let flightMissions = [...this._flightMissions];

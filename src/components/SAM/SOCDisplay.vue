@@ -14,6 +14,9 @@
       <v-circle
         :config="{ x: 255, y: 250, width: i * 20 * mainRadar.scale, stroke: 'rgb(150, 249, 123)', strokeWidth: 0.1 }"
         v-for="i in countCircles" />
+       <v-circle
+        :config="{ x: 255, y: 250, width: 50 * mainRadar.scale, stroke: 'rgb(150, 249, 123)', strokeWidth: 0.5 }"
+         />
 
       <v-line :config="{
         points: [azimutLine.x0, azimutLine.y0, azimutLine.x1, azimutLine.y1,],
@@ -96,13 +99,8 @@ const azimutLines = computed(() => {
 });
 
 const targetCursorLine = computed(() => {
-  const azimut = targetRadarStore.isCapturedAzimut && targetRadarStore.capturedTarget
-    ? targetRadarStore.capturedTarget.azimut
-    : mainRadar.targetCursorAngle;
-  
-  const distance = targetRadarStore.isCapturedDistance && targetRadarStore.capturedTarget
-    ? targetRadarStore.capturedTarget.distance
-    : mainRadar.targetCursorDistance;
+  const azimut = targetRadarStore.targetCursorAngle;
+  const distance = targetRadarStore.targetCursorDistance;
 
   const distanceToWindow = distance * mainRadar.scale- SAM_PARAMS.RADAR_DISTANCE_WINDOW * mainRadar.scale/2;
   const distanceFromWindow = (mainRadar.maxDisplayedDistance - distance - SAM_PARAMS.RADAR_DISTANCE_WINDOW/2) * mainRadar.scale

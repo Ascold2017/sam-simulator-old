@@ -15,9 +15,8 @@
     }" />
     <SOCDisplay />
 
-    <SAMButton :x="540" :y="20" name="scale80km" label="80 км" :value="mainRadar.maxDisplayedDistance === 80" @click="mainRadar.setMaxDisplayedDistance(80)" />
-    <SAMButton :x="540" :y="85" name="scale50km" label="50 км" :value="mainRadar.maxDisplayedDistance === 50" @click="mainRadar.setMaxDisplayedDistance(50)" />
-    <SAMButton :x="540" :y="150" name="scale30km" label="30 км" :value="mainRadar.maxDisplayedDistance === 30" @click="mainRadar.setMaxDisplayedDistance(30)" />
+    <SAMButton :x="540" :y="20" name="scale80km" label="50 км" :value="mainRadar.maxDisplayedDistance === 50" @click="mainRadar.setMaxDisplayedDistance(50)" />
+    <SAMButton :x="540" :y="85" name="scale50km" label="30 км" :value="mainRadar.maxDisplayedDistance === 30" @click="mainRadar.setMaxDisplayedDistance(30)" />
 
     <SAMButton :x="540" :y="250" name="asc" label="АСЦ" :value="false" />
 
