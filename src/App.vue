@@ -10,8 +10,12 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, ref } from 'vue'
+import { inject, onMounted, ref, watch } from 'vue'
 import { useMainRadarStore } from '@/store/mainRadarPanel'
+import { useTargetsStore } from '@/store/targets';
+import { useTargetRadarStore } from '@/store/targetRadar';
+import type { IRecognizedTargets } from './classes/SAM';
+import type { Emitter, EventType } from 'mitt';
 import AppMenu from '@/components/AppMenu.vue'
 import SAMScreen from '@/components/SAM/SAM.vue';
 import EditorScreen from '@/components/Editor.vue'
@@ -35,13 +39,19 @@ const keyMapHandlers: Record<string, Function> = {
   'KeyW': () => mainRadar.incrementTargetCursorDistance(0.5),
   'KeyS': () => mainRadar.incrementTargetCursorDistance(-0.5),
 }
+
+const samEventBus = inject<Emitter<Record<EventType, any>>>('samEventBus');
+const targetsStore = useTargetsStore()
+const targetRadar = useTargetRadarStore()
+
 onMounted(() => {
   window.addEventListener('keydown', (e: KeyboardEvent) => {
     const handler = keyMapHandlers[e.code];
     handler && handler();
   })
-})
-
+  samEventBus!.on('delete', (e: string) => targetRadar.resetCaptureTarget(e))
+  samEventBus!.on('update', (e: { targets: IRecognizedTargets[] }) => targetsStore.setTargets(e.targets))
+});
 </script>
 
 <style>

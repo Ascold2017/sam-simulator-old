@@ -10,9 +10,11 @@ export const SAM_PARAMS = {
   RADAR_AZIMUT_DETECT_ACCURACY: 0.2, // deg
   RADAR_DISTANCE_DETECT_ACCURACY: 0.1,
   RADAR_SPOT_AZIMUT_GAIN: 1000,
+  RADAR_DISTANCE_WINDOW: 2 // 2 km
 };
 
 export interface IRecognizedTargets {
+  identifier: string;
   distance: number;
   azimut: number;
   elevation: number;
@@ -34,10 +36,10 @@ export interface IFlightMissiles {
 }
 
 export interface IEventListenerPayload {
-  targets: Record<string, IRecognizedTargets>;
+  targets: IRecognizedTargets[];
   missiles: Record<string, IFlightMissiles>;
 }
-type EventListener = (arg: IEventListenerPayload) => void;
+type EventListener = (eventName: string, arg: IEventListenerPayload | string) => void;
 
 export default class SAM {
   private isEnabled = false;
@@ -48,8 +50,11 @@ export default class SAM {
   private recognizedTargets: Record<string, IRecognizedTargets> = {};
   private flightMissiles: Record<string, IFlightMissiles> = {};
 
+  private eventListener: EventListener | null = null;
+
   constructor(eventListener: EventListener) {
-    this.tick(eventListener);
+    this.eventListener = eventListener;
+    this.tick();
   }
 
   public setIsEnabled(value: boolean) {
@@ -60,13 +65,13 @@ export default class SAM {
     this.flightObjects.push(flightObject);
   }
 
-  private tick(eventListener: EventListener) {
+  private tick() {
     setInterval(() => {
       if (this.isEnabled) {
         this.recalculateTargets();
         this.recalculateMissiles();
-        eventListener({
-          targets: { ...this.recognizedTargets },
+        this.eventListener!('update', {
+          targets: Object.keys(this.recognizedTargets).map(id => this.recognizedTargets[id]),
           missiles: { ...this.flightMissiles },
         });
       }
@@ -120,6 +125,7 @@ export default class SAM {
 
         if (isTargetVisible && inAllowedElevation) {
           this.recognizedTargets[flightObject.identifier!] = {
+            identifier: flightObject.identifier!,
             distance: targetDistance,
             azimut: targetAzimut < 0
               ? 2 * Math.PI + targetAzimut
@@ -135,9 +141,11 @@ export default class SAM {
             size: targetSize,
           };
         } else {
+          this.eventListener!('delete', flightObject.identifier!)
           delete this.recognizedTargets[flightObject.identifier!];
         }
       } else {
+        this.eventListener!('delete', flightObject.identifier!)
         delete this.recognizedTargets[flightObject.identifier!];
       }
     }
@@ -176,5 +184,13 @@ export default class SAM {
         delete this.flightMissiles[missile.identifier!];
       }
     }
+  }
+
+  private getTargetOnAzimutAndDistanceWindow(azimut: number, distance: number) {
+    return Object.keys(this.recognizedTargets).find(id => {
+      const target = this.recognizedTargets[id];
+      return Math.abs(target.azimut - azimut) <= SAM_PARAMS.RADAR_AZIMUT_DETECT_ACCURACY/2 &&
+        Math.abs(target.distance - distance) <= SAM_PARAMS.RADAR_DISTANCE_WINDOW/2
+    })
   }
 }

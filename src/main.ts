@@ -7,13 +7,13 @@ import * as components from 'vuetify/components'
 import mitt from 'mitt'
 
 import App from "./App.vue";
-import SAM from "./classes/SAM";
+import SAM, { type IEventListenerPayload } from "./classes/SAM";
 import { createPinia } from "pinia";
 
 const pinia = createPinia();
 
 const bus = mitt();
-const sam = new SAM((e: any) => bus.emit('update', e));
+const sam = new SAM((eventName: string, eventPayload: IEventListenerPayload | string) => bus.emit(eventName, eventPayload));
 
 pinia.use(() => ({ sam }));
 

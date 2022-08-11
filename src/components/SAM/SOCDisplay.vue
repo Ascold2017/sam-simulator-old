@@ -66,9 +66,10 @@
 
 import { useSupplyPanelStore } from '@/store/supplyPanel';
 import { useMainRadarStore } from '@/store/mainRadarPanel';
-import { computed, inject, ref } from 'vue';
-import type { Emitter, EventType } from 'mitt';
-import { type IEventListenerPayload, SAM_PARAMS } from '@/classes/SAM';
+import { useTargetsStore } from '@/store/targets';
+import { useTargetRadarStore } from '@/store/targetRadar';
+import { computed } from 'vue';
+import { SAM_PARAMS } from '@/classes/SAM';
 
 interface ICanvasTarget {
   radius: number;
@@ -78,9 +79,10 @@ interface ICanvasTarget {
   alpha: number
 };
 
-const samEventBus = inject<Emitter<Record<EventType, any>>>('samEventBus');
 const supplyPanel = useSupplyPanelStore()
 const mainRadar = useMainRadarStore()
+const targetsStore = useTargetsStore()
+const targetRadarStore = useTargetRadarStore()
 
 const countCircles = computed(() => mainRadar.maxDisplayedDistance / 10);
 const azimutLines = computed(() => {
@@ -91,19 +93,26 @@ const azimutLines = computed(() => {
     y1: Math.sin(i * 10 * (Math.PI / 180) - Math.PI / 2) * (mainRadar.maxDisplayedDistance * mainRadar.scale + 10) + 250,
     angleLabel: String(i * 10)
   }))
-})
+});
 
-const targetCursorLine = computed(() => ({
-  x0: 255,
-  y0: 250,
-  x1: Math.cos(mainRadar.targetCursorAngle) * (mainRadar.maxDisplayedDistance * mainRadar.scale) + 255,
-  y1: Math.sin(mainRadar.targetCursorAngle) * (mainRadar.maxDisplayedDistance * mainRadar.scale) + 250,
-  dash: [
-    mainRadar.targetCursorDistance * mainRadar.scale,
-    mainRadar.distanceWindowLength * mainRadar.scale,
-    (mainRadar.maxDisplayedDistance - mainRadar.targetCursorDistance - mainRadar.distanceWindowLength) * mainRadar.scale
-  ]
-}));
+const targetCursorLine = computed(() => {
+  const azimut = targetRadarStore.isCapturedAzimut && targetRadarStore.capturedTarget
+    ? targetRadarStore.capturedTarget.azimut
+    : mainRadar.targetCursorAngle;
+  const distanceToWindow = mainRadar.targetCursorDistance * mainRadar.scale - SAM_PARAMS.RADAR_DISTANCE_WINDOW * mainRadar.scale/2;
+  const distanceFromWindow = (mainRadar.maxDisplayedDistance - mainRadar.targetCursorDistance - SAM_PARAMS.RADAR_DISTANCE_WINDOW/2) * mainRadar.scale
+  return {
+    x0: 255,
+    y0: 250,
+    x1: Math.cos(azimut) * (mainRadar.maxDisplayedDistance * mainRadar.scale) + 255,
+    y1: Math.sin(azimut) * (mainRadar.maxDisplayedDistance * mainRadar.scale) + 250,
+    dash: [
+      distanceToWindow,
+      SAM_PARAMS.RADAR_DISTANCE_WINDOW * mainRadar.scale,
+      distanceFromWindow
+    ]
+  }
+});
 
 const radarCursorLine = computed(() => ({
   x0: 255,
@@ -111,26 +120,21 @@ const radarCursorLine = computed(() => ({
   x1: Math.cos(mainRadar.radarRotation) * (mainRadar.maxDisplayedDistance * mainRadar.scale) + 255,
   y1: Math.sin(mainRadar.radarRotation) * (mainRadar.maxDisplayedDistance * mainRadar.scale) + 250,
 }));
-const canvasTargets = ref<ICanvasTarget[]>([]);
-
-samEventBus?.on('update', (e: IEventListenerPayload) => {
-  const cTargets: ICanvasTarget[] = [];
-  for (let targetId in e.targets) {
-    const target = e.targets[targetId];
-
-    const canvasTargetArcAngle = (target.size * SAM_PARAMS.RADAR_SPOT_AZIMUT_GAIN * 180) / (target.distance * Math.PI)  + SAM_PARAMS.RADAR_AZIMUT_DETECT_ACCURACY * 2;
-    const targetSpotDistance = SAM_PARAMS.RADAR_DISTANCE_DETECT_ACCURACY * mainRadar.scale
-    const alpha = 1
-    if (target.distance < mainRadar.maxDisplayedDistance) {
-      cTargets.push({
+const canvasTargets = computed<ICanvasTarget[]>(() => {
+  return targetsStore.targets
+    .filter(t => t.distance < mainRadar.maxDisplayedDistance)
+    .map(target => {
+      const canvasTargetArcAngle = (target.size * SAM_PARAMS.RADAR_SPOT_AZIMUT_GAIN * 180) / (target.distance * Math.PI)  + SAM_PARAMS.RADAR_AZIMUT_DETECT_ACCURACY * 2;
+      const targetSpotDistance = SAM_PARAMS.RADAR_DISTANCE_DETECT_ACCURACY * mainRadar.scale
+      const alpha = 1
+      return {
         radius: target.distance * mainRadar.scale,
         rotation: target.azimut * (180 / Math.PI) - canvasTargetArcAngle / 2,
         angle: canvasTargetArcAngle,
         strokeWidth: targetSpotDistance,
         alpha
-      })
-    }
-  }
-  canvasTargets.value = cTargets;
-})
+      }
+    });
+});
+
 </script>

@@ -43,16 +43,18 @@
       shadowBlur: 5
     }" />
 
-    <SAMButton :x="540" :y="395" name="capture" :value="false"  label="АС" />
-    <SAMButton :x="540" :y="460" name="resetCapture" :value="false" label="Сброс" />
+    <SAMButton :x="540" :y="395" name="capture" :value="targetRadar.isCapturedAzimut"  label="АС" @click="targetRadar.captureByAzimut" />
+    <SAMButton :x="540" :y="460" name="resetCapture" :value="!targetRadar.isCapturedAzimut" label="Сброс" @click="targetRadar.resetCaptureAll"/>
   </v-group>
 </template>
 
 <script setup lang="ts">
 import { useMainRadarStore } from '@/store//mainRadarPanel';
+import { useTargetRadarStore } from '@/store/targetRadar'
 import SAMButton from './SAMButton.vue'
 import SOCDisplay from './SOCDisplay.vue'
 
 const mainRadar = useMainRadarStore()
+const targetRadar = useTargetRadarStore()
 
 </script>

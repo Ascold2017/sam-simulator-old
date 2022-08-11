@@ -21,7 +21,7 @@
       y: 20,
       width: 300,
       height: 320,
-      fill: 'black'
+      fill:  supplyPanel.isEnabledPower ? 'rgb(15, 33, 19)' : 'black',
     }" />
 
     <v-line :config="{ points: [30, 160, 310, 160], stroke: 'white' }" />
@@ -58,8 +58,10 @@
 </template>
 
 <script setup lang="ts">
+import { useSupplyPanelStore } from "@/store/supplyPanel";
 import { ref } from "vue";
 import SAMButton from "./SAMButton.vue";
 import SAMPotentiometer from "./SAMPotentiometer.vue";
 const isCaptured = ref(false)
+const supplyPanel = useSupplyPanelStore()
 </script>
