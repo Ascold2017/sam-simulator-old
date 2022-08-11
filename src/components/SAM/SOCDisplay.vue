@@ -39,7 +39,7 @@
         strokeWidth: 0.5
       }" />
     </v-group>
-
+    <!-- targets -->
     <v-group
       v-if="supplyPanel.isEnabledPower && supplyPanel.isEnabledRotation && supplyPanel.isEnabledMainRadarTransmitter">
       <v-arc v-for="canvasTarget in canvasTargets" :config="{
@@ -104,8 +104,11 @@ samEventBus?.on('update', (e: IEventListenerPayload) => {
   const cTargets: ICanvasTarget[] = [];
   for (let targetId in e.targets) {
     const target = e.targets[targetId];
-    const targetSpotAzimut = ((target.size * mainRadar.scale) / 360 + SAM_PARAMS.RADAR_AZIMUT_DETECT_ACCURACY * 2) * SAM_PARAMS.RADAR_SPOT_AZIMUT_GAIN;
-    const targetSpotDistance = SAM_PARAMS.RADAR_DISTANCE_DETECT_ACCURACY * mainRadar.scale * SAM_PARAMS.RADAR_SPOT_DISTANCE_GAIN
+
+    const canvasTargetArcAngle = (target.size * SAM_PARAMS.RADAR_SPOT_AZIMUT_GAIN * 180) / (target.distance * Math.PI)  + SAM_PARAMS.RADAR_AZIMUT_DETECT_ACCURACY * 2;
+    const targetSpotAzimut =  canvasTargetArcAngle;
+    const targetSpotDistance = SAM_PARAMS.RADAR_DISTANCE_DETECT_ACCURACY * mainRadar.scale
+    console.log(targetSpotAzimut)
     if (target.distance < mainRadar.maxDisplayedDistance) {
       cTargets.push({
         radius: target.distance * mainRadar.scale,
