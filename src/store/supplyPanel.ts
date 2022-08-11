@@ -2,6 +2,7 @@ import type SAM from "@/classes/SAM";
 import Sounds from "@/classes/Sounds";
 import { defineStore } from "pinia";
 import { inject } from "vue";
+import { useMainRadarStore } from "./mainRadarPanel";
 
 export const useSupplyPanelStore = defineStore("supply", {
   state: () => ({
@@ -19,7 +20,7 @@ export const useSupplyPanelStore = defineStore("supply", {
         const i = setTimeout(() => {
           this.isEnabledPower = true;
           //@ts-ignore
-          this.sam.setIsEnabled(true)
+          this.sam.setIsEnabled(true);
           clearTimeout(i);
         }, 3000);
       } else {
@@ -30,18 +31,21 @@ export const useSupplyPanelStore = defineStore("supply", {
         this.isEnabledTargetRadarTransmitter = false;
         this.isEnabledThermalCamera = false;
         //@ts-ignore
-        sam.setIsEnabled(false)
+        this.sam.setIsEnabled(false);
       }
     },
     setEnablerRotation(value: boolean) {
+      const mainRadar = useMainRadarStore();
       if (!this.isEnabledPower) return;
       if (value) {
         const i = setTimeout(() => {
           this.isEnabledRotation = true;
+          mainRadar.turnRotationMainRadar(true);
           clearTimeout(i);
         }, 1000);
       } else {
         this.isEnabledRotation = false;
+        mainRadar.turnRotationMainRadar(false);
       }
     },
     setIsEnabledMainRadarTransmitter(value: boolean) {
@@ -76,6 +80,6 @@ export const useSupplyPanelStore = defineStore("supply", {
       } else {
         this.isEnabledThermalCamera = false;
       }
-    }
+    },
   },
 });

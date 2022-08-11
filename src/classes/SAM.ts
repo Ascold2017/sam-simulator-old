@@ -33,7 +33,10 @@ export interface IFlightMissiles {
   velocity: number;
 }
 
-export interface IEventListenerPayload { targets: Record<string, IRecognizedTargets>, missiles: Record<string, IFlightMissiles> }
+export interface IEventListenerPayload {
+  targets: Record<string, IRecognizedTargets>;
+  missiles: Record<string, IFlightMissiles>;
+}
 type EventListener = (arg: IEventListenerPayload) => void;
 
 export default class SAM {
@@ -118,7 +121,9 @@ export default class SAM {
         if (isTargetVisible && inAllowedElevation) {
           this.recognizedTargets[flightObject.identifier!] = {
             distance: targetDistance,
-            azimut: targetAzimut,
+            azimut: targetAzimut < 0
+              ? 2 * Math.PI + targetAzimut
+              : targetAzimut,
             elevation: targetElevation,
             radialVelocity,
             velocity: flightObject.currentPoint.v,

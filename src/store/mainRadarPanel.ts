@@ -13,6 +13,8 @@ export const useMainRadarStore = defineStore("mainRadar", {
     targetCursorAngle: 1.5 * Math.PI,
     targetCursorDistance: 30,
     distanceWindowLength: 2, // 2 km
+    radarRotation: 1.5 * Math.PI,
+    rotationInterval: null as number | null,
   }),
   getters: {
     scale(): number {
@@ -42,6 +44,19 @@ export const useMainRadarStore = defineStore("mainRadar", {
         return;
       }
       this.targetCursorDistance += value;
+    },
+    turnRotationMainRadar(value: boolean) {
+      if (value) {
+        this.rotationInterval = setInterval(() => {
+          const dR = Math.PI / 180;
+          this.radarRotation = this.radarRotation + dR >= 2 * Math.PI
+            ? dR
+            : this.radarRotation + dR;
+        });
+      } else {
+        this.rotationInterval && clearInterval(this.rotationInterval);
+        this.radarRotation = 1.5 * Math.PI;
+      }
     },
   },
 });

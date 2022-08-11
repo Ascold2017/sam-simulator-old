@@ -38,6 +38,11 @@
         stroke: 'white',
         strokeWidth: 0.5
       }" />
+      <v-line :config="{
+        points: [radarCursorLine.x0, radarCursorLine.y0, radarCursorLine.x1, radarCursorLine.y1],
+        stroke: 'rgb(150, 249, 123)',
+        strokeWidth: 1
+      }" />
     </v-group>
     <!-- targets -->
     <v-group
@@ -49,7 +54,7 @@
         angle: canvasTarget.angle,
         rotation: canvasTarget.rotation,
         strokeWidth: canvasTarget.strokeWidth,
-        stroke: 'rgba(150, 249, 123, 1)'
+        stroke: `rgba(150, 249, 123, ${canvasTarget.alpha})`
       }" />
     </v-group>
 
@@ -63,13 +68,14 @@ import { useSupplyPanelStore } from '@/store/supplyPanel';
 import { useMainRadarStore } from '@/store/mainRadarPanel';
 import { computed, inject, ref } from 'vue';
 import type { Emitter, EventType } from 'mitt';
-import { type IRecognizedTargets, type IEventListenerPayload, SAM_PARAMS } from '@/classes/SAM';
+import { type IEventListenerPayload, SAM_PARAMS } from '@/classes/SAM';
 
 interface ICanvasTarget {
   radius: number;
   strokeWidth: number;
   angle: number;
   rotation: number;
+  alpha: number
 };
 
 const samEventBus = inject<Emitter<Record<EventType, any>>>('samEventBus');
@@ -97,7 +103,14 @@ const targetCursorLine = computed(() => ({
     mainRadar.distanceWindowLength * mainRadar.scale,
     (mainRadar.maxDisplayedDistance - mainRadar.targetCursorDistance - mainRadar.distanceWindowLength) * mainRadar.scale
   ]
-}))
+}));
+
+const radarCursorLine = computed(() => ({
+  x0: 255,
+  y0: 250,
+  x1: Math.cos(mainRadar.radarRotation) * (mainRadar.maxDisplayedDistance * mainRadar.scale) + 255,
+  y1: Math.sin(mainRadar.radarRotation) * (mainRadar.maxDisplayedDistance * mainRadar.scale) + 250,
+}));
 const canvasTargets = ref<ICanvasTarget[]>([]);
 
 samEventBus?.on('update', (e: IEventListenerPayload) => {
@@ -106,15 +119,15 @@ samEventBus?.on('update', (e: IEventListenerPayload) => {
     const target = e.targets[targetId];
 
     const canvasTargetArcAngle = (target.size * SAM_PARAMS.RADAR_SPOT_AZIMUT_GAIN * 180) / (target.distance * Math.PI)  + SAM_PARAMS.RADAR_AZIMUT_DETECT_ACCURACY * 2;
-    const targetSpotAzimut =  canvasTargetArcAngle;
     const targetSpotDistance = SAM_PARAMS.RADAR_DISTANCE_DETECT_ACCURACY * mainRadar.scale
-    console.log(targetSpotAzimut)
+    const alpha = 1
     if (target.distance < mainRadar.maxDisplayedDistance) {
       cTargets.push({
         radius: target.distance * mainRadar.scale,
-        rotation: target.azimut * (180 / Math.PI) - targetSpotAzimut / 2,
-        angle: targetSpotAzimut,
-        strokeWidth: targetSpotDistance
+        rotation: target.azimut * (180 / Math.PI) - canvasTargetArcAngle / 2,
+        angle: canvasTargetArcAngle,
+        strokeWidth: targetSpotDistance,
+        alpha
       })
     }
   }
