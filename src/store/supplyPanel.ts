@@ -43,7 +43,7 @@ export const useSupplyPanelStore = defineStore("supply", {
         mainRadar.setDefaultValues();
         capturePanel.setDefaultValues();
         targetRadar.setDefaultValues();
-        targets.setTargets([]);
+        targets.setTargets([], []);
         weaponPanel.setDefaultValues()
       }
     },

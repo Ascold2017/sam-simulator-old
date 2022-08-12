@@ -13,7 +13,7 @@
 import { inject, onMounted, ref } from 'vue'
 import { useTargetsStore } from '@/store/targets';
 import { useTargetRadarStore } from '@/store/targetRadar';
-import type { IRecognizedTargets } from './classes/SAM';
+import type { IFlightMissiles, IRecognizedTargets } from './classes/SAM';
 import type { Emitter, EventType } from 'mitt';
 import AppMenu from '@/components/AppMenu.vue'
 import SAMScreen from '@/components/SAM/SAM.vue';
@@ -60,7 +60,7 @@ onMounted(() => {
     handler && handler();
   })
   samEventBus!.on('delete', (e: string) => targetRadar.resetCaptureTarget(e))
-  samEventBus!.on('update', (e: { targets: IRecognizedTargets[] }) => targetsStore.setTargets(e.targets))
+  samEventBus!.on('update', (e: { targets: IRecognizedTargets[], missiles: IFlightMissiles[] }) => targetsStore.setTargets(e.targets, e.missiles))
 });
 </script>
 

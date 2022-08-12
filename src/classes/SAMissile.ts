@@ -2,7 +2,7 @@ import type FlightObject from "./FlightObject";
 import Sounds from "./Sounds";
 
 export default class SAMissile {
-  private _identifier: string | null = null;
+  private _identifier: number | null = null;
   private targetPosition = { x: 0, y: 0, z: 0 };
   private targetDistance = Infinity;
   private maxDistance: number = 0;
@@ -15,15 +15,16 @@ export default class SAMissile {
   };
   private currentRotation = 0;
   private launchTime: number = 0;
-  private killRadius: number = 0.05; // 50 meters
+  private killRadius: number = 0.1; // 100 meters
   private isDestroyed = false;
   private traveledDistance = 0;
   constructor(
+    id: number,
     maxDistance = 25,
     velocity = 900,
     initialPoint = { x: 0, y: 0, z: 0 },
   ) {
-    this._identifier = new Date().toString();
+    this._identifier = id;
     this.maxDistance = maxDistance;
     this._velocity = velocity;
     this.currentPoint = initialPoint;

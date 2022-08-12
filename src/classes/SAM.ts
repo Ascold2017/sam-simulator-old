@@ -30,6 +30,7 @@ export interface IRecognizedTargets {
 }
 
 export interface IFlightMissiles {
+  identifier: string;
   x: number;
   y: number;
   z: number;
@@ -38,7 +39,7 @@ export interface IFlightMissiles {
 
 export interface IEventListenerPayload {
   targets: IRecognizedTargets[];
-  missiles: Record<string, IFlightMissiles>;
+  missiles: IFlightMissiles[];
 }
 type EventListener = (eventName: string, arg: IEventListenerPayload | string) => void;
 
@@ -66,6 +67,10 @@ export default class SAM {
     this.flightObjects.push(flightObject);
   }
 
+  public addMissile(missile: SAMissile) {
+    this.missiles.push(missile);
+  }
+
   private tick() {
     setInterval(() => {
       if (this.isEnabled) {
@@ -73,7 +78,7 @@ export default class SAM {
         this.recalculateMissiles();
         this.eventListener!('update', {
           targets: Object.keys(this.recognizedTargets).map(id => this.recognizedTargets[id]),
-          missiles: { ...this.flightMissiles },
+          missiles: Object.keys(this.flightMissiles).map(id => this.flightMissiles[id]),
         });
       }
     });
@@ -156,6 +161,7 @@ export default class SAM {
     for (let missile of this.missiles) {
       if (!missile.isDestroyedMissile) {
         this.flightMissiles[missile.identifier!] = {
+          identifier: missile.identifier!,
           x: missile.missileCurrentPoint.x,
           y: missile.missileCurrentPoint.y,
           z: missile.missileCurrentPoint.z,
@@ -171,9 +177,9 @@ export default class SAM {
             const z = fo.currentPoint.z;
 
             const distanceToMissile = Math.sqrt(
-              (x - missile.missileCurrentPoint.x) ^
-                2 + (y - missile.missileCurrentPoint.y) ^
-                2 + (z - missile.missileCurrentPoint.z) ^ 2,
+              Math.pow(x - missile.missileCurrentPoint.x, 2) +
+              Math.pow(y - missile.missileCurrentPoint.y, 2) +
+              Math.pow(z - missile.missileCurrentPoint.z, 2),
             );
 
             return distanceToMissile <= missile.missileKillRadius

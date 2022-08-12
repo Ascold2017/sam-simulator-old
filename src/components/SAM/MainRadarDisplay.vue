@@ -96,6 +96,13 @@
         height: 4,
         fill: 'white'
       }" />
+      <v-circle v-for="canvasMissile in canvasMissiles" :config="{
+        x: canvasMissile.x,
+        y: canvasMissile.y,
+        width: 4,
+        height: 4,
+        fill: 'red'
+      }" />
     </v-group>
   </v-group>
 </template>
@@ -180,6 +187,13 @@ const canvasTargets = computed<ICanvasTarget[]>(() => {
       }
     });
 });
+
+const canvasMissiles = computed(() => {
+ return targetsStore.missiles.map(missile => ({
+   x: missile.x * mainRadar.scale + 350,
+    y: missile.y * mainRadar.scale + 350
+ }));
+})
 
 const canvasHitPoint = computed(() => {
   if (!targetRadarStore.capturedTarget || !weaponPanelStore.currentMissile) return { x: 0, y: 0 }

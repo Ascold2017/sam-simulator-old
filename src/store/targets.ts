@@ -1,10 +1,12 @@
-import { SAM_PARAMS, type IRecognizedTargets } from "@/classes/SAM";
+import { SAM_PARAMS, type IFlightMissiles, type IRecognizedTargets } from "@/classes/SAM";
 import { defineStore } from "pinia";
 import { useTargetRadarStore } from "./targetRadar";
+import { useWeaponPanelStore } from "./weaponPanel";
 
 export const useTargetsStore = defineStore("targets", {
   state: () => ({
     targets: [] as IRecognizedTargets[],
+    missiles: [] as IFlightMissiles[]
   }),
   getters: {
     targetsInRay(): IRecognizedTargets[] {
@@ -18,9 +20,11 @@ export const useTargetsStore = defineStore("targets", {
     }
   },
   actions: {
-    setTargets(targets: IRecognizedTargets[]) {
+    setTargets(targets: IRecognizedTargets[], missiles: IFlightMissiles[]) {
       const targetRadar = useTargetRadarStore();
+      const weaponPanel = useWeaponPanelStore();
       this.targets = targets;
+      this.missiles = missiles;
       targetRadar.capturedTarget = targets.find((t) =>
         t.identifier === targetRadar.capturedTargetId
       ) || null;
@@ -32,6 +36,15 @@ export const useTargetsStore = defineStore("targets", {
       }
       if (targetRadar.isCapturedElevation && targetRadar.capturedTarget) {
         targetRadar.targetCursorElevation = targetRadar.capturedTarget.elevation;
+      }
+
+      if (targetRadar.isCapturedAll && targetRadar.capturedTarget) {
+        weaponPanel.launchedMissiles.forEach(m => m.setTargetPosition({
+          x: targetRadar.capturedTarget!.x,
+          y: targetRadar.capturedTarget!.y,
+          z: targetRadar.capturedTarget!.height
+        }));
+
       }
     },
   },

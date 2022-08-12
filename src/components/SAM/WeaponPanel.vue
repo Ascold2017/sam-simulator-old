@@ -91,8 +91,8 @@
         :value="weaponPanel.currentMissileId === missile.id" @click="weaponPanel.selectMissile(missile.id)" />
     </v-group>
     <v-group :config="{ x: 400, y: 20 }">
-      <SAMButton :x="55" :y="0" name="launch" label="ПУСК" :value="false" color="red" />
-      <SAMButton :x="120" :y="0" name="return" label="Возврат" :value="false" />
+      <SAMButton :x="55" :y="0" name="launch" label="ПУСК" :value="false" color="red" @click="weaponPanel.launchMissile" />
+      <SAMButton :x="120" :y="0" name="return" label="Возврат" :value="false" @click="weaponPanel.resetMissile"/>
 
       <v-text :config="{
         x: 0,
