@@ -10,14 +10,14 @@ export enum ViewModes {
 export const useMainRadarStore = defineStore("mainRadar", {
   state: () => ({
     viewMode: ViewModes.MainRadar,
-    maxDisplayedDistance: 50,
+    maxDisplayedDistance: 120,
     
     radarRotation: 1.5 * Math.PI,
     rotationInterval: null as number | null,
   }),
   getters: {
     scale(): number {
-      return (SAM_PARAMS.MAX_DISTANCE / this.maxDisplayedDistance) * 4.5;
+      return (SAM_PARAMS.MAX_DISTANCE / this.maxDisplayedDistance) * 1.8;
     },
   },
   actions: {

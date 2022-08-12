@@ -37,7 +37,7 @@
         v-for="i in countCircles" />
       <!-- Killzone circle -->
       <v-circle
-        :config="{ x: 255, y: 250, width: 50 * mainRadar.scale, stroke: 'rgb(150, 249, 123)', strokeWidth: 0.5 }" />
+        :config="{ x: 255, y: 250, width: 100 * mainRadar.scale, stroke: 'rgb(150, 249, 123)', strokeWidth: 0.5 }" />
       <!-- Azimut lines -->
       <v-line :config="{
         points: [azimutLine.x0, azimutLine.y0, azimutLine.x1, azimutLine.y1,],

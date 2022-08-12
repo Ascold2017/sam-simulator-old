@@ -14,10 +14,10 @@
       cornerRadius: 6,
     }" />
 
-    <SAMButton :x="540" :y="20" name="scale50km" label="50 км" :value="mainRadar.maxDisplayedDistance === 50"
-      @click="mainRadar.setMaxDisplayedDistance(50)" />
-    <SAMButton :x="540" :y="85" name="scale30km" label="30 км" :value="mainRadar.maxDisplayedDistance === 30"
-      @click="mainRadar.setMaxDisplayedDistance(30)" />
+    <SAMButton :x="540" :y="20" name="scale120km" label="120 км" :value="mainRadar.maxDisplayedDistance === 120"
+      @click="mainRadar.setMaxDisplayedDistance(120)" />
+    <SAMButton :x="540" :y="85" name="scale60km" label="60 км" :value="mainRadar.maxDisplayedDistance === 60"
+      @click="mainRadar.setMaxDisplayedDistance(60)" />
 
     <SAMButton :x="540" :y="170" name="mainRadarMode" :value="mainRadar.viewMode === ViewModes.MainRadar" label="СОЦ"
       @click="mainRadar.setViewMode(ViewModes.MainRadar)" />
