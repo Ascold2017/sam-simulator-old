@@ -6,184 +6,134 @@
     <v-rect :config="{
       x: 0,
       y: 0,
-      width: 400,
-      height: 500,
+      width: 800,
+      height: 150,
       fill: 'grey', shadowBlur: 10, cornerRadius: 6,
     }" />
     <!-- Power -->
     <v-group :config="{ x: 20, y: 20 }">
       <v-text :config="{
         x: 0,
-        y: 0,
-        height: 60,
+        y: 10,
+        height: 20,
         verticalAlign: 'middle',
         text: 'Питание',
         fill: '#181818',
         fontFamily: 'Russo One, sans-serif',
-        fontSize: 13
+        fontSize: 12
       }" />
       <v-circle :config="{
         name: 'powerIndicator',
-        x: 180,
-        y: 30,
+        x: 95,
+        y: 20,
         width: 20,
         height: 20,
         fill: supplyPanel.isEnabledPower ? 'rgb(150, 249, 123)' : 'red',
         shadowBlur: 5
       }" />
-      <SAMButton label="Вкл" :x="235" :y="0" name="powerOn" :value="supplyPanel.isEnabledPower"
+      <SAMButton label="Вкл" :x="0" :y="50" name="powerOn" :value="supplyPanel.isEnabledPower"
         @click="supplyPanel.setEnabledPower(true)" />
-      <SAMButton label="Выкл" :x="300" :y="0" name="powerOff" :value="!supplyPanel.isEnabledPower"
+      <SAMButton label="Выкл" :x="65" :y="50" name="powerOff" :value="!supplyPanel.isEnabledPower"
         @click="supplyPanel.setEnabledPower(false)" />
     </v-group>
 
     <!-- SOC mechanization -->
-    <v-group :config="{ x: 20, y: 85 }">
+    <v-group :config="{ x: 160, y: 20 }">
       <v-text :config="{
         x: 0,
-        y: 0,
-        height: 60,
+        y: 10,
+        height: 20,
         verticalAlign: 'middle',
-        text: 'Привод СОЦ',
+        text: 'Поиск',
         fill: '#181818',
         fontFamily: 'Russo One, sans-serif',
-        fontSize: 13
+        fontSize: 12
       }" />
       <v-circle :config="{
         name: 'rotationIndicator',
-        x: 180,
-        y: 30,
+        x: 95,
+        y: 20,
         width: 20,
         height: 20,
-        fill: supplyPanel.isEnabledRotation ? 'rgb(150, 249, 123)' : 'red',
+        fill: supplyPanel.isEnabledMainRadar ? 'rgb(150, 249, 123)' : 'red',
         shadowBlur: 5
       }" />
-      <SAMButton label="Вкл" :x="235" :y="0" name="rotationOn" :value="supplyPanel.isEnabledRotation"
-        @click="supplyPanel.setEnablerRotation(true)" />
-      <SAMButton label="Выкл" :x="300" :y="0" name="rotationOff" :value="!supplyPanel.isEnabledRotation"
-        @click="supplyPanel.setEnablerRotation(false)" />
-    </v-group>
-
-    <!-- SOC antenna -->
-    <v-group :config="{ x: 20, y: 150 }">
-      <v-text :config="{
-        x: 0,
-        y: 0,
-        height: 60,
-        verticalAlign: 'middle',
-        text: 'Передатчик СОЦ',
-        fill: '#181818',
-        fontFamily: 'Russo One, sans-serif',
-        fontSize: 13
-      }" />
-      <v-circle :config="{
-        name: 'mainRadarIndicator',
-        x: 180,
-        y: 30,
-        width: 20,
-        height: 20,
-        fill: supplyPanel.isEnabledMainRadarTransmitter ? 'rgb(150, 249, 123)' : 'red',
-        shadowBlur: 5
-      }" />
-      <SAMButton label="Вкл" :x="235" :y="0" name="mainRadarOn" :value="supplyPanel.isEnabledMainRadarTransmitter"
-        @click="supplyPanel.setIsEnabledMainRadarTransmitter(true)" />
-      <SAMButton label="Выкл" :x="300" :y="0" name="mainRadarOff" :value="!supplyPanel.isEnabledMainRadarTransmitter"
-        @click="supplyPanel.setIsEnabledMainRadarTransmitter(false)" />
+      <SAMButton label="Вкл" :x="0" :y="50" name="rotationOn" :value="supplyPanel.isEnabledMainRadar"
+        @click="supplyPanel.setEnablerMainRadar(true)" />
+      <SAMButton label="Выкл" :x="65" :y="50" name="rotationOff" :value="!supplyPanel.isEnabledMainRadar"
+        @click="supplyPanel.setEnablerMainRadar(false)" />
     </v-group>
 
     <!-- SNR antenna -->
-    <v-group :config="{ x: 20, y: 215 }">
+    <v-group :config="{ x: 300, y: 20 }">
       <v-text :config="{
         x: 0,
-        y: 0,
-        height: 60,
+        y: 10,
+        height: 20,
         verticalAlign: 'middle',
-        text: 'Передатчик СНР',
+        text: 'Передатчик',
         fill: '#181818',
         fontFamily: 'Russo One, sans-serif',
-        fontSize: 13
+        fontSize: 12
       }" />
       <v-circle :config="{
         name: 'targetRadarIndicator',
-        x: 180,
-        y: 30,
+        x: 95,
+        y: 20,
         width: 20,
         height: 20,
         fill: supplyPanel.isEnabledTargetRadarTransmitter ? 'rgb(150, 249, 123)' : 'red',
         shadowBlur: 5
       }" />
-      <SAMButton label="Вкл" :x="235" :y="0" name="snrOn" :value="supplyPanel.isEnabledTargetRadarTransmitter"
+      <SAMButton label="Вкл" :x="0" :y="50" name="snrOn" :value="supplyPanel.isEnabledTargetRadarTransmitter"
         @click="supplyPanel.setIsEnabledTargetRadarTransmitter(true)" />
-      <SAMButton label="Выкл" :x="300" :y="0" name="snrOff" :value="!supplyPanel.isEnabledTargetRadarTransmitter"
+      <SAMButton label="Выкл" :x="65" :y="50" name="snrOff" :value="!supplyPanel.isEnabledTargetRadarTransmitter"
         @click="supplyPanel.setIsEnabledTargetRadarTransmitter(false)" />
     </v-group>
     <!-- OLS power -->
-    <v-group :config="{ x: 20, y: 280 }">
+    <v-group :config="{ x: 440, y: 20 }">
       <v-text :config="{
         x: 0,
-        y: 0,
-        height: 60,
+        y: 10,
+        height: 20,
         verticalAlign: 'middle',
-        text: 'Питание ОЛС',
+        text: 'Тепловизор',
         fill: '#181818',
         fontFamily: 'Russo One, sans-serif',
-        fontSize: 13
+        fontSize: 12
       }" />
       <v-circle :config="{
         name: 'thermalCameraIndicator',
-        x: 180,
-        y: 30,
+        x: 95,
+        y: 20,
         width: 20,
         height: 20,
         fill: supplyPanel.isEnabledThermalCamera ? 'rgb(150, 249, 123)' : 'red',
         shadowBlur: 5
       }" />
-      <SAMButton label="Вкл" :x="235" :y="0" name="thermalCameraOn" :value="supplyPanel.isEnabledThermalCamera"
+      <SAMButton label="Вкл" :x="0" :y="50" name="thermalCameraOn" :value="supplyPanel.isEnabledThermalCamera"
         @click="supplyPanel.setIsEnabledThermalCamera(true)" />
-      <SAMButton label="Выкл" :x="300" :y="0" name="thermalCameraOff" :value="!supplyPanel.isEnabledThermalCamera"
+      <SAMButton label="Выкл" :x="65" :y="50" name="thermalCameraOff" :value="!supplyPanel.isEnabledThermalCamera"
         @click="supplyPanel.setIsEnabledThermalCamera(false)" />
     </v-group>
 
-    <v-line :config="{ points: [20, 390, 50, 390], stroke: '#181818' }" />
-    <v-text :config="{
-      x: 60,
-      y: 380,
-      width: 120,
-      height: 20,
-      verticalAlign: 'middle',
-      align: 'center',
-      text: 'Режим дисплея',
-      fill: '#181818',
-      fontFamily: 'Russo One, sans-serif',
-      fontSize: 13
-    }" />
-    <v-line :config="{ points: [190, 390, 220, 390 ], stroke: '#181818' }" />
-
-    <SAMButton :x="20" :y="420" name="SOC" :value="mainRadar.viewMode === ViewModes.MainRadar" label="СОЦ"
-      @click="mainRadar.viewMode = ViewModes.MainRadar" />
-    <SAMButton :x="90" :y="420" name="BIP" :value="mainRadar.viewMode === ViewModes.BIP" label="БИП"
-      @click="mainRadar.viewMode = ViewModes.BIP" />
-    <SAMButton :x="160" :y="420" name="LOGS" :value="mainRadar.viewMode === ViewModes.LOGS" label="Логи"
-      @click="mainRadar.viewMode = ViewModes.LOGS" />
-
     <v-rect :config="{
-      x: 255,
-      y: 360,
-      width: 125,
-      height: 125,
+      x: 670,
+      y: 20,
+      width: 110,
+      height: 110,
       fill: 'white',
       stroke: '#181818',
     }" />
     <v-circle ref="clocksRef"  :config="{
-      x: 317.5,
-      y: 422.5,
-      width: 125,
-      height: 125,
+      x: 725,
+      y: 75,
+      width: 110,
+      height: 110,
       stroke: '#181818',
       strokeWidth: 2,
       sceneFunc: drawClock
     }" />
-
   </v-group>
 </template>
 
@@ -191,11 +141,9 @@
 import { onMounted, ref } from "vue";
 import type Konva from "konva";
 import { useSupplyPanelStore } from '@/store/supplyPanel';
-import { useMainRadarStore, ViewModes } from '@/store/mainRadarPanel'
 import SAMButton from "./SAMButton.vue";
 const clocksRef = ref();
 const supplyPanel = useSupplyPanelStore();
-const mainRadar = useMainRadarStore();
 
 const drawClock = (ctx: CanvasRenderingContext2D, shape: Konva.Shape) => {
   shape.clearCache()

@@ -1,14 +1,15 @@
 <template>
   <v-container fluid class="px-6 ">
     <div class="d-flex justify-center">
-      <v-stage :config="{ width: 1420, height: 900 }">
+      <v-stage :config="{ width: 1410, height: 900 }">
         <v-layer>
           <SupplyPanel />
-          <ParamsPanel />
-          <TVPanel />
           <MainRadarPanel />
-          <WeaponPanel />
+          
+          <ParamsPanel />
           <CapturePanel />
+          <WeaponPanel />
+          
         </v-layer>
         <v-layer>
           <MainRadarDisplay v-if="mainRadar.viewMode === ViewModes.MainRadar" />

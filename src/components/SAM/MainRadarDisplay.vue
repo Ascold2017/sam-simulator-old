@@ -1,14 +1,14 @@
 <template>
   <v-group :config="{
-    x: 430,
-    y: 210,
+    x: 20,
+    y: 180,
   }">
     <v-rect :config="{
       name: 'display',
       x: 0,
       y: 0,
-      width: 510,
-      height: 500,
+      width: 700,
+      height: 700,
       fill: supplyPanel.isEnabledPower ? 'rgb(15, 33, 19)' : 'black',
     }" />
 
@@ -24,7 +24,7 @@
       />
       <v-text :config="{
           x: 10,
-          y: 480,
+          y: 680,
           text: `Дальность: ${targetRadarStore.targetCursorDistance.toFixed(1)} км`,
           fontFamily: 'Russo One, sans-serif',
           fontSize: 12,
@@ -33,11 +33,11 @@
       />
       <!-- Distance circles -->
       <v-circle
-        :config="{ x: 255, y: 250, width: i * 20 * mainRadar.scale, stroke: 'rgb(150, 249, 123)', strokeWidth: 0.1 }"
+        :config="{ x: 350, y: 350, width: i * 20 * mainRadar.scale, stroke: 'rgb(150, 249, 123)', strokeWidth: 0.1 }"
         v-for="i in countCircles" />
       <!-- Killzone circle -->
       <v-circle
-        :config="{ x: 255, y: 250, width: 100 * mainRadar.scale, stroke: 'rgb(150, 249, 123)', strokeWidth: 0.5 }" />
+        :config="{ x: 350, y: 350, width: 100 * mainRadar.scale, stroke: 'rgb(150, 249, 123)', strokeWidth: 0.5 }" />
       <!-- Azimut lines -->
       <v-line :config="{
         points: [azimutLine.x0, azimutLine.y0, azimutLine.x1, azimutLine.y1,],
@@ -76,9 +76,9 @@
     </v-group>
     <!-- targets -->
     <v-group
-      v-if="supplyPanel.isEnabledPower && supplyPanel.isEnabledRotation && supplyPanel.isEnabledMainRadarTransmitter">
+      v-if="supplyPanel.isEnabledPower && supplyPanel.isEnabledMainRadar">
       <v-arc v-for="canvasTarget in canvasTargets" :config="{
-        x: 255, y: 250,
+        x: 350, y: 350,
         innerRadius: canvasTarget.radius,
         outerRadius: canvasTarget.radius,
         angle: canvasTarget.angle,
@@ -120,10 +120,10 @@ const azimutLabel = computed(() => {
 const countCircles = computed(() => mainRadar.maxDisplayedDistance / 10);
 const azimutLines = computed(() => {
   return Array(36).fill(0).map((_, i) => ({
-    x0: Math.cos(i * 10 * (Math.PI / 180) - Math.PI / 2) * (5 * mainRadar.scale) + 255,
-    y0: Math.sin(i * 10 * (Math.PI / 180) - Math.PI / 2) * (5 * mainRadar.scale) + 250,
-    x1: Math.cos(i * 10 * (Math.PI / 180) - Math.PI / 2) * (mainRadar.maxDisplayedDistance * mainRadar.scale + 10) + 255,
-    y1: Math.sin(i * 10 * (Math.PI / 180) - Math.PI / 2) * (mainRadar.maxDisplayedDistance * mainRadar.scale + 10) + 250,
+    x0: Math.cos(i * 10 * (Math.PI / 180) - Math.PI / 2) * (5 * mainRadar.scale) + 350,
+    y0: Math.sin(i * 10 * (Math.PI / 180) - Math.PI / 2) * (5 * mainRadar.scale) + 350,
+    x1: Math.cos(i * 10 * (Math.PI / 180) - Math.PI / 2) * (mainRadar.maxDisplayedDistance * mainRadar.scale + 10) + 350,
+    y1: Math.sin(i * 10 * (Math.PI / 180) - Math.PI / 2) * (mainRadar.maxDisplayedDistance * mainRadar.scale + 10) + 350,
     angleLabel: String(i * 10)
   }))
 });
@@ -135,10 +135,10 @@ const targetCursorLine = computed(() => {
   const distanceToWindow = distance * mainRadar.scale - SAM_PARAMS.RADAR_DISTANCE_WINDOW * mainRadar.scale / 2;
   const distanceFromWindow = (mainRadar.maxDisplayedDistance - distance - SAM_PARAMS.RADAR_DISTANCE_WINDOW / 2) * mainRadar.scale
   return {
-    x0: 255,
-    y0: 250,
-    x1: Math.cos(azimut) * (mainRadar.maxDisplayedDistance * mainRadar.scale) + 255,
-    y1: Math.sin(azimut) * (mainRadar.maxDisplayedDistance * mainRadar.scale) + 250,
+    x0: 350,
+    y0: 350,
+    x1: Math.cos(azimut) * (mainRadar.maxDisplayedDistance * mainRadar.scale) + 350,
+    y1: Math.sin(azimut) * (mainRadar.maxDisplayedDistance * mainRadar.scale) + 350,
     dash: [
       distanceToWindow,
       SAM_PARAMS.RADAR_DISTANCE_WINDOW * mainRadar.scale,
@@ -148,10 +148,10 @@ const targetCursorLine = computed(() => {
 });
 
 const radarCursorLine = computed(() => ({
-  x0: 255,
-  y0: 250,
-  x1: Math.cos(mainRadar.radarRotation) * (mainRadar.maxDisplayedDistance * mainRadar.scale) + 255,
-  y1: Math.sin(mainRadar.radarRotation) * (mainRadar.maxDisplayedDistance * mainRadar.scale) + 250,
+  x0: 350,
+  y0: 350,
+  x1: Math.cos(mainRadar.radarRotation) * (mainRadar.maxDisplayedDistance * mainRadar.scale) + 350,
+  y1: Math.sin(mainRadar.radarRotation) * (mainRadar.maxDisplayedDistance * mainRadar.scale) + 350,
 }));
 const canvasTargets = computed<ICanvasTarget[]>(() => {
   return targetsStore.targets

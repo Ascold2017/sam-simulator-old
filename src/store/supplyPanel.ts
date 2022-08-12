@@ -9,8 +9,7 @@ import { useWeaponPanelStore } from "./weaponPanel";
 export const useSupplyPanelStore = defineStore("supply", {
   state: () => ({
     isEnabledPower: false,
-    isEnabledRotation: false,
-    isEnabledMainRadarTransmitter: false,
+    isEnabledMainRadar: false,
     isEnabledTargetRadarTransmitter: false,
     isEnabledThermalCamera: false,
   }),
@@ -18,8 +17,7 @@ export const useSupplyPanelStore = defineStore("supply", {
   actions: {
     setDefaultValues() {
       this.isEnabledPower = false;
-      this.isEnabledRotation = false;
-      this.isEnabledMainRadarTransmitter = false;
+      this.isEnabledMainRadar = false;
       this.isEnabledTargetRadarTransmitter = false;
       this.isEnabledThermalCamera = false;
     },
@@ -49,29 +47,18 @@ export const useSupplyPanelStore = defineStore("supply", {
         weaponPanel.setDefaultValues()
       }
     },
-    setEnablerRotation(value: boolean) {
+    setEnablerMainRadar(value: boolean) {
       const mainRadar = useMainRadarStore();
       if (!this.isEnabledPower) return;
       if (value) {
         const i = setTimeout(() => {
-          this.isEnabledRotation = true;
+          this.isEnabledMainRadar = true;
           mainRadar.turnRotationMainRadar(true);
           clearTimeout(i);
         }, 1000);
       } else {
-        this.isEnabledRotation = false;
+        this.isEnabledMainRadar = false;
         mainRadar.turnRotationMainRadar(false);
-      }
-    },
-    setIsEnabledMainRadarTransmitter(value: boolean) {
-      if (!this.isEnabledPower || !this.isEnabledRotation) return;
-      if (value) {
-        const i = setTimeout(() => {
-          this.isEnabledMainRadarTransmitter = true;
-          clearTimeout(i);
-        }, 500);
-      } else {
-        this.isEnabledMainRadarTransmitter = false;
       }
     },
     setIsEnabledTargetRadarTransmitter(value: boolean) {

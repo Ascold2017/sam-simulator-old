@@ -1,14 +1,14 @@
 <template>
   <v-group :config="{
-    x: 430,
-    y: 210,
+    x: 20,
+    y: 180,
   }">
     <v-rect :config="{
       name: 'display',
       x: 0,
       y: 0,
-      width: 510,
-      height: 500,
+     width: 700,
+      height: 700,
       fill: supplyPanel.isEnabledPower ? 'rgb(15, 33, 19)' : 'black',
     }" />
 
@@ -30,7 +30,7 @@
     }" />
     <v-text :config="{
       x: 10,
-      y: 480,
+      y: 680,
       text: `Дальность: ${targetRadarStore.targetCursorDistance.toFixed(1)} км`,
       fontFamily: 'Russo One, sans-serif',
       fontSize: 12,
@@ -38,39 +38,39 @@
     }" />
 
     <v-group v-if="supplyPanel.isEnabledPower" :config="{
-      x: 255, y: 250,
+      x: 350, y: 350,
       rotation: targetRadarStore.targetCursorAngle * (180 / Math.PI)
     }">
       <v-rect :config="{
-        width: 230,
-        height: 100,
+        width: 330,
+        height: 150,
         stroke: 'rgb(150, 249, 123)',
         strokeWidth: 0.5,
-        offsetY: 50,
+        offsetY: 75,
       }" />
       <v-line :config="{
         stroke: 'rgb(150, 249, 123)',
         strokeWidth: 0.2,
-        offsetY: 50,
-        points: [115 - distanceDetectAccuracyCanvas, 0, 115 - distanceDetectAccuracyCanvas, 100]
+        offsetY: 75,
+        points: [165 - distanceDetectAccuracyCanvas, 0, 165 - distanceDetectAccuracyCanvas, 150]
       }" />
       <v-line :config="{
         stroke: 'rgb(150, 249, 123)',
         strokeWidth: 0.2,
-        offsetY: 50,
-        points: [115 + distanceDetectAccuracyCanvas, 0, 115 + distanceDetectAccuracyCanvas, 100]
+        offsetY: 75,
+        points: [165 + distanceDetectAccuracyCanvas, 0, 165 + distanceDetectAccuracyCanvas, 150]
       }" />
       <v-line :config="{
         stroke: 'rgb(150, 249, 123)',
         strokeWidth: 0.2,
-        offsetY: 50,
-        points: [0, 50 - elevationDetectAccuracyCanvas, 230, 50 - elevationDetectAccuracyCanvas]
+        offsetY: 75,
+        points: [0, 75 - elevationDetectAccuracyCanvas, 330, 75 - elevationDetectAccuracyCanvas]
       }" />
       <v-line :config="{
         stroke: 'rgb(150, 249, 123)',
         strokeWidth: 0.2,
-        offsetY: 50,
-        points: [0, 50 + elevationDetectAccuracyCanvas, 230, 50 + elevationDetectAccuracyCanvas]
+        offsetY: 75,
+        points: [0, 75 + elevationDetectAccuracyCanvas, 330, 75 + elevationDetectAccuracyCanvas]
       }" />
       <v-rect v-for="canvasTarget in canvasTargets" :config="{
         x: canvasTarget.x,
@@ -131,12 +131,12 @@ const canvasTargets = computed<ICanvasTarget[]>(() => {
         ? 0
         : (target.distance - targetRadarStore.targetCursorDistance);
       const offsetDistanceK = 2 * offsetDistance / SAM_PARAMS.RADAR_DISTANCE_WINDOW;
-      const offsetDistanceCanvas = offsetDistanceK * 115 + 115; // Half of rect height
+      const offsetDistanceCanvas = offsetDistanceK * 165 + 165; // Half of rect height
       const offsetElevation = targetRadarStore.isCapturedElevation
         ? 0
         : (target.elevation - targetRadarStore.targetCursorElevation);
       const offsetElevationK = 2 * offsetElevation / SAM_PARAMS.TARGET_RADAR_RAY_WIDTH;
-      const canvasOffsetElevation = offsetElevationK * 50;  // Half of rect width
+      const canvasOffsetElevation = offsetElevationK * 75;  // Half of rect width
 
       const rayWidth = ((Math.PI * SAM_PARAMS.TARGET_RADAR_RAY_WIDTH * target.distance) / 180);
       const alpha = 1

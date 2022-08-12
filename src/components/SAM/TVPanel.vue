@@ -1,7 +1,7 @@
 <template>
   <v-group ref="tvPanel" :config="{
-    x: 1020,
-    y: 0,
+    x: 810,
+    y: 540,
   }">
     <v-rect :config="{
       name: 'panel',

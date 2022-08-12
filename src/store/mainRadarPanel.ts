@@ -17,7 +17,7 @@ export const useMainRadarStore = defineStore("mainRadar", {
   }),
   getters: {
     scale(): number {
-      return (SAM_PARAMS.MAX_DISTANCE / this.maxDisplayedDistance) * 1.8;
+      return (SAM_PARAMS.MAX_DISTANCE / this.maxDisplayedDistance) * 2.6;
     },
   },
   actions: {

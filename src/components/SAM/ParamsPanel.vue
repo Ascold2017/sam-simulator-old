@@ -1,6 +1,6 @@
 <template>
   <v-group :config="{
-    x: 410,
+    x: 810,
     y: 0,
   }">
 

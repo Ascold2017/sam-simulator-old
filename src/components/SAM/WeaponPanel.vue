@@ -1,14 +1,14 @@
 <template>
   <v-group :config="{
-    x: 410,
-    y: 740,
+    x: 810,
+    y: 380,
   }">
     <v-rect :config="{
       name: 'panelWeapon',
       x: 0,
       y: 0,
       width: 600,
-      height: 160,
+      height: 150,
       fill: 'grey',
       shadowBlur: 10,
       cornerRadius: 6,
@@ -91,7 +91,7 @@
         :value="weaponPanel.currentMissileId === missile.id" @click="weaponPanel.selectMissile(missile.id)" />
     </v-group>
     <v-group :config="{ x: 400, y: 20 }">
-      <SAMButton :x="0" :y="0" name="launch" label="ПУСК" :value="false" color="red" />
+      <SAMButton :x="55" :y="0" name="launch" label="ПУСК" :value="false" color="red" />
       <SAMButton :x="120" :y="0" name="return" label="Возврат" :value="false" />
 
       <v-text :config="{

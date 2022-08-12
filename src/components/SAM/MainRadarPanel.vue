@@ -1,34 +1,34 @@
 <template>
   <v-group :config="{
-    x: 410,
-    y: 190,
+    x: 0,
+    y: 160,
   }">
     <v-rect :config="{
       name: 'panel',
       x: 0,
       y: 0,
-      width: 600,
-      height: 540,
+      width: 800,
+      height: 740,
       fill: 'grey',
       shadowBlur: 10,
       cornerRadius: 6,
     }" />
 
-    <SAMButton :x="540" :y="20" name="scale120km" label="120 км" :value="mainRadar.maxDisplayedDistance === 120"
+    <SAMButton :x="730" :y="20" name="scale120km" label="120 км" :value="mainRadar.maxDisplayedDistance === 120"
       @click="mainRadar.setMaxDisplayedDistance(120)" />
-    <SAMButton :x="540" :y="85" name="scale60km" label="60 км" :value="mainRadar.maxDisplayedDistance === 60"
+    <SAMButton :x="730" :y="85" name="scale60km" label="60 км" :value="mainRadar.maxDisplayedDistance === 60"
       @click="mainRadar.setMaxDisplayedDistance(60)" />
 
-    <SAMButton :x="540" :y="170" name="mainRadarMode" :value="mainRadar.viewMode === ViewModes.MainRadar" label="СОЦ"
+    <SAMButton :x="730" :y="170" name="mainRadarMode" :value="mainRadar.viewMode === ViewModes.MainRadar" label="СОЦ"
       @click="mainRadar.setViewMode(ViewModes.MainRadar)" />
-    <SAMButton :x="540" :y="235" name="targetRadarMode" :value="mainRadar.viewMode === ViewModes.TargetRadar"
+    <SAMButton :x="730" :y="235" name="targetRadarMode" :value="mainRadar.viewMode === ViewModes.TargetRadar"
       label="ССЦ" @click="openTargetRadar" />
 
-    <SAMButton :x="540" :y="330" name="captureA" :value="targetRadar.isCapturedAzimut" label="АС β"
+    <SAMButton :x="730" :y="330" name="captureA" :value="targetRadar.isCapturedAzimut" label="АС β"
       @click="captureByAzimut" />
-    <SAMButton :x="540" :y="395" name="captureE" :value="targetRadar.isCapturedElevation" label="АС ε"
+    <SAMButton :x="730" :y="395" name="captureE" :value="targetRadar.isCapturedElevation" label="АС ε"
       @click="targetRadar.captureByElevation" />
-    <SAMButton :x="540" :y="460" name="captureD" :value="targetRadar.isCapturedDistance" label="АС r"
+    <SAMButton :x="730" :y="460" name="captureD" :value="targetRadar.isCapturedDistance" label="АС r"
       @click="targetRadar.captureByDistance" />
   </v-group>
 </template>

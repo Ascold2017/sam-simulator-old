@@ -1,13 +1,13 @@
 <template>
   <v-group :config="{
-    x: 1020,
-    y: 370,
+    x: 810,
+    y: 190,
   }">
     <v-rect :config="{
       name: 'panelCapture',
       x: 0,
       y: 0,
-      width: 400,
+      width: 600,
       height: 180,
       fill: 'grey',
       shadowBlur: 10,
@@ -77,15 +77,8 @@
       }" />
 
       <SAMButton
-        :value="targetRadar.isCapturedAzimut && targetRadar.isCapturedElevation && targetRadar.isCapturedDistance"
-        label="АСЦ"
-        :x="255"
-        :y="15"
-        name="asc"
-      />
-      <SAMButton
         label="Сброс"
-        :x="320"
+        :x="230"
         :y="15"
         name="asc"
         :value="!targetRadar.isCapturedAzimut"
@@ -93,9 +86,9 @@
       />
     </v-group>
 
-    <v-line :config="{ points: [20, 85, 130, 85], stroke: '#181818', shadowBlur: 2 }" />
+    <v-line :config="{ points: [20, 85, 80, 85], stroke: '#181818', shadowBlur: 2 }" />
     <v-text :config="{
-      x: 140,
+      x: 87.5,
       y: 75,
       width: 130,
       height: 20,
@@ -106,16 +99,63 @@
       align: 'center',
       verticalAlign: 'middle',
     }" />
-    <v-line :config="{ points: [280, 85, 380, 85], stroke: '#181818', shadowBlur: 2 }" />
+    <v-line :config="{ points: [225, 85, 290, 85], stroke: '#181818', shadowBlur: 2 }" />
     <SAMButton :x="20" :y="100" name="manual" label="Ручн" :value="capturePanel.captureMode === CaptureModes.Manual"
       @click="capturePanel.setCaptureMode(CaptureModes.Manual)" />
-    <SAMButton :x="190" :y="100" name="rls" label="РЛС" :value="capturePanel.captureMode === CaptureModes.Radio"
+    <SAMButton :x="90" :y="100" name="rls" label="РЛС" :value="capturePanel.captureMode === CaptureModes.Radio"
       @click="capturePanel.setCaptureMode(CaptureModes.Radio)" />
-    <SAMButton :x="255" :y="100" name="ols" label="ОЛС" :value="capturePanel.captureMode === CaptureModes.Optical"
+    <SAMButton :x="160" :y="100" name="ols" label="ОЛС" :value="capturePanel.captureMode === CaptureModes.Optical"
       @click="capturePanel.setCaptureMode(CaptureModes.Optical)" />
-    <SAMButton :x="320" :y="100" name="jamming" label="Помеха"
+    <SAMButton :x="230" :y="100" name="jamming" label="Помеха"
       :value="capturePanel.captureMode === CaptureModes.Jamming"
       @click="capturePanel.setCaptureMode(CaptureModes.Jamming)" />
+    
+    <v-line :config="{ points: [300, 15, 300, 160], stroke: '#181818', shadowBlur: 2 }" />
+    <v-group :config="{ x: 310, y: 20}">
+      <v-text :config="{
+        x: 0, y: 0,
+        text: 'Режим антенны',
+        fontFamily: 'Russo One, sans-serif',
+        fill: '#181818',
+        fontSize: 12,
+      }" />
+      <SAMButton :x="0" :y="20" name="antenna" label="Ант" value small />
+      <SAMButton :x="45" :y="20" name="equivalent" label="Экв" value small />
+    </v-group>
+    <v-group :config="{ x: 310, y: 100 }">
+       <v-text :config="{
+        x: 0, y: 0,
+        text: 'СДЦ',
+        fontFamily: 'Russo One, sans-serif',
+        fill: '#181818',
+        fontSize: 12,
+      }" />
+      <SAMButton :x="0" :y="20" name="sdcOn" label="Выкл" value small />
+      <SAMButton :x="45" :y="20" name="sdcOff" label="Вкл" value small />
+    </v-group>
+    <v-group :config="{ x: 430, y: 20 }">
+     <v-text :config="{
+        x: 0, y: 0,
+        width: 60,
+        text: 'Размер отметок',
+        fontFamily: 'Russo One, sans-serif',
+        fill: '#181818',
+        fontSize: 12,
+      }" />
+        <SAMPotentiometer :x="100" :y="0" />
+    </v-group>
+     <v-group :config="{ x: 430, y: 100 }">
+       <v-text :config="{
+        x: 0, y: 0,
+        text: 'Кратность ТВ',
+        fontFamily: 'Russo One, sans-serif',
+        fill: '#181818',
+        fontSize: 12,
+      }" />
+      <SAMButton :x="0" :y="20" name="sdcOn" label="1Х" value small />
+      <SAMButton :x="45" :y="20" name="sdcOff" label="2.5Х" value small />
+      <SAMButton :x="90" :y="20" name="sdcOff" label="5Х" value small />
+    </v-group>
   </v-group>
 </template>
 <script setup lang="ts">
@@ -123,6 +163,7 @@ import { useCapturePanelStore, CaptureModes } from '@/store/capturePanel';
 import { useMainRadarStore } from '@/store//mainRadarPanel';
 import { useTargetRadarStore } from '@/store/targetRadar'
 import SAMButton from './SAMButton.vue'
+import SAMPotentiometer from './SAMPotentiometer.vue'
 
 const mainRadar = useMainRadarStore()
 const targetRadar = useTargetRadarStore()
