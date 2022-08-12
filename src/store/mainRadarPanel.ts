@@ -15,6 +15,8 @@ export const useMainRadarStore = defineStore("mainRadar", {
     
     radarRotation: 1.5 * Math.PI,
     rotationInterval: null as number | null,
+    isEquivalent: false,
+    gain: SAM_PARAMS.RADAR_SPOT_AZIMUT_GAIN
   }),
   getters: {
     scale(): number {
@@ -48,5 +50,12 @@ export const useMainRadarStore = defineStore("mainRadar", {
         this.radarRotation = 1.5 * Math.PI;
       }
     },
+    setEquivalent(value: boolean) {
+      this.isEquivalent = value;
+    },
+    incrementGain(value: number) {
+      if (this.gain + value <= 0) return
+      this.gain += value;
+    }
   },
 });

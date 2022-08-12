@@ -119,8 +119,8 @@
         fill: '#181818',
         fontSize: 12,
       }" />
-      <SAMButton :x="0" :y="20" name="antenna" label="Ант" value small />
-      <SAMButton :x="45" :y="20" name="equivalent" label="Экв" value small />
+      <SAMButton :x="0" :y="20" name="antenna" label="Ант" :value="!mainRadar.isEquivalent" small @click="mainRadar.setEquivalent(false)" />
+      <SAMButton :x="45" :y="20" name="equivalent" label="Экв" :value="mainRadar.isEquivalent" small @click="mainRadar.setEquivalent(true)"/>
     </v-group>
     <v-group :config="{ x: 310, y: 100 }">
        <v-text :config="{
@@ -142,7 +142,7 @@
         fill: '#181818',
         fontSize: 12,
       }" />
-        <SAMPotentiometer :x="100" :y="0" />
+        <SAMPotentiometer :x="100" :y="0" :delta-value="50" @change="mainRadar.incrementGain" />
     </v-group>
      <v-group :config="{ x: 430, y: 100 }">
        <v-text :config="{

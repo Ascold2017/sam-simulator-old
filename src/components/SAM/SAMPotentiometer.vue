@@ -45,11 +45,13 @@
 <script setup lang="ts">
 import Sounds from '@/classes/Sounds'
 import { ref } from 'vue';
-const props = defineProps<{ x: number; y: number; small?: boolean; }>();
+const emit = defineEmits<{ (e: 'change', v: number): void }>()
+const props = defineProps<{ x: number; y: number; small?: boolean; deltaValue?: number }>();
 const rotation = ref(0)
 const onWheel = ({ evt }: { evt: WheelEvent }) => {
   const delta = evt.deltaY < 0 ? 1 : -1;
   Sounds.rotateClick()
-  rotation.value += delta*2
+  rotation.value += delta*2;
+  emit('change', delta * (props.deltaValue || 1))
 }
 </script>
