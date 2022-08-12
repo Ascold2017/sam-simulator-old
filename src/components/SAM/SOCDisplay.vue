@@ -13,6 +13,24 @@
     }" />
 
     <v-group v-if="supplyPanel.isEnabledPower">
+      <v-text :config="{
+          x: 10,
+          y: 10,
+          text: `Азимут: ${azimutLabel}°`,
+          fontFamily: 'Russo One, sans-serif',
+          fontSize: 12,
+        fill: 'rgb(150, 249, 123)',
+        }"
+      />
+      <v-text :config="{
+          x: 10,
+          y: 480,
+          text: `Дальность: ${targetRadarStore.targetCursorDistance.toFixed(1)} км`,
+          fontFamily: 'Russo One, sans-serif',
+          fontSize: 12,
+        fill: 'rgb(150, 249, 123)',
+        }"
+      />
       <!-- Distance circles -->
       <v-circle
         :config="{ x: 255, y: 250, width: i * 20 * mainRadar.scale, stroke: 'rgb(150, 249, 123)', strokeWidth: 0.1 }"
@@ -39,23 +57,26 @@
         width: 20,
         height: 12
       }" v-for="azimutLine in azimutLines" />
-      <!-- Target cursor line -->
-      <v-line :config="{
-        points: [targetCursorLine.x0, targetCursorLine.y0, targetCursorLine.x1, targetCursorLine.y1],
-        dash: targetCursorLine.dash,
-        stroke: 'white',
-        strokeWidth: 0.5
-      }" />
+     
       <!-- Rotation cursor -->
       <v-line :config="{
         points: [radarCursorLine.x0, radarCursorLine.y0, radarCursorLine.x1, radarCursorLine.y1],
         stroke: 'rgb(150, 249, 123)',
         strokeWidth: 1
       }" />
+       <!-- Target cursor line -->
+      <v-line
+        :config="{
+          points: [targetCursorLine.x0, targetCursorLine.y0, targetCursorLine.x1, targetCursorLine.y1],
+          dash: targetCursorLine.dash,
+          stroke: 'white',
+          strokeWidth: 0.5
+        }"
+      />
     </v-group>
     <!-- targets -->
     <v-group
-      v-if="supplyPanel.isEnabledPower && supplyPanel.isEnabledRotation && supplyPanel.isEnabledMainRadarTransmitter">
+      v-if="supplyPanel.isEnabledPower && supplyPanel.isEnabledRotation && supplyPanel.isEnabledMainRadarTransmitter && !targetRadarStore.isCapturedAzimut">
       <v-arc v-for="canvasTarget in canvasTargets" :config="{
         x: 255, y: 250,
         innerRadius: canvasTarget.radius,
@@ -65,9 +86,8 @@
         strokeWidth: canvasTarget.strokeWidth,
         stroke: `rgba(150, 249, 123, ${canvasTarget.alpha})`
       }" />
+      
     </v-group>
-
-
   </v-group>
 </template>
 
@@ -93,6 +113,10 @@ const mainRadar = useMainRadarStore()
 const targetsStore = useTargetsStore()
 const targetRadarStore = useTargetRadarStore()
 
+const azimutLabel = computed(() => {
+  const deg = (targetRadarStore.targetCursorAngle - 1.5*Math.PI) * (180/Math.PI)
+  return (deg < 0 ? 360 + deg : deg).toFixed(1);
+});
 const countCircles = computed(() => mainRadar.maxDisplayedDistance / 10);
 const azimutLines = computed(() => {
   return Array(36).fill(0).map((_, i) => ({

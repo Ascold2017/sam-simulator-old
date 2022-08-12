@@ -10,8 +10,7 @@
 </template>
 
 <script setup lang="ts">
-import { inject, onMounted, ref, watch } from 'vue'
-import { useMainRadarStore } from '@/store/mainRadarPanel'
+import { inject, onMounted, ref } from 'vue'
 import { useTargetsStore } from '@/store/targets';
 import { useTargetRadarStore } from '@/store/targetRadar';
 import type { IRecognizedTargets } from './classes/SAM';
@@ -42,13 +41,13 @@ const selectMission = (missionId: number) => {
   editorRef.value.loadMission(missions.find(m => m.id === missionId)!.data)
 }
 
-const mainRadar = useMainRadarStore();
-
 const keyMapHandlers: Record<string, Function> = {
-  'KeyA': () => targetRadar.incrementTargetCursorAngle(-0.5),
-  'KeyD': () => targetRadar.incrementTargetCursorAngle(0.5),
+  'KeyA': () => targetRadar.incrementTargetCursorAzimut(-0.5),
+  'KeyD': () => targetRadar.incrementTargetCursorAzimut(0.5),
   'KeyW': () => targetRadar.incrementTargetCursorDistance(0.5),
   'KeyS': () => targetRadar.incrementTargetCursorDistance(-0.5),
+  'KeyQ': () => targetRadar.incrementTargetCursorElevation(-0.5),
+  'KeyE': () => targetRadar.incrementTargetCursorElevation(0.5),
 }
 
 const samEventBus = inject<Emitter<Record<EventType, any>>>('samEventBus');

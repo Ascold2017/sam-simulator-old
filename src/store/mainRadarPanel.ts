@@ -3,6 +3,7 @@ import { defineStore } from "pinia";
 
 export enum ViewModes {
   MainRadar = "MainRadar",
+  TargetRadar = 'TargetRadar',
   BIP = "BIP",
   LOGS = "LOGS",
 }

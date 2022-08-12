@@ -16,7 +16,7 @@ export const useTargetRadarStore = defineStore("targetRadar", {
   }),
 
   actions: {
-    incrementTargetCursorAngle(value: number) {
+    incrementTargetCursorAzimut(value: number) {
       if (this.isCapturedAzimut) return;
       value *= Math.PI / 180;
       let newAngle = this.targetCursorAngle + value < 0
@@ -24,6 +24,10 @@ export const useTargetRadarStore = defineStore("targetRadar", {
         : this.targetCursorAngle + value;
       newAngle = newAngle >= 2 * Math.PI ? value : newAngle;
       this.targetCursorAngle = newAngle;
+    },
+    incrementTargetCursorElevation(value: number) {
+      if (this.isCapturedElevation) return;
+      this.targetCursorElevation = this.targetCursorElevation + value * Math.PI / 180;
     },
     incrementTargetCursorDistance(value: number) {
       const mainRadarStore = useMainRadarStore();

@@ -11,7 +11,8 @@
           <CapturePanel />
         </v-layer>
         <v-layer>
-          <SOCDisplay />
+          <SOCDisplay v-if="mainRadar.viewMode === ViewModes.MainRadar" />
+          <TargetRadarDisplay v-if="mainRadar.viewMode === ViewModes.TargetRadar" />
         </v-layer>
       </v-stage>
     </div>
@@ -29,4 +30,8 @@ import ElevationPanel from './ElevationPanel.vue';
 import DistancePanel from './DistancePanel.vue';
 import CapturePanel from './CapturePanel.vue';
 import SOCDisplay from './SOCDisplay.vue';
+import { useMainRadarStore, ViewModes } from '@/store/mainRadarPanel';
+import TargetRadarDisplay from './TargetRadarDisplay.vue';
+
+const mainRadar = useMainRadarStore()
 </script>

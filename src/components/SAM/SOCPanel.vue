@@ -14,9 +14,11 @@
       cornerRadius: 6,
     }" />
 
-    <SAMButton :x="540" :y="20" name="scale80km" label="50 км" :value="mainRadar.maxDisplayedDistance === 50" @click="mainRadar.setMaxDisplayedDistance(50)" />
-    <SAMButton :x="540" :y="85" name="scale50km" label="30 км" :value="mainRadar.maxDisplayedDistance === 30" @click="mainRadar.setMaxDisplayedDistance(30)" />
+    <SAMButton :x="540" :y="20" name="scale50km" label="50 км" :value="mainRadar.maxDisplayedDistance === 50" @click="mainRadar.setMaxDisplayedDistance(50)" />
+    <SAMButton :x="540" :y="85" name="scale30km" label="30 км" :value="mainRadar.maxDisplayedDistance === 30" @click="mainRadar.setMaxDisplayedDistance(30)" />
 
+    <SAMButton :x="540" :y="170" name="mainRadarMode" :value="mainRadar.viewMode === ViewModes.MainRadar"  label="СОЦ" @click="mainRadar.setViewMode(ViewModes.MainRadar)" />
+    <SAMButton :x="540" :y="235" name="targetRadarMode" :value="mainRadar.viewMode === ViewModes.TargetRadar"  label="ССЦ" @click="mainRadar.setViewMode(ViewModes.TargetRadar)" />
 
     <SAMButton :x="540" :y="330" name="captureA" :value="targetRadar.isCapturedAzimut"  label="АС β" @click="targetRadar.captureByAzimut" />
     <SAMButton :x="540" :y="395" name="captureE" :value="targetRadar.isCapturedElevation"  label="АС ε" @click="targetRadar.captureByElevation" />
@@ -25,7 +27,7 @@
 </template>
 
 <script setup lang="ts">
-import { useMainRadarStore } from '@/store//mainRadarPanel';
+import { useMainRadarStore, ViewModes } from '@/store//mainRadarPanel';
 import { useTargetRadarStore } from '@/store/targetRadar'
 import SAMButton from './SAMButton.vue'
 
