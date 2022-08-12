@@ -15,6 +15,12 @@ export const useTargetRadarStore = defineStore("targetRadar", {
     targetCursorElevation: 0,
   }),
 
+  getters: {
+    isCapturedAll() : boolean {
+      return this.isCapturedAzimut && this.isCapturedElevation && this.isCapturedDistance
+    }
+  },
+
   actions: {
     incrementTargetCursorAzimut(value: number) {
       if (this.isCapturedAzimut) return;

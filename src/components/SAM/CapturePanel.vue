@@ -8,7 +8,7 @@
       x: 0,
       y: 0,
       width: 400,
-      height: 200,
+      height: 180,
       fill: 'grey',
       shadowBlur: 10,
       cornerRadius: 6,
