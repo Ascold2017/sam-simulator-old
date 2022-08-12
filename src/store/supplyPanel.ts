@@ -1,8 +1,10 @@
-import type SAM from "@/classes/SAM";
 import Sounds from "@/classes/Sounds";
 import { defineStore } from "pinia";
-import { inject } from "vue";
+import { useCapturePanelStore } from "./capturePanel";
 import { useMainRadarStore } from "./mainRadarPanel";
+import { useTargetRadarStore } from "./targetRadar";
+import { useTargetsStore } from "./targets";
+import { useWeaponPanelStore } from "./weaponPanel";
 
 export const useSupplyPanelStore = defineStore("supply", {
   state: () => ({
@@ -14,7 +16,19 @@ export const useSupplyPanelStore = defineStore("supply", {
   }),
 
   actions: {
+    setDefaultValues() {
+      this.isEnabledPower = false;
+      this.isEnabledRotation = false;
+      this.isEnabledMainRadarTransmitter = false;
+      this.isEnabledTargetRadarTransmitter = false;
+      this.isEnabledThermalCamera = false;
+    },
     setEnabledPower(value: boolean) {
+      const mainRadar = useMainRadarStore();
+      const targetRadar = useTargetRadarStore();
+      const capturePanel = useCapturePanelStore();
+      const targets = useTargetsStore()
+      const weaponPanel = useWeaponPanelStore()
       if (value) {
         Sounds.startEngine();
         const i = setTimeout(() => {
@@ -25,13 +39,14 @@ export const useSupplyPanelStore = defineStore("supply", {
         }, 3000);
       } else {
         Sounds.stopEngine();
-        this.isEnabledPower = false;
-        this.isEnabledRotation = false;
-        this.isEnabledMainRadarTransmitter = false;
-        this.isEnabledTargetRadarTransmitter = false;
-        this.isEnabledThermalCamera = false;
         //@ts-ignore
         this.sam.setIsEnabled(false);
+        this.setDefaultValues();
+        mainRadar.setDefaultValues();
+        capturePanel.setDefaultValues();
+        targetRadar.setDefaultValues();
+        targets.setTargets([]);
+        weaponPanel.setDefaultValues()
       }
     },
     setEnablerRotation(value: boolean) {

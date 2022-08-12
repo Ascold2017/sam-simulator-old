@@ -22,6 +22,12 @@ export const useTargetRadarStore = defineStore("targetRadar", {
   },
 
   actions: {
+    setDefaultValues() {
+      this.resetCaptureAll();
+      this.targetCursorAngle = 1.5 * Math.PI;
+      this.targetCursorDistance = 30;
+      this.targetCursorElevation = 0;
+    },
     incrementTargetCursorAzimut(value: number) {
       if (this.isCapturedAzimut) return;
       value *= Math.PI / 180;

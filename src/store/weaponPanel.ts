@@ -21,6 +21,12 @@ export const useWeaponPanelStore = defineStore("weaponPanel", {
   }),
 
   actions: {
+    setDefaultValues() {
+      this.missiles = Array(8).fill(0).map((_, i) => ({ id: i + 1, isLaunched: false }));
+      this.currentMissileId = null;
+      this.missileState = null;
+      this.detonatorMode = DetonatorModes.AUTO
+    },
     setDetonatorMode(mode: DetonatorModes) {
       const supplyPanel = useSupplyPanelStore();
       if (!supplyPanel.isEnabledPower) return

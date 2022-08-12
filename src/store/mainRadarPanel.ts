@@ -21,6 +21,12 @@ export const useMainRadarStore = defineStore("mainRadar", {
     },
   },
   actions: {
+    setDefaultValues() {
+      this.viewMode = ViewModes.MainRadar;
+      this.maxDisplayedDistance = 120;
+      this.rotationInterval && clearInterval(this.rotationInterval);
+      this.radarRotation = 1.5 * Math.PI;
+    },
     setViewMode(value: ViewModes) {
       this.viewMode = value;
     },
