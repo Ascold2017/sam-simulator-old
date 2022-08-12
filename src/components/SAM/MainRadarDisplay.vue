@@ -63,7 +63,7 @@
         strokeWidth: 1
       }" />
       <!-- Target cursor line -->
-      <v-line :config="{
+      <v-line v-if="!targetRadarStore.isCapturedAll" :config="{
         points: [targetCursorLine.x0, targetCursorLine.y0, targetCursorLine.x1, targetCursorLine.y1],
         dash: targetCursorLine.dash,
         stroke: 'white',
@@ -80,6 +80,14 @@
         rotation: canvasTarget.rotation,
         strokeWidth: canvasTarget.strokeWidth,
         stroke: `rgba(150, 249, 123, ${canvasTarget.alpha})`
+      }" />
+      <v-circle v-if="targetRadarStore.isCapturedAll && targetRadarStore.capturedTarget" :config="{
+        x: targetRadarStore.capturedTarget.x * mainRadar.scale + 350,
+        y: targetRadarStore.capturedTarget.y * mainRadar.scale + 350,
+        width: 20,
+        height: 20,
+        stroke: `rgb(150, 249, 123)`,
+        strokeWidth: 0.5
       }" />
       <v-circle v-if="targetRadarStore.isCapturedAll" :config="{
         x: canvasHitPoint.x,
