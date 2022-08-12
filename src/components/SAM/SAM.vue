@@ -6,12 +6,12 @@
           <SupplyPanel />
           <ParamsPanel />
           <TVPanel />
-          <SOCPanel />
+          <MainRadarPanel />
           <WeaponPanel />
           <CapturePanel />
         </v-layer>
         <v-layer>
-          <SOCDisplay v-if="mainRadar.viewMode === ViewModes.MainRadar" />
+          <MainRadarDisplay v-if="mainRadar.viewMode === ViewModes.MainRadar" />
           <TargetRadarDisplay v-if="mainRadar.viewMode === ViewModes.TargetRadar" />
         </v-layer>
       </v-stage>
@@ -21,17 +21,15 @@
 </template>
 
 <script setup lang="ts">
-import SOCPanel from './SOCPanel.vue';
+import MainRadarPanel from './MainRadarPanel.vue';
 import TVPanel from './TVPanel.vue';
 import ParamsPanel from './ParamsPanel.vue';
 import SupplyPanel from './SupplyPanel.vue';
 import WeaponPanel from './WeaponPanel.vue';
-import ElevationPanel from './ElevationPanel.vue';
-import DistancePanel from './DistancePanel.vue';
 import CapturePanel from './CapturePanel.vue';
-import SOCDisplay from './SOCDisplay.vue';
-import { useMainRadarStore, ViewModes } from '@/store/mainRadarPanel';
+import MainRadarDisplay from './MainRadarDisplay.vue';
 import TargetRadarDisplay from './TargetRadarDisplay.vue';
+import { useMainRadarStore, ViewModes } from '@/store/mainRadarPanel';
 
 const mainRadar = useMainRadarStore()
 </script>

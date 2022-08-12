@@ -7,12 +7,13 @@ export const useTargetsStore = defineStore("targets", {
     targets: [] as IRecognizedTargets[],
   }),
   getters: {
-    targetsInRay() {
+    targetsInRay(): IRecognizedTargets[] {
       const targetRadar = useTargetRadarStore();
-      this.targets.filter(target => {
-        const intoAzimut = Math.abs(target.azimut - targetRadar.targetCursorAngle) < SAM_PARAMS.RADAR_AZIMUT_DETECT_ACCURACY;
-        const intoElevation = Math.abs(target.elevation - targetRadar.targetCursorElevation) < SAM_PARAMS.RADAR_AZIMUT_DETECT_ACCURACY;
-        return intoAzimut && intoElevation
+      return this.targets.filter(target => {
+        const intoAzimut = Math.abs(target.azimut - targetRadar.targetCursorAngle) < SAM_PARAMS.TARGET_RADAR_RAY_WIDTH/2;
+        const intoElevation = Math.abs(target.elevation - targetRadar.targetCursorElevation) < SAM_PARAMS.TARGET_RADAR_RAY_WIDTH/2;
+        const intoDistanceWindow = Math.abs(target.distance - targetRadar.targetCursorDistance) < SAM_PARAMS.RADAR_DISTANCE_WINDOW/2
+        return intoAzimut && intoElevation && intoDistanceWindow
       })
     }
   },

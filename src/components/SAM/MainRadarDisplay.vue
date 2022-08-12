@@ -76,7 +76,7 @@
     </v-group>
     <!-- targets -->
     <v-group
-      v-if="supplyPanel.isEnabledPower && supplyPanel.isEnabledRotation && supplyPanel.isEnabledMainRadarTransmitter && !targetRadarStore.isCapturedAzimut">
+      v-if="supplyPanel.isEnabledPower && supplyPanel.isEnabledRotation && supplyPanel.isEnabledMainRadarTransmitter">
       <v-arc v-for="canvasTarget in canvasTargets" :config="{
         x: 255, y: 250,
         innerRadius: canvasTarget.radius,

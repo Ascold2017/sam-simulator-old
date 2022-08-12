@@ -1,5 +1,5 @@
 <template>
-<v-group :config="{
+  <v-group :config="{
     x: 430,
     y: 210,
   }">
@@ -12,29 +12,121 @@
       fill: supplyPanel.isEnabledPower ? 'rgb(15, 33, 19)' : 'black',
     }" />
 
-     <v-group v-if="supplyPanel.isEnabledPower">
-      <v-rect :config="{
+    <v-text :config="{
+      x: 10,
+      y: 10,
+      text: `Азимут: ${azimutLabel}°`,
+      fontFamily: 'Russo One, sans-serif',
+      fontSize: 12,
+      fill: 'rgb(150, 249, 123)',
+    }" />
+    <v-text :config="{
+      x: 10,
+      y: 30,
+      text: `Угол места: ${elevationLabel}°`,
+      fontFamily: 'Russo One, sans-serif',
+      fontSize: 12,
+      fill: 'rgb(150, 249, 123)',
+    }" />
+    <v-text :config="{
+      x: 10,
+      y: 480,
+      text: `Дальность: ${targetRadarStore.targetCursorDistance.toFixed(1)} км`,
+      fontFamily: 'Russo One, sans-serif',
+      fontSize: 12,
+      fill: 'rgb(150, 249, 123)',
+    }" />
+
+    <v-group v-if="supplyPanel.isEnabledPower"
+      :config="{ 
         x: 255, y: 250,
-        width: mainRadar.maxDisplayedDistance * mainRadar.scale,
+        rotation: targetRadarStore.targetCursorAngle * (180 / Math.PI)
+      }">
+      <v-rect :config="{
+        width: 230,
         height: 100,
         stroke: 'rgb(150, 249, 123)',
         strokeWidth: 0.5,
         offsetY: 50,
-        rotation: targetRadarStore.targetCursorAngle * (180/Math.PI)
       }" />
-      
+      <v-rect
+        v-for="canvasTarget in canvasTargets"
+        :config="{
+          x: canvasTarget.x,
+          y: canvasTarget.y,
+          stroke: 'rgb(150, 249, 123)',
+          fill: 'rgb(150, 249, 123)',
+          width: canvasTarget.width,
+          height:canvasTarget.length,
+          offsetX: canvasTarget.width/2,
+          offsetY: canvasTarget.length/2,
+        }"
+      />
+
     </v-group>
+
+   
   </v-group>
 </template>
 
 <script setup lang="ts">
+import { SAM_PARAMS } from '@/classes/SAM';
 import { useMainRadarStore } from '@/store/mainRadarPanel';
 import { useSupplyPanelStore } from '@/store/supplyPanel';
 import { useTargetRadarStore } from '@/store/targetRadar';
 import { useTargetsStore } from '@/store/targets';
+import { computed } from 'vue';
 
 const supplyPanel = useSupplyPanelStore()
 const mainRadar = useMainRadarStore()
 const targetsStore = useTargetsStore()
 const targetRadarStore = useTargetRadarStore()
+
+const azimutLabel = computed(() => {
+  const deg = (targetRadarStore.targetCursorAngle - 1.5 * Math.PI) * (180 / Math.PI)
+  return (deg < 0 ? 360 + deg : deg).toFixed(1);
+});
+
+const elevationLabel = computed(() => {
+  return (targetRadarStore.targetCursorElevation * (180 / Math.PI)).toFixed(1);
+});
+
+interface ICanvasTarget {
+  x: number;
+  y: number;
+  width: number;
+  length: number;
+  alpha: number
+};
+
+
+const canvasTargets = computed<ICanvasTarget[]>(() => {
+  if (!supplyPanel.isEnabledTargetRadarTransmitter) return []
+  return targetsStore.targetsInRay
+    .filter(t => t.distance < mainRadar.maxDisplayedDistance)
+    .map(target => {
+      const offsetDistance = targetRadarStore.isCapturedDistance
+        ? 0
+        : (target.distance - targetRadarStore.targetCursorDistance);
+      const offsetDistanceK = 2 *offsetDistance / SAM_PARAMS.RADAR_DISTANCE_WINDOW;
+      const offsetDistanceCanvas = offsetDistanceK * 115 + 115; // Half of rect height
+      const canvasDistanceAccuracy = SAM_PARAMS.RADAR_DISTANCE_DETECT_ACCURACY * mainRadar.scale;
+
+      const offsetElevation = targetRadarStore.isCapturedElevation
+        ? 0
+        : (target.elevation - targetRadarStore.targetCursorElevation);
+      const offsetElevationK = 2 * offsetElevation / SAM_PARAMS.TARGET_RADAR_RAY_WIDTH;
+      const canvasOffsetElevation = offsetElevationK * 50;  // Half of rect width
+
+      const rayWidth = ((Math.PI * SAM_PARAMS.TARGET_RADAR_RAY_WIDTH * target.distance) / 180);
+      const alpha = 1
+      return {
+        x: offsetDistanceCanvas,
+        y: canvasOffsetElevation,
+        length: canvasDistanceAccuracy,
+        width: target.size / rayWidth,
+        alpha
+      }
+    });
+});
 </script>

@@ -67,12 +67,12 @@
         fontSize: 14,
       }" />
       <v-circle :config="{
-        name: 'captureElevationIndicator',
+        name: 'captureDistanceIndicator',
         x: 200,
         y: 55,
         width: 20,
         height: 20,
-        fill: targetRadar.isCapturedElevation ? 'rgb(150, 249, 123)' : 'red',
+        fill: targetRadar.isCapturedDistance ? 'rgb(150, 249, 123)' : 'red',
         shadowBlur: 5
       }" />
 
@@ -92,8 +92,6 @@
         @click="targetRadar.resetCaptureAll"
       />
     </v-group>
-
-
 
     <v-line :config="{ points: [20, 85, 130, 85], stroke: '#181818', shadowBlur: 2 }" />
     <v-text :config="{
