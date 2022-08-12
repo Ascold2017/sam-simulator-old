@@ -3,14 +3,15 @@
     <div class="d-flex justify-center">
       <v-stage :config="{ width: 1420, height: 900 }">
         <v-layer>
-          <DistancePanel />
           <SupplyPanel />
           <ParamsPanel />
-          <ElevationPanel />
           <TVPanel />
           <SOCPanel />
           <WeaponPanel />
           <CapturePanel />
+        </v-layer>
+        <v-layer>
+          <SOCDisplay />
         </v-layer>
       </v-stage>
     </div>
@@ -27,4 +28,5 @@ import WeaponPanel from './WeaponPanel.vue';
 import ElevationPanel from './ElevationPanel.vue';
 import DistancePanel from './DistancePanel.vue';
 import CapturePanel from './CapturePanel.vue';
+import SOCDisplay from './SOCDisplay.vue';
 </script>

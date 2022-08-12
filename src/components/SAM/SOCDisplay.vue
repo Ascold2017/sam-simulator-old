@@ -1,5 +1,8 @@
 <template>
-  <v-group :config="{ x: 20, y: 20 }">
+  <v-group :config="{
+    x: 430,
+    y: 210,
+  }">
     <v-rect :config="{
       name: 'display',
       x: 0,
@@ -10,19 +13,20 @@
     }" />
 
     <v-group v-if="supplyPanel.isEnabledPower">
-
+      <!-- Distance circles -->
       <v-circle
         :config="{ x: 255, y: 250, width: i * 20 * mainRadar.scale, stroke: 'rgb(150, 249, 123)', strokeWidth: 0.1 }"
         v-for="i in countCircles" />
-       <v-circle
-        :config="{ x: 255, y: 250, width: 50 * mainRadar.scale, stroke: 'rgb(150, 249, 123)', strokeWidth: 0.5 }"
-         />
-
+      <!-- Killzone circle -->
+      <v-circle
+        :config="{ x: 255, y: 250, width: 50 * mainRadar.scale, stroke: 'rgb(150, 249, 123)', strokeWidth: 0.5 }" />
+      <!-- Azimut lines -->
       <v-line :config="{
         points: [azimutLine.x0, azimutLine.y0, azimutLine.x1, azimutLine.y1,],
         stroke: 'rgb(150, 249, 123)',
         strokeWidth: 0.1
       }" v-for="azimutLine in azimutLines" />
+      <!-- Azimut labels -->
       <v-text :config="{
         x: azimutLine.x1 - 10,
         y: azimutLine.y1 - 6,
@@ -35,12 +39,14 @@
         width: 20,
         height: 12
       }" v-for="azimutLine in azimutLines" />
+      <!-- Target cursor line -->
       <v-line :config="{
         points: [targetCursorLine.x0, targetCursorLine.y0, targetCursorLine.x1, targetCursorLine.y1],
         dash: targetCursorLine.dash,
         stroke: 'white',
         strokeWidth: 0.5
       }" />
+      <!-- Rotation cursor -->
       <v-line :config="{
         points: [radarCursorLine.x0, radarCursorLine.y0, radarCursorLine.x1, radarCursorLine.y1],
         stroke: 'rgb(150, 249, 123)',
@@ -102,8 +108,8 @@ const targetCursorLine = computed(() => {
   const azimut = targetRadarStore.targetCursorAngle;
   const distance = targetRadarStore.targetCursorDistance;
 
-  const distanceToWindow = distance * mainRadar.scale- SAM_PARAMS.RADAR_DISTANCE_WINDOW * mainRadar.scale/2;
-  const distanceFromWindow = (mainRadar.maxDisplayedDistance - distance - SAM_PARAMS.RADAR_DISTANCE_WINDOW/2) * mainRadar.scale
+  const distanceToWindow = distance * mainRadar.scale - SAM_PARAMS.RADAR_DISTANCE_WINDOW * mainRadar.scale / 2;
+  const distanceFromWindow = (mainRadar.maxDisplayedDistance - distance - SAM_PARAMS.RADAR_DISTANCE_WINDOW / 2) * mainRadar.scale
   return {
     x0: 255,
     y0: 250,
@@ -127,7 +133,7 @@ const canvasTargets = computed<ICanvasTarget[]>(() => {
   return targetsStore.targets
     .filter(t => t.distance < mainRadar.maxDisplayedDistance)
     .map(target => {
-      const canvasTargetArcAngle = (target.size * SAM_PARAMS.RADAR_SPOT_AZIMUT_GAIN * 180) / (target.distance * Math.PI)  + SAM_PARAMS.RADAR_AZIMUT_DETECT_ACCURACY * 2;
+      const canvasTargetArcAngle = (target.size * SAM_PARAMS.RADAR_SPOT_AZIMUT_GAIN * 180) / (target.distance * Math.PI) + SAM_PARAMS.RADAR_AZIMUT_DETECT_ACCURACY * 2;
       const targetSpotDistance = SAM_PARAMS.RADAR_DISTANCE_DETECT_ACCURACY * mainRadar.scale
       const alpha = 1
       return {

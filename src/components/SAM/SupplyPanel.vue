@@ -1,7 +1,7 @@
 <template>
   <v-group :config="{
     x: 0,
-    y: 300,
+    y: 0,
   }">
     <v-rect :config="{
       x: 0,
@@ -146,12 +146,12 @@
 
     <v-line :config="{ points: [20, 390, 50, 390], stroke: '#181818' }" />
     <v-text :config="{
-  x: 60,
-  y: 380,
-  width: 120,
-  height: 20,
-  verticalAlign: 'middle',
-  align: 'center',
+      x: 60,
+      y: 380,
+      width: 120,
+      height: 20,
+      verticalAlign: 'middle',
+      align: 'center',
       text: 'Режим дисплея',
       fill: '#181818',
       fontFamily: 'Russo One, sans-serif',

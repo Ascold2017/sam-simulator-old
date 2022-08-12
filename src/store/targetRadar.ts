@@ -1,4 +1,4 @@
-import { SAM_PARAMS, type IRecognizedTargets } from "@/classes/SAM";
+import { type IRecognizedTargets, SAM_PARAMS } from "@/classes/SAM";
 import { defineStore } from "pinia";
 import { useMainRadarStore } from "./mainRadarPanel";
 import { useSupplyPanelStore } from "./supplyPanel";
@@ -12,6 +12,7 @@ export const useTargetRadarStore = defineStore("targetRadar", {
     capturedTarget: null as IRecognizedTargets | null,
     targetCursorAngle: 1.5 * Math.PI,
     targetCursorDistance: 30,
+    targetCursorElevation: 0,
   }),
 
   actions: {
@@ -28,7 +29,8 @@ export const useTargetRadarStore = defineStore("targetRadar", {
       const mainRadarStore = useMainRadarStore();
       if (
         this.targetCursorDistance + value < SAM_PARAMS.MIN_CAPTURE_RANGE ||
-        this.targetCursorDistance + value >= mainRadarStore.maxDisplayedDistance ||
+        this.targetCursorDistance + value >=
+          mainRadarStore.maxDisplayedDistance ||
         this.isCapturedDistance
       ) {
         return;
@@ -46,9 +48,16 @@ export const useTargetRadarStore = defineStore("targetRadar", {
       this.isCapturedAzimut = !!this.capturedTargetId;
     },
 
+    captureByElevation() {
+      const supply = useSupplyPanelStore();
+      if (!supply.isEnabledTargetRadarTransmitter) return;
+    },
+
     captureByDistance() {
       const supply = useSupplyPanelStore();
-      if (!supply.isEnabledTargetRadarTransmitter || this.isCapturedDistance) return;
+      if (!supply.isEnabledTargetRadarTransmitter || this.isCapturedDistance) {
+        return;
+      }
       // @ts-ignore
       this.isCapturedDistance = !!this.sam.isTargetOnDistance(
         this.capturedTargetId,
@@ -68,6 +77,6 @@ export const useTargetRadarStore = defineStore("targetRadar", {
     },
     resetCaptureTarget(id: string) {
       if (this.capturedTargetId === id) this.resetCaptureAll();
-    }
+    },
   },
 });

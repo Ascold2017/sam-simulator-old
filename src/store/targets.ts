@@ -1,4 +1,4 @@
-import type { IRecognizedTargets } from "@/classes/SAM";
+import { SAM_PARAMS, type IRecognizedTargets } from "@/classes/SAM";
 import { defineStore } from "pinia";
 import { useTargetRadarStore } from "./targetRadar";
 
@@ -6,6 +6,16 @@ export const useTargetsStore = defineStore("targets", {
   state: () => ({
     targets: [] as IRecognizedTargets[],
   }),
+  getters: {
+    targetsInRay() {
+      const targetRadar = useTargetRadarStore();
+      this.targets.filter(target => {
+        const intoAzimut = Math.abs(target.azimut - targetRadar.targetCursorAngle) < SAM_PARAMS.RADAR_AZIMUT_DETECT_ACCURACY;
+        const intoElevation = Math.abs(target.elevation - targetRadar.targetCursorElevation) < SAM_PARAMS.RADAR_AZIMUT_DETECT_ACCURACY;
+        return intoAzimut && intoElevation
+      })
+    }
+  },
   actions: {
     setTargets(targets: IRecognizedTargets[]) {
       const targetRadar = useTargetRadarStore();
@@ -18,6 +28,9 @@ export const useTargetsStore = defineStore("targets", {
       }
       if (targetRadar.isCapturedDistance && targetRadar.capturedTarget) {
         targetRadar.targetCursorDistance = targetRadar.capturedTarget.distance;
+      }
+      if (targetRadar.isCapturedElevation && targetRadar.capturedTarget) {
+        targetRadar.targetCursorElevation = targetRadar.capturedTarget.elevation;
       }
     },
   },

@@ -13,37 +13,14 @@
       shadowBlur: 10,
       cornerRadius: 6,
     }" />
-    <SOCDisplay />
 
     <SAMButton :x="540" :y="20" name="scale80km" label="50 км" :value="mainRadar.maxDisplayedDistance === 50" @click="mainRadar.setMaxDisplayedDistance(50)" />
     <SAMButton :x="540" :y="85" name="scale50km" label="30 км" :value="mainRadar.maxDisplayedDistance === 30" @click="mainRadar.setMaxDisplayedDistance(30)" />
 
-    <SAMButton :x="540" :y="250" name="asc" label="АСЦ" :value="false" />
 
-
-    <v-text :config="{
-      x: 540,
-      y: 330,
-      width: 60,
-      text: 'β',
-      align: 'center',
-      fontFamily: 'Russo One, sans-serif',
-      fill: '#181818',
-      fontStyle: 'bold',
-      fontSize: 14,
-    }" />
-    <v-circle :config="{
-      name: 'captureIndicator',
-      x: 570,
-      y: 370,
-      width: 20,
-      height: 20,
-      fill: targetRadar.isCapturedAzimut ? 'rgb(150, 249, 123)': 'red',
-      shadowBlur: 5
-    }" />
-
-    <SAMButton :x="540" :y="395" name="capture" :value="targetRadar.isCapturedAzimut"  label="АС" @click="targetRadar.captureByAzimut" />
-    <SAMButton :x="540" :y="460" name="resetCapture" :value="!targetRadar.isCapturedAzimut" label="Сброс" @click="targetRadar.resetCaptureAll"/>
+    <SAMButton :x="540" :y="330" name="captureA" :value="targetRadar.isCapturedAzimut"  label="АС β" @click="targetRadar.captureByAzimut" />
+    <SAMButton :x="540" :y="395" name="captureE" :value="targetRadar.isCapturedElevation"  label="АС ε" @click="targetRadar.captureByElevation" />
+    <SAMButton :x="540" :y="460" name="captureD" :value="targetRadar.isCapturedAzimut"  label="АС r" @click="targetRadar.captureByDistance" />
   </v-group>
 </template>
 
@@ -51,7 +28,6 @@
 import { useMainRadarStore } from '@/store//mainRadarPanel';
 import { useTargetRadarStore } from '@/store/targetRadar'
 import SAMButton from './SAMButton.vue'
-import SOCDisplay from './SOCDisplay.vue'
 
 const mainRadar = useMainRadarStore()
 const targetRadar = useTargetRadarStore()

@@ -96,7 +96,7 @@
 
       <v-text :config="{
         x: 0,
-        y: 80,
+        y: 75,
         height: 40,
         text: 'Взрыватель',
         fontFamily: 'Russo One, sans-serif',
@@ -104,10 +104,10 @@
         fontSize: 12,
         verticalAlign: 'middle'
       }" />
-      <SAMButton :x="95" :y="80" name="detonatorAuto" label="Авто"
+      <SAMButton :x="95" :y="75" name="detonatorAuto" label="Авто"
         :value="weaponPanel.detonatorMode === DetonatorModes.AUTO"
         @click="weaponPanel.setDetonatorMode(DetonatorModes.AUTO)" small />
-      <SAMButton :x="140" :y="80" name="detonator2Sec" label="2 сек"
+      <SAMButton :x="140" :y="75" name="detonator2Sec" label="2 сек"
         :value="weaponPanel.detonatorMode === DetonatorModes.ON_2_SEC"
         @click="weaponPanel.setDetonatorMode(DetonatorModes.ON_2_SEC)" small />
     </v-group>
