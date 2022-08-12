@@ -14,29 +14,27 @@
 
     <v-group v-if="supplyPanel.isEnabledPower">
       <v-text :config="{
-          x: 10,
-          y: 10,
-          text: `Азимут: ${azimutLabel}°`,
-          fontFamily: 'Russo One, sans-serif',
-          fontSize: 12,
+        x: 10,
+        y: 10,
+        text: `Азимут: ${azimutLabel}°`,
+        fontFamily: 'Russo One, sans-serif',
+        fontSize: 12,
         fill: 'rgb(150, 249, 123)',
-        }"
-      />
+      }" />
       <v-text :config="{
-          x: 10,
-          y: 680,
-          text: `Дальность: ${targetRadarStore.targetCursorDistance.toFixed(1)} км`,
-          fontFamily: 'Russo One, sans-serif',
-          fontSize: 12,
+        x: 10,
+        y: 680,
+        text: `Дальность: ${targetRadarStore.targetCursorDistance.toFixed(1)} км`,
+        fontFamily: 'Russo One, sans-serif',
+        fontSize: 12,
         fill: 'rgb(150, 249, 123)',
-        }"
-      />
+      }" />
       <!-- Distance circles -->
       <v-circle
         :config="{ x: 350, y: 350, width: i * 20 * mainRadar.scale, stroke: 'rgb(150, 249, 123)', strokeWidth: 0.1 }"
         v-for="i in countCircles" />
       <!-- Killzone circle -->
-      <v-circle
+      <v-circle v-if="mainRadar.maxDisplayedDistance > 50"
         :config="{ x: 350, y: 350, width: 100 * mainRadar.scale, stroke: 'rgb(150, 249, 123)', strokeWidth: 0.5 }" />
       <!-- Azimut lines -->
       <v-line :config="{
@@ -46,37 +44,34 @@
       }" v-for="azimutLine in azimutLines" />
       <!-- Azimut labels -->
       <v-text :config="{
-        x: azimutLine.x1 - 10,
+        x: azimutLine.x1 - 12.5,
         y: azimutLine.y1 - 6,
         text: azimutLine.angleLabel,
         align: 'center',
         verticalAlign: 'middle',
         fontFamily: 'Russo One, sans-serif',
         fill: 'rgb(150, 249, 123)',
-        fontSize: 9,
-        width: 20,
+        fontSize: 11,
+        width: 25,
         height: 12
       }" v-for="azimutLine in azimutLines" />
-     
+
       <!-- Rotation cursor -->
       <v-line :config="{
         points: [radarCursorLine.x0, radarCursorLine.y0, radarCursorLine.x1, radarCursorLine.y1],
         stroke: 'rgb(150, 249, 123)',
         strokeWidth: 1
       }" />
-       <!-- Target cursor line -->
-      <v-line
-        :config="{
-          points: [targetCursorLine.x0, targetCursorLine.y0, targetCursorLine.x1, targetCursorLine.y1],
-          dash: targetCursorLine.dash,
-          stroke: 'white',
-          strokeWidth: 0.5
-        }"
-      />
+      <!-- Target cursor line -->
+      <v-line :config="{
+        points: [targetCursorLine.x0, targetCursorLine.y0, targetCursorLine.x1, targetCursorLine.y1],
+        dash: targetCursorLine.dash,
+        stroke: 'white',
+        strokeWidth: 0.5
+      }" />
     </v-group>
     <!-- targets -->
-    <v-group
-      v-if="supplyPanel.isEnabledPower && supplyPanel.isEnabledMainRadar">
+    <v-group v-if="supplyPanel.isEnabledPower && supplyPanel.isEnabledMainRadar">
       <v-arc v-for="canvasTarget in canvasTargets" :config="{
         x: 350, y: 350,
         innerRadius: canvasTarget.radius,
@@ -86,7 +81,13 @@
         strokeWidth: canvasTarget.strokeWidth,
         stroke: `rgba(150, 249, 123, ${canvasTarget.alpha})`
       }" />
-      
+      <v-circle v-if="targetRadarStore.isCapturedAll" :config="{
+        x: canvasHitPoint.x,
+        y: canvasHitPoint.y,
+        width: 4,
+        height: 4,
+        fill: 'white'
+      }" />
     </v-group>
   </v-group>
 </template>
@@ -97,6 +98,7 @@ import { useSupplyPanelStore } from '@/store/supplyPanel';
 import { useMainRadarStore } from '@/store/mainRadarPanel';
 import { useTargetsStore } from '@/store/targets';
 import { useTargetRadarStore } from '@/store/targetRadar';
+import { useWeaponPanelStore } from '@/store/weaponPanel';
 import { computed } from 'vue';
 import { SAM_PARAMS } from '@/classes/SAM';
 
@@ -112,9 +114,10 @@ const supplyPanel = useSupplyPanelStore()
 const mainRadar = useMainRadarStore()
 const targetsStore = useTargetsStore()
 const targetRadarStore = useTargetRadarStore()
+const weaponPanelStore = useWeaponPanelStore();
 
 const azimutLabel = computed(() => {
-  const deg = (targetRadarStore.targetCursorAngle - 1.5*Math.PI) * (180/Math.PI)
+  const deg = (targetRadarStore.targetCursorAngle - 1.5 * Math.PI) * (180 / Math.PI)
   return (deg < 0 ? 360 + deg : deg).toFixed(1);
 });
 const countCircles = computed(() => mainRadar.maxDisplayedDistance / 10);
@@ -169,5 +172,21 @@ const canvasTargets = computed<ICanvasTarget[]>(() => {
       }
     });
 });
+
+const canvasHitPoint = computed(() => {
+  if (!targetRadarStore.capturedTarget || !weaponPanelStore.currentMissile) return { x: 0, y: 0 }
+  const timeToHitKmS = targetRadarStore.capturedTarget.distance /
+    ((targetRadarStore.capturedTarget.radialVelocity + weaponPanelStore.currentMissile.velocity) / 1000);
+  const distanceToHitKm = (timeToHitKmS * (weaponPanelStore.currentMissile.velocity / 1000));
+  const hitX = distanceToHitKm *
+    Math.cos(targetRadarStore.capturedTarget.azimut) * mainRadar.scale + 350;
+  const hitY = distanceToHitKm *
+    Math.sin(targetRadarStore.capturedTarget.azimut) * mainRadar.scale + 350;
+    console.log(hitX, hitY)
+  return {
+    x: hitX,
+    y: hitY
+  }
+})
 
 </script>

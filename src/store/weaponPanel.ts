@@ -12,17 +12,28 @@ export enum DetonatorModes {
   ON_2_SEC = "ON_2_SEC",
 }
 
+interface IMissile {
+  id: number;
+  isLaunched: boolean;
+  velocity: number;
+}
 export const useWeaponPanelStore = defineStore("weaponPanel", {
   state: () => ({
-    missiles: Array(8).fill(0).map((_, i) => ({ id: i + 1, isLaunched: false })),
+    missiles: Array(8).fill(0).map((_, i) => ({ id: i + 1, isLaunched: false, velocity: 1200 })) as IMissile[],
     currentMissileId: null as number | null,
     missileState: null as MissileStates | null,
     detonatorMode: DetonatorModes.AUTO,
   }),
 
+  getters: {
+    currentMissile(): IMissile | null {
+      return this.missiles.find(m => m.id === this.currentMissileId) || null
+    }
+  },
+
   actions: {
     setDefaultValues() {
-      this.missiles = Array(8).fill(0).map((_, i) => ({ id: i + 1, isLaunched: false }));
+      this.missiles = Array(8).fill(0).map((_, i) => ({ id: i + 1, isLaunched: false, velocity: 1200 }));
       this.currentMissileId = null;
       this.missileState = null;
       this.detonatorMode = DetonatorModes.AUTO

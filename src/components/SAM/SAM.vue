@@ -5,11 +5,9 @@
         <v-layer>
           <SupplyPanel />
           <MainRadarPanel />
-          
           <ParamsPanel />
           <CapturePanel />
           <WeaponPanel />
-          
         </v-layer>
         <v-layer>
           <MainRadarDisplay v-if="mainRadar.viewMode === ViewModes.MainRadar" />
@@ -23,7 +21,6 @@
 
 <script setup lang="ts">
 import MainRadarPanel from './MainRadarPanel.vue';
-import TVPanel from './TVPanel.vue';
 import ParamsPanel from './ParamsPanel.vue';
 import SupplyPanel from './SupplyPanel.vue';
 import WeaponPanel from './WeaponPanel.vue';

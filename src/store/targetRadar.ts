@@ -73,6 +73,7 @@ export const useTargetRadarStore = defineStore("targetRadar", {
 
     captureByElevation() {
       const supply = useSupplyPanelStore();
+      const mainRadarPanel = useMainRadarStore()
       if (!supply.isEnabledTargetRadarTransmitter) return;
 
       if (this.isCapturedElevation) {
@@ -87,10 +88,14 @@ export const useTargetRadarStore = defineStore("targetRadar", {
       );
       this.isCapturedElevation = !!capturedTargetId;
       capturedTargetId && (this.capturedTargetId = capturedTargetId);
+      if (this.isCapturedAll) {
+        mainRadarPanel.setViewMode(ViewModes.MainRadar);
+      }
     },
 
     captureByDistance() {
       const supply = useSupplyPanelStore();
+      const mainRadarPanel = useMainRadarStore()
       if (!supply.isEnabledTargetRadarTransmitter) {
         return;
       }
@@ -107,6 +112,10 @@ export const useTargetRadarStore = defineStore("targetRadar", {
 
       this.isCapturedDistance = !!capturedTargetId;
       capturedTargetId && (this.capturedTargetId = capturedTargetId);
+
+      if (this.isCapturedAll) {
+        mainRadarPanel.setViewMode(ViewModes.MainRadar);
+      }
     },
 
     resetCaptureAll() {
