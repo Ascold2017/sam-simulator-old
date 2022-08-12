@@ -55,6 +55,14 @@ export const useTargetRadarStore = defineStore("targetRadar", {
     captureByElevation() {
       const supply = useSupplyPanelStore();
       if (!supply.isEnabledTargetRadarTransmitter) return;
+
+      // @ts-ignore
+      const capturedTargetId = this.sam.getTargetOnAzimutAndElevation(
+        this.targetCursorAngle,
+        this.targetCursorElevation,
+      );
+      this.isCapturedElevation = !!capturedTargetId;
+      capturedTargetId && (this.capturedTargetId = capturedTargetId);
     },
 
     captureByDistance() {
@@ -63,10 +71,14 @@ export const useTargetRadarStore = defineStore("targetRadar", {
         return;
       }
       // @ts-ignore
-      this.isCapturedDistance = !!this.sam.isTargetOnDistance(
-        this.capturedTargetId,
+      const capturedTargetId = this.sam.getTargetOnAzimutElevationAndDistance(
+        this.targetCursorAngle,
+        this.targetCursorElevation,
         this.targetCursorDistance,
       );
+
+      this.isCapturedDistance = capturedTargetId;
+      capturedTargetId && (this.capturedTargetId = capturedTargetId);
     },
 
     resetCaptureAll() {

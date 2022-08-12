@@ -7,7 +7,7 @@ export const SAM_PARAMS = {
   MAX_ELEVATION: 75 * (Math.PI / 180),
   MAX_DISTANCE: 50, // 80 km
   MIN_CAPTURE_RANGE: 2,
-  RADAR_AZIMUT_DETECT_ACCURACY: 0.2, // deg
+  RADAR_AZIMUT_DETECT_ACCURACY: 1 * (Math.PI / 180),
   RADAR_DISTANCE_DETECT_ACCURACY: 0.1,
   RADAR_SPOT_AZIMUT_GAIN: 1000,
   RADAR_DISTANCE_WINDOW: 2, // 2 km
@@ -190,13 +190,23 @@ export default class SAM {
   getTargetOnAzimutAndDistanceWindow(azimut: number, distance: number) {
     return Object.keys(this.recognizedTargets).find(id => {
       const target = this.recognizedTargets[id];
-      return Math.abs(target.azimut - azimut) <= SAM_PARAMS.RADAR_AZIMUT_DETECT_ACCURACY/2 &&
-        Math.abs(target.distance - distance) <= SAM_PARAMS.RADAR_DISTANCE_WINDOW/2
+      return (Math.abs(target.azimut - azimut) <= SAM_PARAMS.RADAR_AZIMUT_DETECT_ACCURACY/2) &&
+        (Math.abs(target.distance - distance) <= SAM_PARAMS.RADAR_DISTANCE_WINDOW/2)
     })
   }
 
-  isTargetOnDistance(identifier: string, distance: number) {
-    const target = this.recognizedTargets[identifier];
+  getTargetOnAzimutAndElevation(azimut: number, elevation: number) {
+    return Object.keys(this.recognizedTargets).find(id => {
+      const target = this.recognizedTargets[id];
+      return (Math.abs(target.azimut - azimut) <= SAM_PARAMS.RADAR_AZIMUT_DETECT_ACCURACY/2) &&
+        (Math.abs(elevation - target.elevation) <= SAM_PARAMS.RADAR_AZIMUT_DETECT_ACCURACY/2)
+    })
+  }
+
+  getTargetOnAzimutElevationAndDistance(azimut: number, elevation: number, distance: number) {
+    const id = this.getTargetOnAzimutAndElevation(azimut, elevation);
+    if (!id) return null
+    const target = this.recognizedTargets[id];
     return Math.abs(target.distance - distance) <= SAM_PARAMS.RADAR_DISTANCE_DETECT_ACCURACY / 2;
   }
 }
