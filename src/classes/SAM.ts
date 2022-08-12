@@ -192,7 +192,7 @@ export default class SAM {
       const target = this.recognizedTargets[id];
       return (Math.abs(target.azimut - azimut) <= SAM_PARAMS.RADAR_AZIMUT_DETECT_ACCURACY/2) &&
         (Math.abs(target.distance - distance) <= SAM_PARAMS.RADAR_DISTANCE_WINDOW/2)
-    })
+    }) || null
   }
 
   getTargetOnAzimutAndElevation(azimut: number, elevation: number) {
@@ -200,13 +200,13 @@ export default class SAM {
       const target = this.recognizedTargets[id];
       return (Math.abs(target.azimut - azimut) <= SAM_PARAMS.RADAR_AZIMUT_DETECT_ACCURACY/2) &&
         (Math.abs(elevation - target.elevation) <= SAM_PARAMS.RADAR_AZIMUT_DETECT_ACCURACY/2)
-    })
+    }) || null
   }
 
   getTargetOnAzimutElevationAndDistance(azimut: number, elevation: number, distance: number) {
     const id = this.getTargetOnAzimutAndElevation(azimut, elevation);
     if (!id) return null
     const target = this.recognizedTargets[id];
-    return Math.abs(target.distance - distance) <= SAM_PARAMS.RADAR_DISTANCE_DETECT_ACCURACY / 2;
+    return Math.abs(target.distance - distance) <= SAM_PARAMS.RADAR_DISTANCE_DETECT_ACCURACY / 2 ? id : null;
   }
 }

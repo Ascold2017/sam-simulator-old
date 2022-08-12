@@ -1,6 +1,6 @@
 import { type IRecognizedTargets, SAM_PARAMS } from "@/classes/SAM";
 import { defineStore } from "pinia";
-import { useMainRadarStore } from "./mainRadarPanel";
+import { useMainRadarStore, ViewModes } from "./mainRadarPanel";
 import { useSupplyPanelStore } from "./supplyPanel";
 
 export const useTargetRadarStore = defineStore("targetRadar", {
@@ -43,7 +43,14 @@ export const useTargetRadarStore = defineStore("targetRadar", {
     },
     captureByAzimut() {
       const supply = useSupplyPanelStore();
+      const mainRadarStore = useMainRadarStore()
       if (!supply.isEnabledTargetRadarTransmitter) return;
+
+      if (this.isCapturedAzimut) {
+        this.isCapturedAzimut = false;
+        mainRadarStore.viewMode = ViewModes.MainRadar
+        return
+      }
       // @ts-ignore
       this.capturedTargetId = this.sam.getTargetOnAzimutAndDistanceWindow(
         this.targetCursorAngle,
@@ -56,6 +63,11 @@ export const useTargetRadarStore = defineStore("targetRadar", {
       const supply = useSupplyPanelStore();
       if (!supply.isEnabledTargetRadarTransmitter) return;
 
+      if (this.isCapturedElevation) {
+        this.isCapturedElevation = false;
+        return
+      }
+
       // @ts-ignore
       const capturedTargetId = this.sam.getTargetOnAzimutAndElevation(
         this.targetCursorAngle,
@@ -67,8 +79,12 @@ export const useTargetRadarStore = defineStore("targetRadar", {
 
     captureByDistance() {
       const supply = useSupplyPanelStore();
-      if (!supply.isEnabledTargetRadarTransmitter || this.isCapturedDistance) {
+      if (!supply.isEnabledTargetRadarTransmitter) {
         return;
+      }
+      if (this.isCapturedDistance) {
+        this.isCapturedDistance = false;
+        return
       }
       // @ts-ignore
       const capturedTargetId = this.sam.getTargetOnAzimutElevationAndDistance(
@@ -77,15 +93,17 @@ export const useTargetRadarStore = defineStore("targetRadar", {
         this.targetCursorDistance,
       );
 
-      this.isCapturedDistance = capturedTargetId;
+      this.isCapturedDistance = !!capturedTargetId;
       capturedTargetId && (this.capturedTargetId = capturedTargetId);
     },
 
     resetCaptureAll() {
+      const mainRadarStore = useMainRadarStore()
       this.isCapturedAzimut = false;
       this.isCapturedDistance = false;
       this.isCapturedElevation = false;
       this.capturedTargetId = null;
+      mainRadarStore.viewMode = ViewModes.MainRadar
     },
 
     resetCaptureDistance() {

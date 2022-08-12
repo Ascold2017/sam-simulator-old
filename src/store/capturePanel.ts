@@ -8,7 +8,7 @@ export enum CaptureModes {
 }
 export const useCapturePanelStore = defineStore("capturePanel", {
   state: () => ({
-    captureMode: CaptureModes.Radio,
+    captureMode: CaptureModes.Manual,
   }),
   actions: {
     setCaptureMode(mode: CaptureModes) {

@@ -37,11 +37,10 @@
       fill: 'rgb(150, 249, 123)',
     }" />
 
-    <v-group v-if="supplyPanel.isEnabledPower"
-      :config="{ 
-        x: 255, y: 250,
-        rotation: targetRadarStore.targetCursorAngle * (180 / Math.PI)
-      }">
+    <v-group v-if="supplyPanel.isEnabledPower" :config="{
+      x: 255, y: 250,
+      rotation: targetRadarStore.targetCursorAngle * (180 / Math.PI)
+    }">
       <v-rect :config="{
         width: 230,
         height: 100,
@@ -49,23 +48,44 @@
         strokeWidth: 0.5,
         offsetY: 50,
       }" />
-      <v-rect
-        v-for="canvasTarget in canvasTargets"
-        :config="{
-          x: canvasTarget.x,
-          y: canvasTarget.y,
-          stroke: 'rgb(150, 249, 123)',
-          fill: 'rgb(150, 249, 123)',
-          width: canvasTarget.width,
-          height:canvasTarget.length,
-          offsetX: canvasTarget.width/2,
-          offsetY: canvasTarget.length/2,
-        }"
-      />
+      <v-line :config="{
+        stroke: 'rgb(150, 249, 123)',
+        strokeWidth: 0.2,
+        offsetY: 50,
+        points: [115 - distanceDetectAccuracyCanvas, 0, 115 - distanceDetectAccuracyCanvas, 100]
+      }" />
+      <v-line :config="{
+        stroke: 'rgb(150, 249, 123)',
+        strokeWidth: 0.2,
+        offsetY: 50,
+        points: [115 + distanceDetectAccuracyCanvas, 0, 115 + distanceDetectAccuracyCanvas, 100]
+      }" />
+      <v-line :config="{
+        stroke: 'rgb(150, 249, 123)',
+        strokeWidth: 0.2,
+        offsetY: 50,
+        points: [0, 50 - elevationDetectAccuracyCanvas, 230, 50 - elevationDetectAccuracyCanvas]
+      }" />
+      <v-line :config="{
+        stroke: 'rgb(150, 249, 123)',
+        strokeWidth: 0.2,
+        offsetY: 50,
+        points: [0, 50 + elevationDetectAccuracyCanvas, 230, 50 + elevationDetectAccuracyCanvas]
+      }" />
+      <v-rect v-for="canvasTarget in canvasTargets" :config="{
+        x: canvasTarget.x,
+        y: canvasTarget.y,
+        stroke: 'rgb(150, 249, 123)',
+        fill: 'rgb(150, 249, 123)',
+        height: canvasTarget.width,
+        width: canvasTarget.length,
+        offsetX: canvasTarget.length / 2,
+        offsetY: canvasTarget.width / 2,
+      }" />
 
     </v-group>
 
-   
+
   </v-group>
 </template>
 
@@ -91,6 +111,8 @@ const elevationLabel = computed(() => {
   return (targetRadarStore.targetCursorElevation * (180 / Math.PI)).toFixed(1);
 });
 
+const distanceDetectAccuracyCanvas = SAM_PARAMS.RADAR_DISTANCE_DETECT_ACCURACY / SAM_PARAMS.RADAR_DISTANCE_WINDOW * 230
+const elevationDetectAccuracyCanvas = SAM_PARAMS.RADAR_AZIMUT_DETECT_ACCURACY / SAM_PARAMS.TARGET_RADAR_RAY_WIDTH * 100
 interface ICanvasTarget {
   x: number;
   y: number;
@@ -108,10 +130,8 @@ const canvasTargets = computed<ICanvasTarget[]>(() => {
       const offsetDistance = targetRadarStore.isCapturedDistance
         ? 0
         : (target.distance - targetRadarStore.targetCursorDistance);
-      const offsetDistanceK = 2 *offsetDistance / SAM_PARAMS.RADAR_DISTANCE_WINDOW;
+      const offsetDistanceK = 2 * offsetDistance / SAM_PARAMS.RADAR_DISTANCE_WINDOW;
       const offsetDistanceCanvas = offsetDistanceK * 115 + 115; // Half of rect height
-      const canvasDistanceAccuracy = SAM_PARAMS.RADAR_DISTANCE_DETECT_ACCURACY * mainRadar.scale;
-
       const offsetElevation = targetRadarStore.isCapturedElevation
         ? 0
         : (target.elevation - targetRadarStore.targetCursorElevation);
@@ -123,7 +143,7 @@ const canvasTargets = computed<ICanvasTarget[]>(() => {
       return {
         x: offsetDistanceCanvas,
         y: canvasOffsetElevation,
-        length: canvasDistanceAccuracy,
+        length: distanceDetectAccuracyCanvas,
         width: target.size / rayWidth,
         alpha
       }
