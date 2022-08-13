@@ -3,6 +3,7 @@ import Sounds from "./Sounds";
 
 export default class SAMissile {
   private _identifier: number | null = null;
+  private target: FlightObject | null = null;
   private targetPosition = { x: 0, y: 0, z: 0 };
   private targetDistance = Infinity;
   private maxDistance: number = 0;
@@ -15,7 +16,7 @@ export default class SAMissile {
   };
   private currentRotation = 0;
   private launchTime: number = 0;
-  private killRadius: number = 0.1; // 100 meters
+  private killRadius: number = 0.05; // 50 meters
   private isDestroyed = false;
   private traveledDistance = 0;
   constructor(
@@ -23,11 +24,13 @@ export default class SAMissile {
     maxDistance = 25,
     velocity = 900,
     initialPoint = { x: 0, y: 0, z: 0 },
+    target: FlightObject
   ) {
     this._identifier = id;
     this.maxDistance = maxDistance;
     this._velocity = velocity;
     this.currentPoint = initialPoint;
+    this.target = target
   }
 
   get identifier() {
@@ -54,9 +57,7 @@ export default class SAMissile {
     return this.targetDistance;
   }
 
-  public setTargetPosition(
-    targetPosition: { x: number; y: number; z: number },
-  ) {
+  public setTargetPosition(targetPosition: { x: number; y: number; z: number }) {
     this.targetPosition = targetPosition;
   }
 
@@ -76,9 +77,11 @@ export default class SAMissile {
       const dFlightDistance = ((dt / 1000) * vectorVelocity) /
         1000;
 
-      const dx = this.targetPosition.x - this.currentPoint.x;
-      const dy = this.targetPosition.y - this.currentPoint.y;
-      const dz = this.targetPosition.z - this.currentPoint.z;
+      const targetPosition = this.target ? this.target.currentPoint : this.targetPosition;
+
+      const dx = targetPosition.x - this.currentPoint.x;
+      const dy = targetPosition.y - this.currentPoint.y;
+      const dz = targetPosition.z - this.currentPoint.z;
 
       this.targetDistance = Math.sqrt(dx * dx + dy * dy + dz * dz);
 

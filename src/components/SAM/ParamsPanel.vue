@@ -15,8 +15,8 @@
     }" />
 
     <!-- Target param indicator -->
-    <ParamIndicator :config="{ x: 20, y: 20 }" label="Р, км" :min-value="0" :max-value="30" :value="param"
-      :strokes="30" />
+    <ParamIndicator :config="{ x: 20, y: 20 }" label="Р, км" :min-value="0" :max-value="50" :value="param"
+      :strokes="50" />
     <!-- Target height indicator -->
     <ParamIndicator :config="{ x: 185, y: 20 }" label="H, км" :min-value="0" :max-value="heightIndicatorMaxValue"
       :value="height" :strokes="40" />

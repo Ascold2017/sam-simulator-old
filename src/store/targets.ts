@@ -37,15 +37,6 @@ export const useTargetsStore = defineStore("targets", {
       if (targetRadar.isCapturedElevation && targetRadar.capturedTarget) {
         targetRadar.targetCursorElevation = targetRadar.capturedTarget.elevation;
       }
-
-      if (targetRadar.isCapturedAll && targetRadar.capturedTarget) {
-        weaponPanel.launchedMissiles.forEach(m => m.setTargetPosition({
-          x: targetRadar.capturedTarget!.x,
-          y: targetRadar.capturedTarget!.y,
-          z: targetRadar.capturedTarget!.height
-        }));
-
-      }
     },
   },
 });

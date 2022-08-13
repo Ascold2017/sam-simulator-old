@@ -72,11 +72,15 @@ export default class SAM {
     this.missiles.push(missile);
   }
 
+  public getFlightObject(id: string) {
+    return this.flightObjects.find(fo =>fo.identifier === id)
+  }
   private tick() {
     setInterval(() => {
       if (this.isEnabled) {
         this.recalculateTargets();
         this.recalculateMissiles();
+        
         this.eventListener!('update', {
           targets: Object.keys(this.recognizedTargets).map(id => this.recognizedTargets[id]),
           missiles: Object.keys(this.flightMissiles).map(id => this.flightMissiles[id]),
@@ -171,6 +175,7 @@ export default class SAM {
           z: missile.missileCurrentPoint.z,
           velocity: missile.velocity,
         };
+        missile.setTargetPosition
 
         // Если цель в радиусе поражения
         if (missile.missileTargetDistance <= missile.missileKillRadius) {
