@@ -176,14 +176,13 @@ const canvasTargets = computed<ICanvasTarget[]>(() => {
     .filter(t => t.distance < mainRadar.maxDisplayedDistance)
     .map(target => {
       const canvasTargetArcAngle = (target.size * mainRadar.gain * 180) / (target.distance * Math.PI) + SAM_PARAMS.RADAR_AZIMUT_DETECT_ACCURACY * 2;
-      const targetSpotDistance = SAM_PARAMS.RADAR_DISTANCE_DETECT_ACCURACY * mainRadar.scale
-      const alpha = 1
+      const targetSpotDistance = SAM_PARAMS.RADAR_DISTANCE_DETECT_ACCURACY * mainRadar.scale;
       return {
         radius: target.distance * mainRadar.scale,
         rotation: target.azimut * (180 / Math.PI) - canvasTargetArcAngle / 2,
         angle: canvasTargetArcAngle,
         strokeWidth: targetSpotDistance,
-        alpha
+        alpha: target.visibilityK * mainRadar.brightness
       }
     });
 });

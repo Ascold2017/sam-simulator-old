@@ -27,10 +27,11 @@ export interface IRecognizedTargets {
   y: number;
   rotation: number;
   size: number;
+  visibilityK: number;
 }
 
 export interface IFlightMissiles {
-  identifier: string;
+  identifier: number;
   x: number;
   y: number;
   z: number;
@@ -128,6 +129,8 @@ export default class SAM {
 
         const inAllowedElevation = targetElevation > SAM_PARAMS.MIN_ELEVATION &&
           targetElevation < SAM_PARAMS.MAX_ELEVATION;
+        
+        const visibilityK = (SAM_PARAMS.MAX_DISTANCE * flightObject.rcs) / targetDistance;
 
         if (isTargetVisible && inAllowedElevation) {
           this.recognizedTargets[flightObject.identifier!] = {
@@ -145,6 +148,7 @@ export default class SAM {
             y: flightObject.currentPoint.y,
             rotation: flightObject.currentRotation,
             size: targetSize,
+            visibilityK
           };
         } else {
           this.eventListener!('delete', flightObject.identifier!)

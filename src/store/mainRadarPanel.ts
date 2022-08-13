@@ -16,7 +16,8 @@ export const useMainRadarStore = defineStore("mainRadar", {
     radarRotation: 1.5 * Math.PI,
     rotationInterval: null as number | null,
     isEquivalent: false,
-    gain: SAM_PARAMS.RADAR_SPOT_AZIMUT_GAIN
+    gain: SAM_PARAMS.RADAR_SPOT_AZIMUT_GAIN,
+    brightness: 1
   }),
   getters: {
     scale(): number {
@@ -29,6 +30,8 @@ export const useMainRadarStore = defineStore("mainRadar", {
       this.maxDisplayedDistance = 120;
       this.rotationInterval && clearInterval(this.rotationInterval);
       this.radarRotation = 1.5 * Math.PI;
+      this.gain = SAM_PARAMS.RADAR_SPOT_AZIMUT_GAIN;
+      this.brightness = 1
     },
     setViewMode(value: ViewModes) {
       this.viewMode = value;
@@ -56,6 +59,10 @@ export const useMainRadarStore = defineStore("mainRadar", {
     incrementGain(value: number) {
       if (this.gain + value <= 0) return
       this.gain += value;
+    },
+    incrementBrightness(value: number) {
+      if (this.brightness + value <= 0) return
+      this.brightness += value;
     }
   },
 });

@@ -137,24 +137,23 @@
      <v-text :config="{
         x: 0, y: 0,
         width: 60,
+        text: 'Яркость отметок',
+        fontFamily: 'Russo One, sans-serif',
+        fill: '#181818',
+        fontSize: 12,
+      }" />
+        <SAMPotentiometer :x="100" :y="0" :delta-value="0.1" @change="mainRadar.incrementBrightness" />
+    </v-group>
+    <v-group :config="{ x: 430, y: 110 }">
+     <v-text :config="{
+        x: 0, y: 0,
+        width: 60,
         text: 'Размер отметок',
         fontFamily: 'Russo One, sans-serif',
         fill: '#181818',
         fontSize: 12,
       }" />
         <SAMPotentiometer :x="100" :y="0" :delta-value="50" @change="mainRadar.incrementGain" />
-    </v-group>
-     <v-group :config="{ x: 430, y: 100 }">
-       <v-text :config="{
-        x: 0, y: 0,
-        text: 'Кратность ТВ',
-        fontFamily: 'Russo One, sans-serif',
-        fill: '#181818',
-        fontSize: 12,
-      }" />
-      <SAMButton :x="0" :y="20" name="sdcOn" label="1Х" value small />
-      <SAMButton :x="45" :y="20" name="sdcOff" label="2.5Х" value small />
-      <SAMButton :x="90" :y="20" name="sdcOff" label="5Х" value small />
     </v-group>
   </v-group>
 </template>
