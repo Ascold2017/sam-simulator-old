@@ -152,7 +152,7 @@ const drawClock = (ctx: CanvasRenderingContext2D, shape: Konva.Shape) => {
   const minutes = d.getMinutes();
   const seconds = d.getSeconds();
 
-  const hoursAngle = (hour / 24) * 2 * Math.PI - Math.PI/2
+  const hoursAngle = ((Math.PI * 2) * ((hour * 5 + (minutes / 60) * 5) / 60)) - ((Math.PI * 2) / 4)
   const minutesAngle = (minutes/60)* 2 * Math.PI - Math.PI/2
   const secondsAngle = (seconds/60)* 2 * Math.PI - Math.PI/2
 
