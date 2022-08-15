@@ -28,7 +28,7 @@ const rotateClicks = [
 ]
 let isTurning = false;
 export default class Sounds {
-  static isEnabled = false;
+  static isEnabled = true;
   static onEndedStartSound() {
     idleSound.addEventListener("timeupdate", function () {
       var buffer = 0.1;

@@ -36,7 +36,7 @@
         shadowBlur: 5
       }" />
       <v-text :config="{
-        x: 190,
+        x: 60,
         y: 15,
         width: 20,
         text: 'r',
@@ -48,13 +48,18 @@
       }" />
       <v-circle :config="{
         name: 'captureDistanceIndicator',
-        x: 200,
+        x: 70,
         y: 55,
         width: 20,
         height: 20,
         fill: targetRadar.isCapturedDistance ? 'rgb(150, 249, 123)' : 'red',
         shadowBlur: 5
       }" />
+
+       <SAMButton :x="100" :y="15" name="captureDir" :value="targetRadar.isCapturedDirection" label="АС ϕ"
+      @click="targetRadar.captureByDirection" />
+    <SAMButton :x="165" :y="15" name="captureD" :value="targetRadar.isCapturedDistance" label="АС r"
+      @click="targetRadar.captureByDistance" />
 
       <SAMButton
         label="Сброс"
@@ -99,8 +104,8 @@
         fill: '#181818',
         fontSize: 12,
       }" />
-      <SAMButton :x="0" :y="20" name="antenna" label="Ант" :value="!mainRadar.isEquivalent" small @click="mainRadar.setEquivalent(false)" />
-      <SAMButton :x="45" :y="20" name="equivalent" label="Экв" :value="mainRadar.isEquivalent" small @click="mainRadar.setEquivalent(true)"/>
+      <SAMButton :x="0" :y="20" name="antenna" label="Ант" :value="!targetRadar.isEquivalent" small @click="targetRadar.setEquivalent(false)" />
+      <SAMButton :x="45" :y="20" name="equivalent" label="Экв" :value="targetRadar.isEquivalent" small @click="targetRadar.setEquivalent(true)"/>
     </v-group>
     <v-group :config="{ x: 310, y: 100 }">
        <v-text :config="{
@@ -113,28 +118,7 @@
       <SAMButton :x="0" :y="20" name="sdcOn" label="Выкл" value small />
       <SAMButton :x="45" :y="20" name="sdcOff" label="Вкл" value small />
     </v-group>
-    <v-group :config="{ x: 430, y: 20 }">
-     <v-text :config="{
-        x: 0, y: 0,
-        width: 60,
-        text: 'Яркость отметок',
-        fontFamily: 'Russo One, sans-serif',
-        fill: '#181818',
-        fontSize: 12,
-      }" />
-        <SAMPotentiometer :x="100" :y="0" :delta-value="0.1" @change="mainRadar.incrementBrightness" />
-    </v-group>
-    <v-group :config="{ x: 430, y: 110 }">
-     <v-text :config="{
-        x: 0, y: 0,
-        width: 60,
-        text: 'Размер отметок',
-        fontFamily: 'Russo One, sans-serif',
-        fill: '#181818',
-        fontSize: 12,
-      }" />
-        <SAMPotentiometer :x="100" :y="0" :delta-value="50" @change="mainRadar.incrementGain" />
-    </v-group>
+    
   </v-group>
 </template>
 <script setup lang="ts">
@@ -142,7 +126,7 @@ import { useCapturePanelStore, CaptureModes } from '@/store/capturePanel';
 import { useMainRadarStore } from '@/store//mainRadarPanel';
 import { useTargetRadarStore } from '@/store/targetRadar'
 import SAMButton from './SAMButton.vue'
-import SAMPotentiometer from './SAMPotentiometer.vue'
+
 
 const mainRadar = useMainRadarStore()
 const targetRadar = useTargetRadarStore()

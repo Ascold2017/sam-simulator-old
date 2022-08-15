@@ -13,6 +13,9 @@ export const useTargetRadarStore = defineStore("targetRadar", {
     targetCursorAngle: 1.5 * Math.PI,
     targetCursorDistance: 30,
     targetCursorElevation: 0,
+    isEquivalent: true,
+    gain: SAM_PARAMS.RADAR_SPOT_AZIMUT_GAIN,
+    brightness: 1
   }),
 
   getters: {
@@ -40,6 +43,9 @@ export const useTargetRadarStore = defineStore("targetRadar", {
       this.targetCursorAngle = 1.5 * Math.PI;
       this.targetCursorDistance = 30;
       this.targetCursorElevation = 0;
+      this.isEquivalent = true;
+      this.gain = SAM_PARAMS.RADAR_SPOT_AZIMUT_GAIN;
+      this.brightness = 1
     },
     incrementTargetCursorAzimut(value: number) {
       if (this.isCapturedDirection) return;
@@ -63,6 +69,17 @@ export const useTargetRadarStore = defineStore("targetRadar", {
         return;
       }
       this.targetCursorDistance += value;
+    },
+    setEquivalent(value: boolean) {
+      this.isEquivalent = value;
+    },
+    incrementGain(value: number) {
+      if (this.gain + value <= 0) return
+      this.gain += value;
+    },
+    incrementBrightness(value: number) {
+      if (this.brightness + value <= 0) return
+      this.brightness += value;
     },
     
 

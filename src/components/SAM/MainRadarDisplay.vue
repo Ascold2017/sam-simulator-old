@@ -78,7 +78,7 @@
       }" />
     </v-group>
     <!-- targets -->
-    <v-group v-if="supplyPanel.isEnabledPower && supplyPanel.isEnabledMainRadar && !mainRadar.isEquivalent">
+    <v-group v-if="supplyPanel.isEnabledPower && supplyPanel.isEnabledMainRadar">
       <v-arc v-for="canvasTarget in canvasTargets" :config="{
         x: 350, y: 350,
         innerRadius: canvasTarget.radius,
@@ -173,7 +173,7 @@ const canvasTargets = computed<ICanvasTarget[]>(() => {
   return targetsStore.targets
     .filter(target => target.distance <= SAM_PARAMS.MAX_DISTANCE)
     .map(target => {
-      const canvasTargetArcAngle = (target.size * mainRadar.gain * 180) / (target.distance * Math.PI) + SAM_PARAMS.RADAR_AZIMUT_DETECT_ACCURACY * 2;
+      const canvasTargetArcAngle = (target.size * targetRadarStore.gain * 180) / (target.distance * Math.PI) + SAM_PARAMS.RADAR_AZIMUT_DETECT_ACCURACY * 2;
       const targetSpotDistance = SAM_PARAMS.RADAR_DISTANCE_DETECT_ACCURACY * mainRadar.scale;
 
       return {
@@ -181,7 +181,7 @@ const canvasTargets = computed<ICanvasTarget[]>(() => {
         rotation: target.azimut * (180 / Math.PI) - canvasTargetArcAngle / 2,
         angle: canvasTargetArcAngle,
         strokeWidth: targetSpotDistance,
-        alpha: target.visibilityK * mainRadar.brightness
+        alpha: target.visibilityK * targetRadarStore.brightness
       }
     });
 });

@@ -63,7 +63,7 @@
         points: [lineY, 0, lineY, 150],
         dash: [2, 10],
         offsetY: 75
-      }" v-for="lineY in canvasDistanceLinesY"/>
+      }" v-for="lineY in canvasDistanceLinesY" />
       <!-- Distance window lines -->
       <v-line :config="{
         stroke: 'rgb(150, 249, 123)',
@@ -77,17 +77,19 @@
         points: [canvasDistanceWindow.end, 0, canvasDistanceWindow.end, 150],
         offsetY: 75
       }" />
-      <!-- Targets -->
-      <v-rect v-for="canvasTarget in canvasTargets" :config="{
-        x: canvasTarget.x,
-        y: canvasTarget.y,
-        stroke: 'rgb(150, 249, 123)',
-        fill: 'rgb(150, 249, 123)',
-        height: canvasTarget.width,
-        width: canvasTarget.length,
-        offsetX: canvasTarget.length / 2,
-        offsetY: canvasTarget.width / 2,
-      }" />
+      <v-group v-if="!targetRadarStore.isEquivalent">
+        <!-- Targets -->
+        <v-rect v-for="canvasTarget in canvasTargets" :config="{
+          x: canvasTarget.x,
+          y: canvasTarget.y,
+          stroke: `rgba(150, 249, 123, ${canvasTarget.alpha})`,
+          fill: `rgba(150, 249, 123, ${canvasTarget.alpha})`,
+          height: canvasTarget.width,
+          width: canvasTarget.length,
+          offsetX: canvasTarget.length / 2,
+          offsetY: canvasTarget.width / 2,
+        }" />
+      </v-group>
 
     </v-group>
   </v-group>
@@ -141,12 +143,13 @@ const canvasTargets = computed<ICanvasTarget[]>(() => {
       const canvasOffsetElevation = offsetElevationK * 75;  // Half of rect width
 
       const rayWidth = ((Math.PI * SAM_PARAMS.TARGET_RADAR_RAY_HEIGHT * target.distance) / 180);
-      const alpha = mainRadar.brightness
+      const azimutOffsetK = 1 - 2 * Math.abs(targetRadarStore.targetCursorAngle - target.azimut) / SAM_PARAMS.TARGET_RADAR_RAY_WIDTH;
+      const alpha = target.visibilityK * azimutOffsetK * (1 - Math.abs(offsetElevationK)) * targetRadarStore.brightness
       return {
         x: offsetDistanceCanvas,
         y: canvasOffsetElevation,
         length: distanceDetectAccuracyCanvas,
-        width: target.size * mainRadar.gain / rayWidth,
+        width: target.size * targetRadarStore.gain / rayWidth,
         alpha
       }
     });
@@ -154,10 +157,10 @@ const canvasTargets = computed<ICanvasTarget[]>(() => {
 
 const canvasDistanceWindow = computed(() => {
   return {
-    start: ((targetRadarStore.targetCursorDistance - SAM_PARAMS.RADAR_DISTANCE_WINDOW/2)/SAM_PARAMS.MAX_DISTANCE) * 330,
-    end: ((targetRadarStore.targetCursorDistance + SAM_PARAMS.RADAR_DISTANCE_WINDOW/2)/SAM_PARAMS.MAX_DISTANCE) * 330,
+    start: ((targetRadarStore.targetCursorDistance - SAM_PARAMS.RADAR_DISTANCE_WINDOW / 2) / SAM_PARAMS.MAX_DISTANCE) * 330,
+    end: ((targetRadarStore.targetCursorDistance + SAM_PARAMS.RADAR_DISTANCE_WINDOW / 2) / SAM_PARAMS.MAX_DISTANCE) * 330,
   }
 });
 
-const canvasDistanceLinesY = computed(() => Array(SAM_PARAMS.MAX_DISTANCE/10).fill(0).map((_, i) => (i*10 / SAM_PARAMS.MAX_DISTANCE) * 330))
+const canvasDistanceLinesY = computed(() => Array(SAM_PARAMS.MAX_DISTANCE / 10).fill(0).map((_, i) => (i * 10 / SAM_PARAMS.MAX_DISTANCE) * 330))
 </script>

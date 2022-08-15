@@ -13,9 +13,7 @@ export const useMainRadarStore = defineStore("mainRadar", {
     viewMode: ViewModes.MainRadar,
     radarRotation: 1.5 * Math.PI,
     rotationInterval: null as number | null,
-    isEquivalent: false,
-    gain: SAM_PARAMS.RADAR_SPOT_AZIMUT_GAIN,
-    brightness: 1
+    
   }),
   getters: {
     scale(): number {
@@ -27,8 +25,7 @@ export const useMainRadarStore = defineStore("mainRadar", {
       this.viewMode = ViewModes.MainRadar;
       this.rotationInterval && clearInterval(this.rotationInterval);
       this.radarRotation = 1.5 * Math.PI;
-      this.gain = SAM_PARAMS.RADAR_SPOT_AZIMUT_GAIN;
-      this.brightness = 1
+      
     },
     setViewMode(value: ViewModes) {
       this.viewMode = value;
@@ -47,16 +44,6 @@ export const useMainRadarStore = defineStore("mainRadar", {
         this.radarRotation = 1.5 * Math.PI;
       }
     },
-    setEquivalent(value: boolean) {
-      this.isEquivalent = value;
-    },
-    incrementGain(value: number) {
-      if (this.gain + value <= 0) return
-      this.gain += value;
-    },
-    incrementBrightness(value: number) {
-      if (this.brightness + value <= 0) return
-      this.brightness += value;
-    }
+    
   },
 });
