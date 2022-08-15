@@ -46,7 +46,6 @@ const mainRadar = useMainRadarStore()
 const targetRadar = useTargetRadarStore()
 
 const openTargetRadar = () => {
-  if (!targetRadar.isCapturedAzimut) return;
   mainRadar.setViewMode(ViewModes.TargetRadar)
 }
 

@@ -9,7 +9,7 @@
       y: 0,
       width: 700,
       height: 700,
-      fill: supplyPanel.isEnabledPower ? 'rgb(15, 33, 19)' : 'black',
+      fill: 'black',
     }" />
 
     <v-group v-if="supplyPanel.isEnabledPower">
@@ -29,6 +29,8 @@
         fontSize: 12,
         fill: 'rgb(150, 249, 123)',
       }" />
+      <v-circle
+        :config="{ x: 350, y: 350, width: mainRadar.maxDisplayedDistance * mainRadar.scale * 2, fill: 'rgb(15, 33, 19)' }" />
       <!-- Distance circles -->
       <v-circle
         :config="{ x: 350, y: 350, width: i * 20 * mainRadar.scale, stroke: 'rgb(150, 249, 123)', strokeWidth: 0.1 }"
@@ -44,9 +46,12 @@
       }" v-for="azimutLine in azimutLines" />
       <!-- Azimut labels -->
       <v-text :config="{
-        x: azimutLine.x1 - 12.5,
-        y: azimutLine.y1 - 6,
+        x: azimutLine.x1,
+        y: azimutLine.y1,
         text: azimutLine.angleLabel,
+        rotation: azimutLine.angleLabel,
+        offsetX: 12.5,
+        offsetY: 6,
         align: 'center',
         verticalAlign: 'middle',
         fontFamily: 'Russo One, sans-serif',
@@ -63,10 +68,12 @@
         strokeWidth: 1
       }" />
       <!-- Target cursor line -->
-      <v-line  :config="{
+      <v-arrow v-if="!targetRadarStore.isCapturedAll" :config="{
         points: [targetCursorLine.x0, targetCursorLine.y0, targetCursorLine.x1, targetCursorLine.y1],
-        dash: targetCursorLine.dash,
         stroke: 'white',
+        fill: 'white',
+        pointerLength: 5,
+        pointerWidth: 5,
         strokeWidth: 0.5
       }" />
     </v-group>
@@ -113,7 +120,6 @@ import { useSupplyPanelStore } from '@/store/supplyPanel';
 import { useMainRadarStore } from '@/store/mainRadarPanel';
 import { useTargetsStore } from '@/store/targets';
 import { useTargetRadarStore } from '@/store/targetRadar';
-import { useWeaponPanelStore } from '@/store/weaponPanel';
 import { computed } from 'vue';
 import { SAM_PARAMS } from '@/classes/SAM';
 
@@ -147,20 +153,14 @@ const azimutLines = computed(() => {
 
 const targetCursorLine = computed(() => {
   const azimut = targetRadarStore.targetCursorAngle;
-  const distance = targetRadarStore.targetCursorDistance;
-
-  const distanceToWindow = distance * mainRadar.scale - SAM_PARAMS.RADAR_DISTANCE_WINDOW * mainRadar.scale / 2;
-  const distanceFromWindow = (mainRadar.maxDisplayedDistance - distance - SAM_PARAMS.RADAR_DISTANCE_WINDOW / 2) * mainRadar.scale
+  const distance = targetRadarStore.targetCursorDistance > mainRadar.maxDisplayedDistance
+    ? mainRadar.maxDisplayedDistance
+    : targetRadarStore.targetCursorDistance;
   return {
     x0: 350,
     y0: 350,
-    x1: Math.cos(azimut) * (mainRadar.maxDisplayedDistance * mainRadar.scale) + 350,
-    y1: Math.sin(azimut) * (mainRadar.maxDisplayedDistance * mainRadar.scale) + 350,
-    dash: [
-      distanceToWindow,
-      SAM_PARAMS.RADAR_DISTANCE_WINDOW * mainRadar.scale,
-      distanceFromWindow
-    ]
+    x1: Math.cos(azimut) * (distance * mainRadar.scale) + 350,
+    y1: Math.sin(azimut) * (distance * mainRadar.scale) + 350
   }
 });
 
@@ -171,12 +171,13 @@ const radarCursorLine = computed(() => ({
   y1: Math.sin(mainRadar.radarRotation) * (mainRadar.maxDisplayedDistance * mainRadar.scale) + 350,
 }));
 const canvasTargets = computed<ICanvasTarget[]>(() => {
-  
+
   return targetsStore.targets
     .filter(t => t.distance < mainRadar.maxDisplayedDistance)
     .map(target => {
       const canvasTargetArcAngle = (target.size * mainRadar.gain * 180) / (target.distance * Math.PI) + SAM_PARAMS.RADAR_AZIMUT_DETECT_ACCURACY * 2;
       const targetSpotDistance = SAM_PARAMS.RADAR_DISTANCE_DETECT_ACCURACY * mainRadar.scale;
+
       return {
         radius: target.distance * mainRadar.scale,
         rotation: target.azimut * (180 / Math.PI) - canvasTargetArcAngle / 2,
@@ -188,10 +189,10 @@ const canvasTargets = computed<ICanvasTarget[]>(() => {
 });
 
 const canvasMissiles = computed(() => {
- return targetsStore.missiles.map(missile => ({
-   x: missile.x * mainRadar.scale + 350,
+  return targetsStore.missiles.map(missile => ({
+    x: missile.x * mainRadar.scale + 350,
     y: missile.y * mainRadar.scale + 350
- }));
+  }));
 })
 
 const canvasHitPoint = computed(() => {
