@@ -2,6 +2,7 @@ import { type IRecognizedTargets, SAM_PARAMS } from "@/classes/SAM";
 import { defineStore } from "pinia";
 import { useMainRadarStore, ViewModes } from "./mainRadarPanel";
 import { useSupplyPanelStore } from "./supplyPanel";
+import { useWeaponPanelStore } from "./weaponPanel";
 
 export const useTargetRadarStore = defineStore("targetRadar", {
   state: () => ({
@@ -16,9 +17,23 @@ export const useTargetRadarStore = defineStore("targetRadar", {
   }),
 
   getters: {
-    isCapturedAll() : boolean {
-      return this.isCapturedAzimut && this.isCapturedElevation && this.isCapturedDistance
-    }
+    isCapturedAll(): boolean {
+      return this.isCapturedAzimut && this.isCapturedElevation &&
+        this.isCapturedDistance;
+    },
+    distanceToHit(): number {
+      const weaponPanelStore = useWeaponPanelStore();
+      if (
+        !this.isCapturedAll || !this.capturedTarget ||
+        !weaponPanelStore.currentMissile
+      ) {
+        return 0;
+      }
+      const timeToHitKmS = this.capturedTarget.distance /
+        ((this.capturedTarget.radialVelocity +
+          weaponPanelStore.currentMissile.velocity) / 1000);
+      return (timeToHitKmS * (weaponPanelStore.currentMissile.velocity / 1000));
+    },
   },
 
   actions: {
@@ -39,7 +54,8 @@ export const useTargetRadarStore = defineStore("targetRadar", {
     },
     incrementTargetCursorElevation(value: number) {
       if (this.isCapturedElevation) return;
-      this.targetCursorElevation = this.targetCursorElevation + value * Math.PI / 180;
+      this.targetCursorElevation = this.targetCursorElevation +
+        value * Math.PI / 180;
     },
     incrementTargetCursorDistance(value: number) {
       const mainRadarStore = useMainRadarStore();
@@ -55,13 +71,13 @@ export const useTargetRadarStore = defineStore("targetRadar", {
     },
     captureByAzimut() {
       const supply = useSupplyPanelStore();
-      const mainRadarStore = useMainRadarStore()
+      const mainRadarStore = useMainRadarStore();
       if (!supply.isEnabledTargetRadarTransmitter) return;
 
       if (this.isCapturedAzimut) {
         this.isCapturedAzimut = false;
-        mainRadarStore.viewMode = ViewModes.MainRadar
-        return
+        mainRadarStore.viewMode = ViewModes.MainRadar;
+        return;
       }
       // @ts-ignore
       this.capturedTargetId = this.sam.getTargetOnAzimutAndDistanceWindow(
@@ -73,12 +89,12 @@ export const useTargetRadarStore = defineStore("targetRadar", {
 
     captureByElevation() {
       const supply = useSupplyPanelStore();
-      const mainRadarPanel = useMainRadarStore()
+      const mainRadarPanel = useMainRadarStore();
       if (!supply.isEnabledTargetRadarTransmitter) return;
 
       if (this.isCapturedElevation) {
         this.isCapturedElevation = false;
-        return
+        return;
       }
 
       // @ts-ignore
@@ -95,13 +111,13 @@ export const useTargetRadarStore = defineStore("targetRadar", {
 
     captureByDistance() {
       const supply = useSupplyPanelStore();
-      const mainRadarPanel = useMainRadarStore()
+      const mainRadarPanel = useMainRadarStore();
       if (!supply.isEnabledTargetRadarTransmitter) {
         return;
       }
       if (this.isCapturedDistance) {
         this.isCapturedDistance = false;
-        return
+        return;
       }
       // @ts-ignore
       const capturedTargetId = this.sam.getTargetOnAzimutElevationAndDistance(
@@ -119,12 +135,12 @@ export const useTargetRadarStore = defineStore("targetRadar", {
     },
 
     resetCaptureAll() {
-      const mainRadarStore = useMainRadarStore()
+      const mainRadarStore = useMainRadarStore();
       this.isCapturedAzimut = false;
       this.isCapturedDistance = false;
       this.isCapturedElevation = false;
       this.capturedTargetId = null;
-      mainRadarStore.viewMode = ViewModes.MainRadar
+      mainRadarStore.viewMode = ViewModes.MainRadar;
     },
 
     resetCaptureDistance() {

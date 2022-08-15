@@ -63,7 +63,7 @@
         strokeWidth: 1
       }" />
       <!-- Target cursor line -->
-      <v-line v-if="!targetRadarStore.isCapturedAll" :config="{
+      <v-line  :config="{
         points: [targetCursorLine.x0, targetCursorLine.y0, targetCursorLine.x1, targetCursorLine.y1],
         dash: targetCursorLine.dash,
         stroke: 'white',
@@ -129,7 +129,6 @@ const supplyPanel = useSupplyPanelStore()
 const mainRadar = useMainRadarStore()
 const targetsStore = useTargetsStore()
 const targetRadarStore = useTargetRadarStore()
-const weaponPanelStore = useWeaponPanelStore();
 
 const azimutLabel = computed(() => {
   const deg = (targetRadarStore.targetCursorAngle - 1.5 * Math.PI) * (180 / Math.PI)
@@ -172,6 +171,7 @@ const radarCursorLine = computed(() => ({
   y1: Math.sin(mainRadar.radarRotation) * (mainRadar.maxDisplayedDistance * mainRadar.scale) + 350,
 }));
 const canvasTargets = computed<ICanvasTarget[]>(() => {
+  
   return targetsStore.targets
     .filter(t => t.distance < mainRadar.maxDisplayedDistance)
     .map(target => {
@@ -195,13 +195,10 @@ const canvasMissiles = computed(() => {
 })
 
 const canvasHitPoint = computed(() => {
-  if (!targetRadarStore.capturedTarget || !weaponPanelStore.currentMissile) return { x: 0, y: 0 }
-  const timeToHitKmS = targetRadarStore.capturedTarget.distance /
-    ((targetRadarStore.capturedTarget.radialVelocity + weaponPanelStore.currentMissile.velocity) / 1000);
-  const distanceToHitKm = (timeToHitKmS * (weaponPanelStore.currentMissile.velocity / 1000));
-  const hitX = distanceToHitKm *
+  if (!targetRadarStore.capturedTarget) return { x: 0, y: 0 }
+  const hitX = targetRadarStore.distanceToHit *
     Math.cos(targetRadarStore.capturedTarget.azimut) * mainRadar.scale + 350;
-  const hitY = distanceToHitKm *
+  const hitY = targetRadarStore.distanceToHit *
     Math.sin(targetRadarStore.capturedTarget.azimut) * mainRadar.scale + 350;
   return {
     x: hitX,

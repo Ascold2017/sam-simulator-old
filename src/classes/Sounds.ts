@@ -28,6 +28,7 @@ const rotateClicks = [
 ]
 let isTurning = false;
 export default class Sounds {
+  static isEnabled = false;
   static onEndedStartSound() {
     idleSound.addEventListener("timeupdate", function () {
       var buffer = 0.1;
@@ -53,6 +54,7 @@ export default class Sounds {
   }
 
   static startEngine() {
+    if (!Sounds.isEnabled) return
     turnOnSound.volume = 0.5;
     turnOnSound.play();
     stopSound.pause();
@@ -62,12 +64,14 @@ export default class Sounds {
   }
 
   static turnStart() {
+    if (!Sounds.isEnabled) return
     if (isTurning) return;
     isTurning = true;
     turnStartSound.play();
     turnStartSound.addEventListener("ended", Sounds.onEndedStartTunringSound);
   }
   static turnStop() {
+    if (!Sounds.isEnabled) return
     if (!isTurning) return;
     isTurning = false;
     turnStartSound.pause();
@@ -78,6 +82,7 @@ export default class Sounds {
   }
 
   static stopEngine() {
+    if (!Sounds.isEnabled) return
     turnOffSound.play();
     startSound.pause();
     idleSound.pause();
@@ -88,6 +93,7 @@ export default class Sounds {
   }
 
   static click(off?: boolean) {
+    if (!Sounds.isEnabled) return
     if (off !== undefined) {
       return off ? turnOffSound.play() : turnOnSound.play();
     }
@@ -95,11 +101,13 @@ export default class Sounds {
   }
 
   static missileStart() {
+    if (!Sounds.isEnabled) return
     startMissileSound.currentTime = 0;
     startMissileSound.play();
   }
 
   static rotateClick() {
+    if (!Sounds.isEnabled) return
     const sound = rotateClicks[Math.round(Math.random() * 3)];
     sound.volume = 0.5;
     sound.play();

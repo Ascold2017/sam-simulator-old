@@ -18,7 +18,7 @@
     <!-- Missile indicators-->
     <v-group :config="{ x: 20, y: 0 }">
       <v-circle
-        :config="{ width: 20, x: 60, y: 30, fill: weaponPanel.missileState === MissileStates.READY ? 'rgb(150, 249, 123)' : 'red', shadowBlur: 5 }" />
+        :config="{ width: 20, x: 60, y: 30, fill: weaponPanel.isMissileReady ? 'rgb(150, 249, 123)' : 'red', shadowBlur: 5 }" />
       <v-text :config="{
         x: 20,
         y: 50,
@@ -31,7 +31,7 @@
       }" />
 
       <v-circle
-        :config="{ width: 20, x: 140, y: 30, fill: weaponPanel.missileState === MissileStates.IN_RANGE ? 'rgb(150, 249, 123)' : 'red', shadowBlur: 5 }" />
+        :config="{ width: 20, x: 140, y: 30, fill: inRange ? 'rgb(150, 249, 123)' : 'red', shadowBlur: 5 }" />
       <v-text :config="{
         x: 100,
         y: 50,
@@ -44,7 +44,7 @@
       }" />
 
       <v-circle
-        :config="{ width: 20, x: 220, y: 30, fill: weaponPanel.missileState === MissileStates.LAUNCH ? 'rgb(150, 249, 123)' : 'red', shadowBlur: 5 }" />
+        :config="{ width: 20, x: 220, y: 30, fill: isLaunched ? 'rgb(150, 249, 123)' : 'red', shadowBlur: 5 }" />
       <v-text :config="{
         x: 180,
         y: 50,
@@ -57,7 +57,7 @@
       }" />
 
       <v-circle
-        :config="{ width: 20, x: 300, y: 30, fill: weaponPanel.missileState === MissileStates.RESET ? 'rgb(150, 249, 123)' : 'red', shadowBlur: 5 }" />
+        :config="{ width: 20, x: 300, y: 30, fill: isReset ? 'rgb(150, 249, 123)' : 'red', shadowBlur: 5 }" />
       <v-text :config="{
         x: 260,
         y: 50,
@@ -91,32 +91,62 @@
         :value="weaponPanel.currentMissileId === missile.id" @click="weaponPanel.selectMissile(missile.id)" />
     </v-group>
     <v-group :config="{ x: 400, y: 20 }">
+      
       <SAMButton :x="55" :y="0" name="launch" label="ПУСК" :value="false" color="red" @click="weaponPanel.launchMissile" />
-      <SAMButton :x="120" :y="0" name="return" label="Возврат" :value="false" @click="weaponPanel.resetMissile"/>
+      <SAMButton :x="120" :y="0" name="return" label="Cброс" :value="false" @click="weaponPanel.resetMissile"/>
 
       <v-text :config="{
         x: 0,
         y: 75,
         height: 40,
-        text: 'Взрыватель',
+        text: 'Наведение',
         fontFamily: 'Russo One, sans-serif',
         fill: '#181818',
         fontSize: 12,
         verticalAlign: 'middle'
       }" />
-      <SAMButton :x="95" :y="75" name="detonatorAuto" label="Авто"
-        :value="weaponPanel.detonatorMode === DetonatorModes.AUTO"
-        @click="weaponPanel.setDetonatorMode(DetonatorModes.AUTO)" small />
-      <SAMButton :x="140" :y="75" name="detonator2Sec" label="2 сек"
-        :value="weaponPanel.detonatorMode === DetonatorModes.ON_2_SEC"
-        @click="weaponPanel.setDetonatorMode(DetonatorModes.ON_2_SEC)" small />
+      
+      <SAMButton
+        :x="95" :y="75"
+        small
+        name="threePoints"
+        label="3-Т"
+        :value="weaponPanel.trackingMode === TrackingModes.THREE_POINTS"
+        @click="weaponPanel.setTrackingMode(TrackingModes.THREE_POINTS)"
+      />
+       <SAMButton
+        :x="140" :y="75"
+        small
+        name="threePoints"
+        label="1/2"
+        :value="weaponPanel.trackingMode === TrackingModes.HALF_STRAIGHTENING"
+        @click="weaponPanel.setTrackingMode(TrackingModes.HALF_STRAIGHTENING)"
+      />
     </v-group>
   </v-group>
 </template>
 
 <script setup lang="ts">
-import { useWeaponPanelStore, DetonatorModes, MissileStates } from "@/store/weaponPanel";
+import { useTargetRadarStore } from "@/store/targetRadar";
+import { useWeaponPanelStore, DetonatorModes, MissileStates, TrackingModes } from "@/store/weaponPanel";
+import { computed } from "@vue/reactivity";
 import SAMButton from "./SAMButton.vue";
 
 const weaponPanel = useWeaponPanelStore();
+const targetRadar = useTargetRadarStore()
+
+const inRange = computed(() => {
+  if (!targetRadar.isCapturedAll || !weaponPanel.currentMissile || !targetRadar.capturedTarget) return false;
+  return targetRadar.distanceToHit <= weaponPanel.currentMissile.maxDistance;
+});
+
+const isLaunched = computed(() => {
+  if (!weaponPanel.currentMissile) return false;
+  return weaponPanel.currentMissile.isLaunched
+});
+
+const isReset = computed(() => {
+  if (!weaponPanel.currentMissile) return false
+  return weaponPanel.currentMissile.isDestroyed
+})
 </script>

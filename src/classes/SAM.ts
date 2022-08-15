@@ -175,7 +175,6 @@ export default class SAM {
           z: missile.missileCurrentPoint.z,
           velocity: missile.velocity,
         };
-        missile.setTargetPosition
 
         // Если цель в радиусе поражения
         if (missile.missileTargetDistance <= missile.missileKillRadius) {
