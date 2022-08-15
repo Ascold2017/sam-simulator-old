@@ -4,6 +4,7 @@ import {
   SAM_PARAMS,
 } from "@/classes/SAM";
 import { defineStore } from "pinia";
+import { useMainRadarStore } from "./mainRadarPanel";
 import { useTargetRadarStore } from "./targetRadar";
 import { MissileStates, useWeaponPanelStore } from "./weaponPanel";
 
@@ -21,11 +22,8 @@ export const useTargetsStore = defineStore("targets", {
             SAM_PARAMS.TARGET_RADAR_RAY_WIDTH / 2;
         const intoElevation =
           Math.abs(target.elevation - targetRadar.targetCursorElevation) <
-            SAM_PARAMS.TARGET_RADAR_RAY_WIDTH / 2;
-        const intoDistanceWindow =
-          Math.abs(target.distance - targetRadar.targetCursorDistance) <
-            SAM_PARAMS.RADAR_DISTANCE_WINDOW / 2;
-        return intoAzimut && intoElevation && intoDistanceWindow;
+            SAM_PARAMS.TARGET_RADAR_RAY_HEIGHT / 2;
+        return intoAzimut && intoElevation;
       });
     },
   },
@@ -37,15 +35,12 @@ export const useTargetsStore = defineStore("targets", {
       targetRadar.capturedTarget = targets.find((t) =>
         t.identifier === targetRadar.capturedTargetId
       ) || null;
-      if (targetRadar.isCapturedAzimut && targetRadar.capturedTarget) {
+      if (targetRadar.isCapturedDirection && targetRadar.capturedTarget) {
         targetRadar.targetCursorAngle = targetRadar.capturedTarget.azimut;
+        targetRadar.targetCursorElevation = targetRadar.capturedTarget.elevation;
       }
       if (targetRadar.isCapturedDistance && targetRadar.capturedTarget) {
         targetRadar.targetCursorDistance = targetRadar.capturedTarget.distance;
-      }
-      if (targetRadar.isCapturedElevation && targetRadar.capturedTarget) {
-        targetRadar.targetCursorElevation =
-          targetRadar.capturedTarget.elevation;
       }
     },
   },

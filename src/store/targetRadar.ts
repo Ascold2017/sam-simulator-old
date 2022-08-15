@@ -7,9 +7,8 @@ import { useWeaponPanelStore } from "./weaponPanel";
 export const useTargetRadarStore = defineStore("targetRadar", {
   state: () => ({
     capturedTargetId: null as null | string,
-    isCapturedAzimut: false,
+    isCapturedDirection: false,
     isCapturedDistance: false,
-    isCapturedElevation: false,
     capturedTarget: null as IRecognizedTargets | null,
     targetCursorAngle: 1.5 * Math.PI,
     targetCursorDistance: 30,
@@ -18,8 +17,7 @@ export const useTargetRadarStore = defineStore("targetRadar", {
 
   getters: {
     isCapturedAll(): boolean {
-      return this.isCapturedAzimut && this.isCapturedElevation &&
-        this.isCapturedDistance;
+      return this.isCapturedDirection && this.isCapturedDistance;
     },
     distanceToHit(): number {
       const weaponPanelStore = useWeaponPanelStore();
@@ -44,7 +42,7 @@ export const useTargetRadarStore = defineStore("targetRadar", {
       this.targetCursorElevation = 0;
     },
     incrementTargetCursorAzimut(value: number) {
-      if (this.isCapturedAzimut) return;
+      if (this.isCapturedDirection) return;
       value *= Math.PI / 180;
       let newAngle = this.targetCursorAngle + value < 0
         ? 2 * Math.PI + value
@@ -53,47 +51,28 @@ export const useTargetRadarStore = defineStore("targetRadar", {
       this.targetCursorAngle = newAngle;
     },
     incrementTargetCursorElevation(value: number) {
-      if (this.isCapturedElevation) return;
+      if (this.isCapturedDirection) return;
       this.targetCursorElevation = this.targetCursorElevation +
         value * Math.PI / 180;
     },
     incrementTargetCursorDistance(value: number) {
-      const mainRadarStore = useMainRadarStore();
       if (
         this.targetCursorDistance + value < SAM_PARAMS.MIN_CAPTURE_RANGE ||
-        this.targetCursorDistance + value >=
-          mainRadarStore.maxDisplayedDistance ||
         this.isCapturedDistance
       ) {
         return;
       }
       this.targetCursorDistance += value;
     },
-    captureByAzimut() {
-      const supply = useSupplyPanelStore();
-      const mainRadarStore = useMainRadarStore();
-      if (!supply.isEnabledTargetRadarTransmitter) return;
+    
 
-      if (this.isCapturedAzimut) {
-        this.isCapturedAzimut = false;
-        mainRadarStore.viewMode = ViewModes.MainRadar;
-        return;
-      }
-      // @ts-ignore
-      this.capturedTargetId = this.sam.getTargetOnAzimutAndDistanceWindow(
-        this.targetCursorAngle,
-        this.targetCursorDistance,
-      );
-      this.isCapturedAzimut = !!this.capturedTargetId;
-    },
-
-    captureByElevation() {
+    captureByDirection() {
       const supply = useSupplyPanelStore();
       const mainRadarPanel = useMainRadarStore();
       if (!supply.isEnabledTargetRadarTransmitter) return;
 
-      if (this.isCapturedElevation) {
-        this.isCapturedElevation = false;
+      if (this.isCapturedDirection) {
+        this.isCapturedDirection = false;
         return;
       }
 
@@ -102,7 +81,7 @@ export const useTargetRadarStore = defineStore("targetRadar", {
         this.targetCursorAngle,
         this.targetCursorElevation,
       );
-      this.isCapturedElevation = !!capturedTargetId;
+      this.isCapturedDirection = !!capturedTargetId;
       capturedTargetId && (this.capturedTargetId = capturedTargetId);
       if (this.isCapturedAll) {
         mainRadarPanel.setViewMode(ViewModes.MainRadar);
@@ -136,9 +115,8 @@ export const useTargetRadarStore = defineStore("targetRadar", {
 
     resetCaptureAll() {
       const mainRadarStore = useMainRadarStore();
-      this.isCapturedAzimut = false;
+      this.isCapturedDirection = false;
       this.isCapturedDistance = false;
-      this.isCapturedElevation = false;
       this.capturedTargetId = null;
       mainRadarStore.viewMode = ViewModes.MainRadar;
     },

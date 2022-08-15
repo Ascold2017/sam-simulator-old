@@ -7,11 +7,13 @@ export const SAM_PARAMS = {
   MAX_ELEVATION: 75 * (Math.PI / 180),
   MAX_DISTANCE: 120, // 120 km
   MIN_CAPTURE_RANGE: 2,
-  RADAR_AZIMUT_DETECT_ACCURACY: 1 * (Math.PI / 180),
+  RADAR_AZIMUT_DETECT_ACCURACY: 4 * (Math.PI / 180),
+  RADAR_ELEVATION_DETECT_ACCURACY: 18 * (Math.PI / 180),
   RADAR_DISTANCE_DETECT_ACCURACY: 0.1,
   RADAR_SPOT_AZIMUT_GAIN: 1000,
-  RADAR_DISTANCE_WINDOW: 2, // 2 km
-  TARGET_RADAR_RAY_WIDTH: 18 * (Math.PI / 180)
+  RADAR_DISTANCE_WINDOW: 4, // 4 km
+  TARGET_RADAR_RAY_WIDTH: 4 *  (Math.PI / 180),
+  TARGET_RADAR_RAY_HEIGHT: 18 * (Math.PI / 180)
 };
 
 export interface IRecognizedTargets {
@@ -213,7 +215,7 @@ export default class SAM {
     return Object.keys(this.recognizedTargets).find(id => {
       const target = this.recognizedTargets[id];
       return (Math.abs(target.azimut - azimut) <= SAM_PARAMS.RADAR_AZIMUT_DETECT_ACCURACY/2) &&
-        (Math.abs(elevation - target.elevation) <= SAM_PARAMS.RADAR_AZIMUT_DETECT_ACCURACY/2)
+        (Math.abs(elevation - target.elevation) <= SAM_PARAMS.RADAR_ELEVATION_DETECT_ACCURACY/2)
     }) || null
   }
 

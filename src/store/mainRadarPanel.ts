@@ -11,8 +11,6 @@ export enum ViewModes {
 export const useMainRadarStore = defineStore("mainRadar", {
   state: () => ({
     viewMode: ViewModes.MainRadar,
-    maxDisplayedDistance: 120,
-    
     radarRotation: 1.5 * Math.PI,
     rotationInterval: null as number | null,
     isEquivalent: false,
@@ -21,13 +19,12 @@ export const useMainRadarStore = defineStore("mainRadar", {
   }),
   getters: {
     scale(): number {
-      return (SAM_PARAMS.MAX_DISTANCE / this.maxDisplayedDistance) * 2.6;
+      return 2.6;
     },
   },
   actions: {
     setDefaultValues() {
       this.viewMode = ViewModes.MainRadar;
-      this.maxDisplayedDistance = 120;
       this.rotationInterval && clearInterval(this.rotationInterval);
       this.radarRotation = 1.5 * Math.PI;
       this.gain = SAM_PARAMS.RADAR_SPOT_AZIMUT_GAIN;
@@ -35,9 +32,6 @@ export const useMainRadarStore = defineStore("mainRadar", {
     },
     setViewMode(value: ViewModes) {
       this.viewMode = value;
-    },
-    setMaxDisplayedDistance(value: number) {
-      this.maxDisplayedDistance = value;
     },
     
     turnRotationMainRadar(value: boolean) {

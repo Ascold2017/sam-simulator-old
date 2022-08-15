@@ -19,7 +19,7 @@
         x: 20,
         y: 15,
         width: 20,
-        text: 'β',
+        text: 'ϕ',
         align: 'center',
         fontFamily: 'Russo One, sans-serif',
         fill: '#181818',
@@ -27,32 +27,12 @@
         fontSize: 14,
       }" />
       <v-circle :config="{
-        name: 'captureAzimutIndicator',
+        name: 'captureDirectionIndicator',
         x: 30,
         y: 55,
         width: 20,
         height: 20,
-        fill: targetRadar.isCapturedAzimut ? 'rgb(150, 249, 123)' : 'red',
-        shadowBlur: 5
-      }" />
-      <v-text :config="{
-        x: 105,
-        y: 15,
-        width: 20,
-        text: 'ε',
-        align: 'center',
-        fontFamily: 'Russo One, sans-serif',
-        fill: '#181818',
-        fontStyle: 'bold',
-        fontSize: 14,
-      }" />
-      <v-circle :config="{
-        name: 'captureElevationIndicator',
-        x: 115,
-        y: 55,
-        width: 20,
-        height: 20,
-        fill: targetRadar.isCapturedElevation ? 'rgb(150, 249, 123)' : 'red',
+        fill: targetRadar.isCapturedDirection ? 'rgb(150, 249, 123)' : 'red',
         shadowBlur: 5
       }" />
       <v-text :config="{
@@ -81,7 +61,7 @@
         :x="230"
         :y="15"
         name="asc"
-        :value="!targetRadar.isCapturedAzimut"
+        :value="!targetRadar.isCapturedAll"
         @click="targetRadar.resetCaptureAll"
       />
     </v-group>

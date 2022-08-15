@@ -30,13 +30,13 @@
         fill: 'rgb(150, 249, 123)',
       }" />
       <v-circle
-        :config="{ x: 350, y: 350, width: mainRadar.maxDisplayedDistance * mainRadar.scale * 2, fill: 'rgb(15, 33, 19)' }" />
+        :config="{ x: 350, y: 350, width: SAM_PARAMS.MAX_DISTANCE * mainRadar.scale * 2, fill: 'rgb(15, 33, 19)' }" />
       <!-- Distance circles -->
       <v-circle
         :config="{ x: 350, y: 350, width: i * 20 * mainRadar.scale, stroke: 'rgb(150, 249, 123)', strokeWidth: 0.1 }"
         v-for="i in countCircles" />
       <!-- Killzone circle -->
-      <v-circle v-if="mainRadar.maxDisplayedDistance > 50"
+      <v-circle
         :config="{ x: 350, y: 350, width: 100 * mainRadar.scale, stroke: 'rgb(150, 249, 123)', strokeWidth: 0.5 }" />
       <!-- Azimut lines -->
       <v-line :config="{
@@ -140,22 +140,20 @@ const azimutLabel = computed(() => {
   const deg = (targetRadarStore.targetCursorAngle - 1.5 * Math.PI) * (180 / Math.PI)
   return (deg < 0 ? 360 + deg : deg).toFixed(1);
 });
-const countCircles = computed(() => mainRadar.maxDisplayedDistance / 10);
+const countCircles = computed(() => SAM_PARAMS.MAX_DISTANCE / 10);
 const azimutLines = computed(() => {
   return Array(36).fill(0).map((_, i) => ({
     x0: Math.cos(i * 10 * (Math.PI / 180) - Math.PI / 2) * (5 * mainRadar.scale) + 350,
     y0: Math.sin(i * 10 * (Math.PI / 180) - Math.PI / 2) * (5 * mainRadar.scale) + 350,
-    x1: Math.cos(i * 10 * (Math.PI / 180) - Math.PI / 2) * (mainRadar.maxDisplayedDistance * mainRadar.scale + 10) + 350,
-    y1: Math.sin(i * 10 * (Math.PI / 180) - Math.PI / 2) * (mainRadar.maxDisplayedDistance * mainRadar.scale + 10) + 350,
+    x1: Math.cos(i * 10 * (Math.PI / 180) - Math.PI / 2) * (SAM_PARAMS.MAX_DISTANCE * mainRadar.scale + 10) + 350,
+    y1: Math.sin(i * 10 * (Math.PI / 180) - Math.PI / 2) * (SAM_PARAMS.MAX_DISTANCE * mainRadar.scale + 10) + 350,
     angleLabel: String(i * 10)
   }))
 });
 
 const targetCursorLine = computed(() => {
   const azimut = targetRadarStore.targetCursorAngle;
-  const distance = targetRadarStore.targetCursorDistance > mainRadar.maxDisplayedDistance
-    ? mainRadar.maxDisplayedDistance
-    : targetRadarStore.targetCursorDistance;
+  const distance = targetRadarStore.targetCursorDistance;
   return {
     x0: 350,
     y0: 350,
@@ -167,13 +165,13 @@ const targetCursorLine = computed(() => {
 const radarCursorLine = computed(() => ({
   x0: 350,
   y0: 350,
-  x1: Math.cos(mainRadar.radarRotation) * (mainRadar.maxDisplayedDistance * mainRadar.scale) + 350,
-  y1: Math.sin(mainRadar.radarRotation) * (mainRadar.maxDisplayedDistance * mainRadar.scale) + 350,
+  x1: Math.cos(mainRadar.radarRotation) * (SAM_PARAMS.MAX_DISTANCE * mainRadar.scale) + 350,
+  y1: Math.sin(mainRadar.radarRotation) * (SAM_PARAMS.MAX_DISTANCE * mainRadar.scale) + 350,
 }));
 const canvasTargets = computed<ICanvasTarget[]>(() => {
 
   return targetsStore.targets
-    .filter(t => t.distance < mainRadar.maxDisplayedDistance)
+    .filter(target => target.distance <= SAM_PARAMS.MAX_DISTANCE)
     .map(target => {
       const canvasTargetArcAngle = (target.size * mainRadar.gain * 180) / (target.distance * Math.PI) + SAM_PARAMS.RADAR_AZIMUT_DETECT_ACCURACY * 2;
       const targetSpotDistance = SAM_PARAMS.RADAR_DISTANCE_DETECT_ACCURACY * mainRadar.scale;

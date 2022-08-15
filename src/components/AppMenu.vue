@@ -28,7 +28,7 @@ const emit = defineEmits<{
   (e: 'loadMission', missionId: number): void;
 }>();
 
-const isActive = ref(false)
+const isActive = ref(true)
 
 const openScreen = (screen: string) => {
   emit('openScreen', screen);
