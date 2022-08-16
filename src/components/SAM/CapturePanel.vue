@@ -1,7 +1,7 @@
 <template>
   <v-group :config="{
     x: 810,
-    y: 190,
+    y: 500,
   }">
     <v-rect :config="{
       name: 'panelCapture',
@@ -35,31 +35,11 @@
         fill: targetRadar.isCapturedDirection ? 'rgb(150, 249, 123)' : 'red',
         shadowBlur: 5
       }" />
-      <v-text :config="{
-        x: 60,
-        y: 15,
-        width: 20,
-        text: 'r',
-        align: 'center',
-        fontFamily: 'Russo One, sans-serif',
-        fill: '#181818',
-        fontStyle: 'bold',
-        fontSize: 14,
-      }" />
-      <v-circle :config="{
-        name: 'captureDistanceIndicator',
-        x: 70,
-        y: 55,
-        width: 20,
-        height: 20,
-        fill: targetRadar.isCapturedDistance ? 'rgb(150, 249, 123)' : 'red',
-        shadowBlur: 5
-      }" />
+      
 
        <SAMButton :x="100" :y="15" name="captureDir" :value="targetRadar.isCapturedDirection" label="АС ϕ"
       @click="targetRadar.captureByDirection" />
-    <SAMButton :x="165" :y="15" name="captureD" :value="targetRadar.isCapturedDistance" label="АС r"
-      @click="targetRadar.captureByDistance" />
+    
 
       <SAMButton
         label="Сброс"

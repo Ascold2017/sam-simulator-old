@@ -154,7 +154,7 @@ export default class SAM {
             y: flightObject.currentPoint.y,
             rotation: flightObject.currentRotation,
             size: targetSize,
-            visibilityK
+            visibilityK: visibilityK > 1 ? 1 : visibilityK
           };
         } else {
           this.eventListener!('delete', flightObject.identifier!)

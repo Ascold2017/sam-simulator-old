@@ -6,6 +6,7 @@
           <SupplyPanel />
           <MainRadarPanel />
           <ParamsPanel />
+          <DistancePanel />
           <CapturePanel />
           <WeaponPanel />
         </v-layer>
@@ -28,6 +29,7 @@ import CapturePanel from './CapturePanel.vue';
 import MainRadarDisplay from './MainRadarDisplay.vue';
 import TargetRadarDisplay from './TargetRadarDisplay.vue';
 import { useMainRadarStore, ViewModes } from '@/store/mainRadarPanel';
+import DistancePanel from './DistancePanel.vue';
 
 const mainRadar = useMainRadarStore()
 </script>

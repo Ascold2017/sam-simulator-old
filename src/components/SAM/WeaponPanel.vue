@@ -1,7 +1,7 @@
 <template>
   <v-group :config="{
     x: 810,
-    y: 380,
+    y: 690,
   }">
     <v-rect :config="{
       name: 'panelWeapon',
