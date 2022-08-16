@@ -58,6 +58,12 @@ export const useTargetRadarStore = defineStore("targetRadar", {
     },
     incrementTargetCursorElevation(value: number) {
       if (this.isCapturedDirection) return;
+      if (
+        (this.targetCursorElevation + value * Math.PI / 180)  < SAM_PARAMS.MIN_ELEVATION ||
+        (this.targetCursorElevation + value * Math.PI / 180)  > SAM_PARAMS.MAX_ELEVATION
+      ) {
+        return;
+      }
       this.targetCursorElevation = this.targetCursorElevation +
         value * Math.PI / 180;
     },
@@ -100,9 +106,6 @@ export const useTargetRadarStore = defineStore("targetRadar", {
       );
       this.isCapturedDirection = !!capturedTargetId;
       capturedTargetId && (this.capturedTargetId = capturedTargetId);
-      if (this.isCapturedAll) {
-        mainRadarPanel.setViewMode(ViewModes.MainRadar);
-      }
     },
 
     captureByDistance() {

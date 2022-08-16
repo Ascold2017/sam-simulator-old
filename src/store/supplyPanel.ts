@@ -48,17 +48,14 @@ export const useSupplyPanelStore = defineStore("supply", {
       }
     },
     setEnablerMainRadar(value: boolean) {
-      const mainRadar = useMainRadarStore();
       if (!this.isEnabledPower) return;
       if (value) {
         const i = setTimeout(() => {
           this.isEnabledMainRadar = true;
-          mainRadar.turnRotationMainRadar(true);
           clearTimeout(i);
         }, 1000);
       } else {
         this.isEnabledMainRadar = false;
-        mainRadar.turnRotationMainRadar(false);
       }
     },
     setIsEnabledTargetRadarTransmitter(value: boolean) {

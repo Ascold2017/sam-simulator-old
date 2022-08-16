@@ -61,20 +61,12 @@
         height: 12
       }" v-for="azimutLine in azimutLines" />
 
-      <!-- Rotation cursor -->
-      <v-line :config="{
-        points: [radarCursorLine.x0, radarCursorLine.y0, radarCursorLine.x1, radarCursorLine.y1],
-        stroke: 'rgb(150, 249, 123)',
-        strokeWidth: 1
-      }" />
       <!-- Target cursor line -->
-      <v-arrow v-if="!targetRadarStore.isCapturedAll" :config="{
+      <v-line v-if="!targetRadarStore.isCapturedAll" :config="{
         points: [targetCursorLine.x0, targetCursorLine.y0, targetCursorLine.x1, targetCursorLine.y1],
         stroke: 'white',
         fill: 'white',
-        pointerLength: 5,
-        pointerWidth: 5,
-        strokeWidth: 0.5
+        strokeWidth: 1
       }" />
     </v-group>
     <!-- targets -->
@@ -88,28 +80,6 @@
         strokeWidth: canvasTarget.strokeWidth,
         stroke: `rgba(150, 249, 123, ${canvasTarget.alpha})`
       }" />
-      <v-circle v-if="targetRadarStore.isCapturedAll && targetRadarStore.capturedTarget" :config="{
-        x: targetRadarStore.capturedTarget.x * mainRadar.scale + 350,
-        y: targetRadarStore.capturedTarget.y * mainRadar.scale + 350,
-        width: 20,
-        height: 20,
-        stroke: `rgb(150, 249, 123)`,
-        strokeWidth: 0.5
-      }" />
-      <v-circle v-if="targetRadarStore.isCapturedAll" :config="{
-        x: canvasHitPoint.x,
-        y: canvasHitPoint.y,
-        width: 4,
-        height: 4,
-        fill: 'white'
-      }" />
-      <v-circle v-for="canvasMissile in canvasMissiles" :config="{
-        x: canvasMissile.x,
-        y: canvasMissile.y,
-        width: 4,
-        height: 4,
-        fill: 'red'
-      }" />
     </v-group>
   </v-group>
 </template>
@@ -120,7 +90,7 @@ import { useSupplyPanelStore } from '@/store/supplyPanel';
 import { useMainRadarStore } from '@/store/mainRadarPanel';
 import { useTargetsStore } from '@/store/targets';
 import { useTargetRadarStore } from '@/store/targetRadar';
-import { computed } from 'vue';
+import { computed, onMounted, ref } from 'vue';
 import { SAM_PARAMS } from '@/classes/SAM';
 
 interface ICanvasTarget {
@@ -162,15 +132,8 @@ const targetCursorLine = computed(() => {
   }
 });
 
-const radarCursorLine = computed(() => ({
-  x0: 350,
-  y0: 350,
-  x1: Math.cos(mainRadar.radarRotation) * (SAM_PARAMS.MAX_DISTANCE * mainRadar.scale) + 350,
-  y1: Math.sin(mainRadar.radarRotation) * (SAM_PARAMS.MAX_DISTANCE * mainRadar.scale) + 350,
-}));
-const canvasTargets = computed<ICanvasTarget[]>(() => {
-
-  return targetsStore.targets
+const getTargets = (): ICanvasTarget[] => {
+ return targetsStore.targets
     .filter(target => target.distance <= SAM_PARAMS.MAX_DISTANCE)
     .map(target => {
       const canvasTargetArcAngle = (target.size * targetRadarStore.gain * 180) / (target.distance * Math.PI) + SAM_PARAMS.RADAR_AZIMUT_DETECT_ACCURACY * 2;
@@ -184,25 +147,17 @@ const canvasTargets = computed<ICanvasTarget[]>(() => {
         alpha: target.visibilityK * targetRadarStore.brightness
       }
     });
-});
+}
 
-const canvasMissiles = computed(() => {
-  return targetsStore.missiles.map(missile => ({
-    x: missile.x * mainRadar.scale + 350,
-    y: missile.y * mainRadar.scale + 350
-  }));
+const canvasTargets = ref<ICanvasTarget[]>([]);
+
+onMounted(() => {
+  setInterval(() => {
+    if (supplyPanel.isEnabledMainRadar) {
+      canvasTargets.value = getTargets();
+    } else {
+      canvasTargets.value  = []
+    }
+  }, SAM_PARAMS.RADAR_UPDATE_INTERVAL)
 })
-
-const canvasHitPoint = computed(() => {
-  if (!targetRadarStore.capturedTarget) return { x: 0, y: 0 }
-  const hitX = targetRadarStore.distanceToHit *
-    Math.cos(targetRadarStore.capturedTarget.azimut) * mainRadar.scale + 350;
-  const hitY = targetRadarStore.distanceToHit *
-    Math.sin(targetRadarStore.capturedTarget.azimut) * mainRadar.scale + 350;
-  return {
-    x: hitX,
-    y: hitY
-  }
-})
-
 </script>

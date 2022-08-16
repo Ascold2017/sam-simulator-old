@@ -3,8 +3,8 @@ import type SAMissile from "./SAMissile";
 
 export const SAM_PARAMS = {
   RADAR_HEIGHT: 0.025, // 25 meters
-  MIN_ELEVATION: -5,
-  MAX_ELEVATION: 75 * (Math.PI / 180),
+  MIN_ELEVATION: -5 * (Math.PI / 180),
+  MAX_ELEVATION: 50 * (Math.PI / 180),
   MAX_DISTANCE: 120, // 120 km
   MIN_CAPTURE_RANGE: 2,
   RADAR_AZIMUT_DETECT_ACCURACY: 4 * (Math.PI / 180),
@@ -13,7 +13,8 @@ export const SAM_PARAMS = {
   RADAR_SPOT_AZIMUT_GAIN: 1000,
   RADAR_DISTANCE_WINDOW: 4, // 4 km
   TARGET_RADAR_RAY_WIDTH: 4 *  (Math.PI / 180),
-  TARGET_RADAR_RAY_HEIGHT: 18 * (Math.PI / 180)
+  TARGET_RADAR_RAY_HEIGHT: 18 * (Math.PI / 180),
+  RADAR_UPDATE_INTERVAL: 2000
 };
 
 export interface IRecognizedTargets {
