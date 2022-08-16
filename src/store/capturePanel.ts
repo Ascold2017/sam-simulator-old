@@ -2,9 +2,8 @@ import { defineStore } from "pinia";
 
 export enum CaptureModes {
   Manual = "Manual",
-  Radio = "Radio",
-  Optical = "Optical",
-  Jamming = "Jamming",
+  Designation = "Designation",
+  Optical = "Optical"
 }
 export const useCapturePanelStore = defineStore("capturePanel", {
   state: () => ({

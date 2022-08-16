@@ -143,10 +143,10 @@
       <SAMPotentiometer :x="5" :y="0" @change="targetRadarStore.incrementTargetCursorDistance" :deltaValue="0.1" />
 
       <v-text :config="{
-        x: 20,
-        y: 75,
+        x: 0,
+        y: 105,
         width: 20,
-        text: 'r',
+        text: 'Д',
         align: 'center',
         fontFamily: 'Russo One, sans-serif',
         fill: '#181818',
@@ -155,7 +155,7 @@
       }" />
       <v-circle :config="{
         name: 'captureDistanceIndicator',
-        x: 30,
+        x: 35,
         y: 110,
         width: 20,
         height: 20,
@@ -163,7 +163,7 @@
         shadowBlur: 5
       }" />
 
-      <SAMButton :x="0" :y="135" name="captureD" :value="targetRadarStore.isCapturedDistance" label="АС r"
+      <SAMButton :x="0" :y="135" name="captureD" :value="targetRadarStore.isCapturedDistance" label="АС Д"
         @click="targetRadarStore.captureByDistance" />
       <SAMButton :x="0" :y="200" name="resetCaptureD" :value="!targetRadarStore.isCapturedDistance" label="Сброс"
         @click="targetRadarStore.resetCaptureDistance" />
