@@ -1,4 +1,5 @@
 import { type IRecognizedTargets, SAM_PARAMS } from "@/classes/SAM";
+import Vector3D from "@/classes/Vector3D";
 import { defineStore } from "pinia";
 import { useMainRadarStore, ViewModes } from "./mainRadarPanel";
 import { useSupplyPanelStore } from "./supplyPanel";
@@ -15,12 +16,31 @@ export const useTargetRadarStore = defineStore("targetRadar", {
     targetCursorElevation: 0,
     isEquivalent: true,
     gain: SAM_PARAMS.RADAR_SPOT_AZIMUT_GAIN,
-    brightness: 1
+    brightness: 1,
   }),
 
   getters: {
     isCapturedAll(): boolean {
       return this.isCapturedDirection && this.isCapturedDistance;
+    },
+    pointToHit(): { x: number; y: number } {
+      const weaponPanelStore = useWeaponPanelStore();
+      if (
+        !this.isCapturedAll || !this.capturedTarget ||
+        !weaponPanelStore.currentMissile
+      ) {
+        return { x: 0, y: 0 };
+      }
+      const timeToHitKmS = this.capturedTarget.distance /
+        ((this.capturedTarget.radialVelocity +
+          weaponPanelStore.currentMissile.velocity) / 1000);
+      const flightDistance = ((this.capturedTarget.velocity / 1000) * timeToHitKmS);
+      const targetRotation = this.capturedTarget.rotation < 0 ? 2*Math.PI + this.capturedTarget.rotation :  this.capturedTarget.rotation
+      const x = Math.cos(targetRotation) * flightDistance +
+        this.capturedTarget.x;
+      const y = Math.sin(targetRotation) * flightDistance +
+        this.capturedTarget.y;
+      return { x, y };
     },
     distanceToHit(): number {
       const weaponPanelStore = useWeaponPanelStore();
@@ -45,7 +65,7 @@ export const useTargetRadarStore = defineStore("targetRadar", {
       this.targetCursorElevation = 0;
       this.isEquivalent = true;
       this.gain = SAM_PARAMS.RADAR_SPOT_AZIMUT_GAIN;
-      this.brightness = 1
+      this.brightness = 1;
     },
     incrementTargetCursorAzimut(value: number) {
       if (this.isCapturedDirection) return;
@@ -59,8 +79,10 @@ export const useTargetRadarStore = defineStore("targetRadar", {
     incrementTargetCursorElevation(value: number) {
       if (this.isCapturedDirection) return;
       if (
-        (this.targetCursorElevation + value * Math.PI / 180)  < SAM_PARAMS.MIN_ELEVATION ||
-        (this.targetCursorElevation + value * Math.PI / 180)  > SAM_PARAMS.MAX_ELEVATION
+        (this.targetCursorElevation + value * Math.PI / 180) <
+          SAM_PARAMS.MIN_ELEVATION ||
+        (this.targetCursorElevation + value * Math.PI / 180) >
+          SAM_PARAMS.MAX_ELEVATION
       ) {
         return;
       }
@@ -80,18 +102,16 @@ export const useTargetRadarStore = defineStore("targetRadar", {
       this.isEquivalent = value;
     },
     incrementGain(value: number) {
-      if (this.gain + value <= 0) return
+      if (this.gain + value <= 0) return;
       this.gain += value;
     },
     incrementBrightness(value: number) {
-      if (this.brightness + value <= 0) return
+      if (this.brightness + value <= 0) return;
       this.brightness += value;
     },
-    
 
     captureByDirection() {
       const supply = useSupplyPanelStore();
-      const mainRadarPanel = useMainRadarStore();
       if (!supply.isEnabledTargetRadarTransmitter) return;
 
       if (this.isCapturedDirection) {
@@ -110,7 +130,6 @@ export const useTargetRadarStore = defineStore("targetRadar", {
 
     captureByDistance() {
       const supply = useSupplyPanelStore();
-      const mainRadarPanel = useMainRadarStore();
       if (!supply.isEnabledTargetRadarTransmitter) {
         return;
       }
@@ -127,18 +146,12 @@ export const useTargetRadarStore = defineStore("targetRadar", {
 
       this.isCapturedDistance = !!capturedTargetId;
       capturedTargetId && (this.capturedTargetId = capturedTargetId);
-
-      if (this.isCapturedAll) {
-        mainRadarPanel.setViewMode(ViewModes.MainRadar);
-      }
     },
 
     resetCaptureAll() {
-      const mainRadarStore = useMainRadarStore();
       this.isCapturedDirection = false;
       this.isCapturedDistance = false;
       this.capturedTargetId = null;
-      mainRadarStore.viewMode = ViewModes.MainRadar;
     },
 
     resetCaptureDistance() {

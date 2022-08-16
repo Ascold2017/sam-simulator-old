@@ -37,7 +37,7 @@
       fill: 'rgb(150, 249, 123)',
     }" />
 
-    <v-group v-if="supplyPanel.isEnabledPower" :config="{
+    <v-group v-if="supplyPanel.isEnabledPower && !targetRadarStore.isCapturedAll" :config="{
       x: 350, y: 350,
       rotation: targetRadarStore.targetCursorAngle * (180 / Math.PI)
     }">
@@ -90,6 +90,16 @@
         }" />
       </v-group>
 
+    </v-group>
+
+    <v-group v-else-if="targetRadarStore.isCapturedAll" :config="{
+      x: 0, y: 0,
+    }">
+      <v-circle :config="{ x: 350, y: 350, width: (SAM_PARAMS.MIN_CAPTURE_RANGE/SAM_PARAMS.MAX_DISTANCE) * 700, stroke: 'white', strokeWidth: 0.5,}" />
+      <v-circle :config="{ x: 350, y: 350, width: (50/SAM_PARAMS.MAX_DISTANCE) * 700, stroke: 'red', strokeWidth: 0.5, dash: [5, 5]}" />
+      <v-circle :config="{ x: canvasCapturedTarget.x, y: canvasCapturedTarget.y, width: 5, fill: 'rgb(150, 249, 123)', }" />
+      <v-circle :config="{ x: canvasCapturedTarget.hitX, y: canvasCapturedTarget.hitY,width: 5, fill: 'white', }" />
+      <v-circle v-for="canvasMissile in canvasMissiles" :config="{ x: canvasMissile.x, y: canvasMissile.y, width: 5, fill: 'red', }" />
     </v-group>
   </v-group>
 </template>
@@ -163,4 +173,25 @@ const canvasDistanceWindow = computed(() => {
 });
 
 const canvasDistanceLinesY = computed(() => Array(SAM_PARAMS.MAX_DISTANCE / 10).fill(0).map((_, i) => (i * 10 / SAM_PARAMS.MAX_DISTANCE) * canvasWidth))
+
+const canvasCapturedTarget = computed(() => {
+  if (!targetRadarStore.isCapturedAll || !targetRadarStore.capturedTarget) return { x: 0, y: 0 }
+  return {
+    x: (targetRadarStore.capturedTarget.x/SAM_PARAMS.MAX_DISTANCE) * 350 + 350,
+    y: (targetRadarStore.capturedTarget.y/SAM_PARAMS.MAX_DISTANCE) * 350 + 350,
+    hitX: (targetRadarStore.pointToHit.x/SAM_PARAMS.MAX_DISTANCE) * 350 + 350,
+    hitY: (targetRadarStore.pointToHit.y/SAM_PARAMS.MAX_DISTANCE) * 350 + 350,
+  }
+})
+
+const canvasMissiles = computed<{ x: number, y: number }[]>(() => {
+  if (!supplyPanel.isEnabledTargetRadarTransmitter) return []
+  return targetsStore.missiles
+    .map(missile => {
+      return {
+        x: (missile.x/SAM_PARAMS.MAX_DISTANCE) * 350 + 350,
+        y: (missile.y/SAM_PARAMS.MAX_DISTANCE) * 350 + 350,
+      }
+    });
+});
 </script>
