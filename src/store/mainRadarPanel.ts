@@ -9,7 +9,7 @@ export enum ViewModes {
 }
 export const useMainRadarStore = defineStore("mainRadar", {
   state: () => ({
-    viewMode: ViewModes.MainRadar,
+    viewMode: ViewModes.TargetRadar,
 
   }),
   getters: {

@@ -90,7 +90,7 @@ import { useSupplyPanelStore } from '@/store/supplyPanel';
 import { useMainRadarStore } from '@/store/mainRadarPanel';
 import { useTargetsStore } from '@/store/targets';
 import { useTargetRadarStore } from '@/store/targetRadar';
-import { computed, onMounted, ref } from 'vue';
+import { computed, onMounted, onUnmounted, ref } from 'vue';
 import { SAM_PARAMS } from '@/classes/SAM';
 
 interface ICanvasTarget {
@@ -132,32 +132,38 @@ const targetCursorLine = computed(() => {
   }
 });
 
-const getTargets = (): ICanvasTarget[] => {
- return targetsStore.targets
-    .filter(target => target.distance <= SAM_PARAMS.MAX_DISTANCE)
-    .map(target => {
-      const canvasTargetArcAngle = (target.size * targetRadarStore.gain * 180) / (target.distance * Math.PI) + SAM_PARAMS.RADAR_AZIMUT_DETECT_ACCURACY * 2;
-      const targetSpotDistance = SAM_PARAMS.RADAR_DISTANCE_DETECT_ACCURACY * mainRadar.scale;
+const canvasTargets = ref<ICanvasTarget[]>([]);
+const refreshTargets = () => {
+  if (supplyPanel.isEnabledMainRadar) {
+    canvasTargets.value = targetsStore.targets
+      .filter(target => target.distance <= SAM_PARAMS.MAX_DISTANCE)
+      .map(target => {
+        const canvasTargetArcAngle = (target.size * targetRadarStore.gain * 180) / (target.distance * Math.PI) + SAM_PARAMS.RADAR_AZIMUT_DETECT_ACCURACY * 2;
+        const targetSpotDistance = SAM_PARAMS.RADAR_DISTANCE_DETECT_ACCURACY * mainRadar.scale;
 
-      return {
-        radius: target.distance * mainRadar.scale,
-        rotation: target.azimut * (180 / Math.PI) - canvasTargetArcAngle / 2,
-        angle: canvasTargetArcAngle,
-        strokeWidth: targetSpotDistance,
-        alpha: target.visibilityK * targetRadarStore.brightness
-      }
-    });
+        return {
+          radius: target.distance * mainRadar.scale,
+          rotation: target.azimut * (180 / Math.PI) - canvasTargetArcAngle / 2,
+          angle: canvasTargetArcAngle,
+          strokeWidth: targetSpotDistance,
+          alpha: target.visibilityK * targetRadarStore.brightness
+        }
+      });
+  } else {
+    canvasTargets.value = []
+  }
 }
 
-const canvasTargets = ref<ICanvasTarget[]>([]);
+const interval = ref<number | null>(null)
 
 onMounted(() => {
-  setInterval(() => {
-    if (supplyPanel.isEnabledMainRadar) {
-      canvasTargets.value = getTargets();
-    } else {
-      canvasTargets.value  = []
-    }
+  refreshTargets()
+  interval.value = setInterval(() => {
+    refreshTargets()
   }, SAM_PARAMS.RADAR_UPDATE_INTERVAL)
+})
+
+onUnmounted(() => {
+  interval.value && clearInterval(interval.value)
 })
 </script>
