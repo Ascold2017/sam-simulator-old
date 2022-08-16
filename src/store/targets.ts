@@ -37,7 +37,8 @@ export const useTargetsStore = defineStore("targets", {
       ) || null;
       if (targetRadar.isCapturedDirection && targetRadar.capturedTarget) {
         targetRadar.targetCursorAngle = targetRadar.capturedTarget.azimut;
-        targetRadar.targetCursorElevation = targetRadar.capturedTarget.elevation;
+        targetRadar.targetCursorElevation =
+          targetRadar.capturedTarget.elevation;
       }
       if (targetRadar.isCapturedDistance && targetRadar.capturedTarget) {
         targetRadar.targetCursorDistance = targetRadar.capturedTarget.distance;

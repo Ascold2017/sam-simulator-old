@@ -202,15 +202,7 @@ export default class SAM {
       }
     }
   }
-
-  getTargetOnAzimutAndDistanceWindow(azimut: number, distance: number) {
-    return Object.keys(this.recognizedTargets).find(id => {
-      const target = this.recognizedTargets[id];
-      return (Math.abs(target.azimut - azimut) <= SAM_PARAMS.RADAR_AZIMUT_DETECT_ACCURACY/2) &&
-        (Math.abs(target.distance - distance) <= SAM_PARAMS.RADAR_DISTANCE_WINDOW/2)
-    }) || null
-  }
-
+  
   getTargetOnAzimutAndElevation(azimut: number, elevation: number) {
     return Object.keys(this.recognizedTargets).find(id => {
       const target = this.recognizedTargets[id];

@@ -19,99 +19,126 @@
       height: 260,
       fill: 'black',
     }" />
-
-    <v-group v-if="supplyPanel.isEnabledPower && supplyPanel.isEnabledTargetRadarTransmitter && !targetRadarStore.isEquivalent" :config="{ x: 20, y: 20}">
+    <!-- Targets and lines-->
+    <v-group v-if="supplyPanel.isEnabledPower" :config="{ x: 20, y: 20 }">
       <v-text :config="{
-      x: 5,
-      y: 5,
-      text: `Дальность: ${targetRadarStore.targetCursorDistance.toFixed(1)} км`,
-      fontFamily: 'Russo One, sans-serif',
-      fontSize: 9,
-      fill: 'rgb(150, 249, 123)',
-    }" />
-      <v-line v-for="canvasTarget in canvasTargets" :config="{
+        x: 5,
+        y: 5,
+        text: `Дальность: ${targetRadarStore.targetCursorDistance.toFixed(1)} км`,
+        fontFamily: 'Russo One, sans-serif',
+        fontSize: 9,
+        fill: 'rgb(150, 249, 123)',
+      }" />
+      <v-group v-if="supplyPanel.isEnabledTargetRadarTransmitter && !targetRadarStore.isEquivalent">
+        <!-- Targets on max distance range track -->
+        <v-line v-for="canvasTarget in canvasTargets" :config="{
+          points: [
+            canvasTarget.offsetX, canvasHeight / 4 + paddingY,
+            canvasTarget.offsetX, canvasHeight / 4 + paddingY - canvasTarget.height,
+            //canvasTarget.offsetX + canvasTarget.width, canvasHeight/2 - canvasTarget.height,
+            canvasTarget.offsetX + canvasTarget.width, canvasHeight / 4 + paddingY,
+          ],
+          stroke: 'rgba(150, 249, 123, 1)',
+          strokeWidth: 0.5
+        }" />
+        <!-- Missiles on max distance range track -->
+        <v-line v-for="canvasMissile in canvasMissiles" :config="{
+          points: [
+            canvasMissile.offsetX, canvasHeight / 4 + paddingY,
+            canvasMissile.offsetX, canvasHeight / 4 + paddingY + canvasMissile.height,
+            //canvasTarget.offsetX + canvasTarget.width, canvasHeight/2 - canvasTarget.height,
+            canvasMissile.offsetX + canvasMissile.width, canvasHeight / 4 + paddingY,
+          ],
+          stroke: 'red',
+          strokeWidth: 0.5
+        }" />
+        <!-- Targets on window track -->
+        <v-line v-for="canvasTarget in canvasTargets" :config="{
+          points: canvasTarget.isInWindow ? [
+            canvasTarget.offsetXInWindow, canvasHeight / 1.5 + paddingY,
+            canvasTarget.offsetXInWindow, canvasHeight / 1.5 + paddingY - canvasTarget.height,
+            // canvasTarget.offsetXInWindow + canvasTarget.widthInWindow, canvasHeight - canvasTarget.height,
+            canvasTarget.offsetXInWindow + canvasTarget.widthInWindow, canvasHeight / 1.5 + paddingY,
+          ] : [],
+          stroke: 'rgba(150, 249, 123, 1)',
+          strokeWidth: 0.5,
+        }" />
+        <!-- missiles on window track -->
+        <v-line v-for="canvasMissile in canvasMissiles" :config="{
+          points: canvasMissile.isInWindow ? [
+            canvasMissile.offsetXInWindow,  canvasHeight / 1.5 + paddingY,
+            canvasMissile.offsetXInWindow,  canvasHeight / 1.5 + paddingY + canvasMissile.height,
+            // canvasTarget.offsetXInWindow + canvasTarget.widthInWindow, canvasHeight - canvasTarget.height,
+            canvasMissile.offsetXInWindow + canvasMissile.widthInWindow,  canvasHeight / 1.5 + paddingY,
+          ] : [],
+          stroke: 'red',
+          strokeWidth: 0.5,
+        }" />
+      </v-group>
+      <!-- Zero line -->
+      <v-line v-if="supplyPanel.isEnabledPower" :config="{
         points: [
-          canvasTarget.offsetX, canvasHeight/2,
-          canvasTarget.offsetX, canvasHeight/2 - canvasTarget.height,
-          //canvasTarget.offsetX + canvasTarget.width, canvasHeight/2 - canvasTarget.height,
-          canvasTarget.offsetX + canvasTarget.width, canvasHeight/2,
+          paddingX, canvasHeight / 4 + paddingY,
+          canvasWidth - paddingX, canvasHeight / 4 + paddingY,
         ],
         stroke: 'rgba(150, 249, 123, 1)',
         strokeWidth: 0.5
       }" />
-      <v-line :config="{
+      <!-- Zero line on window track -->
+      <v-line v-if="supplyPanel.isEnabledPower" :config="{
         points: [
-          paddingX, canvasHeight/2,
-          canvasWidth - paddingX, canvasHeight/2
+          paddingX, canvasHeight/1.5 + paddingY,
+          canvasWidth - paddingX,
+          canvasHeight/1.5 + paddingY
         ],
         stroke: 'rgba(150, 249, 123, 1)',
         strokeWidth: 0.5
       }" />
-      <!-- Distance window -->
-      <v-group :config="{ x: canvasOffsetDistanceWindow + paddingX, y: paddingY }">
+
+      <!-- Distance window on max distance track -->
+      <v-group v-if="supplyPanel.isEnabledPower" :config="{ x: canvasOffsetDistanceWindow + paddingX, y: paddingY }">
         <v-line :config="{
           points: [
-            0, canvasHeight/2 - paddingY,
+            0, canvasHeight / 4 ,
             0, 0
           ],
           stroke: 'rgba(150, 249, 123, 1)',
           strokeWidth: 0.5,
           dash: [2, 2]
-        }"
-        />
-         <v-line :config="{
+        }" />
+        <v-line :config="{
           points: [
-            canvasWindowWidth, canvasHeight/2 - paddingY,
+            canvasWindowWidth, canvasHeight / 4,
             canvasWindowWidth, 0
-          ], 
+          ],
           stroke: 'rgba(150, 249, 123, 1)',
           strokeWidth: 0.5,
           dash: [2, 2]
-        }"
-        />
-      </v-group>
-
-      <v-line v-for="canvasTarget in canvasTargets" :config="{
-        points: canvasTarget.isInWindow ? [
-          canvasTarget.offsetXInWindow, canvasHeight,
-          canvasTarget.offsetXInWindow, canvasHeight - canvasTarget.height,
-          // canvasTarget.offsetXInWindow + canvasTarget.widthInWindow, canvasHeight - canvasTarget.height,
-          canvasTarget.offsetXInWindow + canvasTarget.widthInWindow, canvasHeight,
-        ] : [],
-        stroke: 'rgba(150, 249, 123, 1)',
-        strokeWidth: 0.5,
-      }" />
-      
-      <v-line :config="{
-        points: [
-          paddingX, canvasHeight,
-          canvasWidth - paddingX,
-          canvasHeight
-        ],
-        stroke: 'rgba(150, 249, 123, 1)',
-        strokeWidth: 0.5
-      }" />
-
-      <v-group :config="{ x: canvasWidth/2 + canvasCaptureWidth/2, y: canvasHeight/2 }">
-      <v-line :config="{
-        points: [
-          0, canvasHeight/2,
-          0, paddingY
-        ],
-        stroke: 'white',
-        strokeWidth: 0.5
-      }" />
-      <v-line :config="{
-        points: [
-          canvasCaptureWidth, canvasHeight/2,
-          canvasCaptureWidth, paddingY
-        ],
-        stroke: 'white',
-        strokeWidth: 0.5
-      }" />
+        }" />
       </v-group>
     </v-group>
 
+    <!-- capturing site -->
+    <v-group :config="{ x: (canvasWidth + paddingX + 20) / 2 + canvasCaptureWidth / 2, y: ( canvasHeight/2 + paddingY + 20) }">
+      <v-line :config="{
+        points: [
+          0, canvasHeight / 4 + paddingY,
+          0, 0
+        ],
+        stroke: 'white',
+        strokeWidth: 0.5
+      }" />
+      <v-line :config="{
+        points: [
+          canvasCaptureWidth, canvasHeight / 4 + paddingY,
+          canvasCaptureWidth, 0
+        ],
+        stroke: 'white',
+        strokeWidth: 0.5
+      }" />
+    </v-group>
+
+    <!-- Track panel -->
     <v-group :config="{ x: 520, y: 20 }">
       <SAMPotentiometer :x="5" :y="0" @change="targetRadarStore.incrementTargetCursorDistance" :deltaValue="0.1" />
 
@@ -163,29 +190,47 @@ const canvasHeight = 220;
 const canvasWidth = 460
 const paddingX = 20;
 const paddingY = 20;
-const canvasWindowWidth = (SAM_PARAMS.RADAR_DISTANCE_WINDOW/SAM_PARAMS.MAX_DISTANCE) * (canvasWidth - paddingX);
-const canvasOffsetDistanceWindow = computed(() => ((targetRadarStore.targetCursorDistance - SAM_PARAMS.RADAR_DISTANCE_WINDOW/2) / SAM_PARAMS.MAX_DISTANCE) * (canvasWidth - paddingX))
-const canvasCaptureWidth = (SAM_PARAMS.RADAR_DISTANCE_DETECT_ACCURACY/SAM_PARAMS.RADAR_DISTANCE_WINDOW)* (canvasWidth - paddingX);
+const canvasWindowWidth = (SAM_PARAMS.RADAR_DISTANCE_WINDOW / SAM_PARAMS.MAX_DISTANCE) * (canvasWidth - paddingX);
+const canvasOffsetDistanceWindow = computed(() => ((targetRadarStore.targetCursorDistance - SAM_PARAMS.RADAR_DISTANCE_WINDOW / 2) / SAM_PARAMS.MAX_DISTANCE) * (canvasWidth - paddingX))
+const canvasCaptureWidth = (SAM_PARAMS.RADAR_DISTANCE_DETECT_ACCURACY / SAM_PARAMS.RADAR_DISTANCE_WINDOW) * (canvasWidth - paddingX);
 const canvasTargets = computed(() => {
- if (!supplyPanel.isEnabledTargetRadarTransmitter) return []
+  if (!supplyPanel.isEnabledTargetRadarTransmitter) return []
   return targetsStore.targetsInRay.map(target => {
     const offsetElevation = targetRadarStore.isCapturedDirection
-        ? 0
-        : (target.elevation - targetRadarStore.targetCursorElevation);
+      ? 0
+      : (target.elevation - targetRadarStore.targetCursorElevation);
 
-      const offsetElevationK = 2 * offsetElevation / SAM_PARAMS.TARGET_RADAR_RAY_HEIGHT;
-      const azimutOffsetK = 1 - 2 * Math.abs(targetRadarStore.targetCursorAngle - target.azimut) / SAM_PARAMS.TARGET_RADAR_RAY_WIDTH;
-      const spotHeight = target.visibilityK * azimutOffsetK * (1 - Math.abs(offsetElevationK)) * targetRadarStore.brightness * (canvasHeight - paddingY);
-      const offsetXInWindow =  ((target.distance - targetRadarStore.targetCursorDistance) / SAM_PARAMS.RADAR_DISTANCE_WINDOW) * (canvasWidth - paddingX) + (canvasWidth - paddingX)/2
-      const offsetX = (target.distance / SAM_PARAMS.MAX_DISTANCE) * (canvasWidth - paddingX);
-      return {
-        height: spotHeight / 2,
-        width: (SAM_PARAMS.RADAR_DISTANCE_DETECT_ACCURACY / SAM_PARAMS.MAX_DISTANCE) * (canvasWidth - paddingX),
-        widthInWindow: (SAM_PARAMS.RADAR_DISTANCE_DETECT_ACCURACY / SAM_PARAMS.RADAR_DISTANCE_WINDOW) * (canvasWidth - paddingX),
-        offsetXInWindow: offsetXInWindow + paddingX,
-        offsetX: offsetX + paddingX,
-        isInWindow: Math.abs(target.distance - targetRadarStore.targetCursorDistance) <= SAM_PARAMS.RADAR_DISTANCE_WINDOW/2
-      }
+    const offsetElevationK = 2 * offsetElevation / SAM_PARAMS.TARGET_RADAR_RAY_HEIGHT;
+    const azimutOffsetK = 1 - 2 * Math.abs(targetRadarStore.targetCursorAngle - target.azimut) / SAM_PARAMS.TARGET_RADAR_RAY_WIDTH;
+    const spotHeight = target.visibilityK * azimutOffsetK * (1 - Math.abs(offsetElevationK)) * targetRadarStore.brightness * (canvasHeight/4);
+    const offsetXInWindow = ((target.distance - targetRadarStore.targetCursorDistance) / SAM_PARAMS.RADAR_DISTANCE_WINDOW) * (canvasWidth - paddingX) + (canvasWidth - paddingX) / 2
+    const offsetX = (target.distance / SAM_PARAMS.MAX_DISTANCE) * (canvasWidth - paddingX);
+    return {
+      height: spotHeight,
+      width: (SAM_PARAMS.RADAR_DISTANCE_DETECT_ACCURACY / SAM_PARAMS.MAX_DISTANCE) * (canvasWidth - paddingX),
+      widthInWindow: (SAM_PARAMS.RADAR_DISTANCE_DETECT_ACCURACY / SAM_PARAMS.RADAR_DISTANCE_WINDOW) * (canvasWidth - paddingX),
+      offsetXInWindow: offsetXInWindow + paddingX,
+      offsetX: offsetX + paddingX,
+      isInWindow: Math.abs(target.distance - targetRadarStore.targetCursorDistance) <= SAM_PARAMS.RADAR_DISTANCE_WINDOW / 2
+    }
+  })
+})
+
+const canvasMissiles = computed(() => {
+  if (!supplyPanel.isEnabledTargetRadarTransmitter) return []
+  return targetsStore.missiles.map(missile => {
+
+    const distance = Math.sqrt(missile.x ** 2 + missile.y ** 2)
+    const offsetXInWindow = ((distance - targetRadarStore.targetCursorDistance) / SAM_PARAMS.RADAR_DISTANCE_WINDOW) * (canvasWidth - paddingX) + (canvasWidth - paddingX) / 2
+    const offsetX = (distance / SAM_PARAMS.MAX_DISTANCE) * (canvasWidth - paddingX);
+    return {
+      height: canvasHeight / 6,
+      width: (SAM_PARAMS.RADAR_DISTANCE_DETECT_ACCURACY / SAM_PARAMS.MAX_DISTANCE) * (canvasWidth - paddingX),
+      widthInWindow: (SAM_PARAMS.RADAR_DISTANCE_DETECT_ACCURACY / SAM_PARAMS.RADAR_DISTANCE_WINDOW) * (canvasWidth - paddingX),
+      offsetXInWindow: offsetXInWindow + paddingX,
+      offsetX: offsetX + paddingX,
+      isInWindow: Math.abs(distance - targetRadarStore.targetCursorDistance) <= SAM_PARAMS.RADAR_DISTANCE_WINDOW / 2
+    }
   })
 })
 </script>
