@@ -94,6 +94,7 @@ export const useTargetRadarStore = defineStore("targetRadar", {
     incrementTargetCursorDistance(value: number) {
       if (
         this.targetCursorDistance + value < SAM_PARAMS.MIN_CAPTURE_RANGE ||
+        this.targetCursorDistance + value > SAM_PARAMS.MAX_DISTANCE - SAM_PARAMS.RADAR_DISTANCE_WINDOW ||
         this.isCapturedDistance
       ) {
         return;

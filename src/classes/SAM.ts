@@ -105,7 +105,7 @@ export default class SAM {
     return {
       azimut: targetAzimut + SAM_PARAMS.DESIGNATION_ANGLE_ACCURACY * (Math.random() * 2 - 1),
       elevation: targetElevation + SAM_PARAMS.DESIGNATION_ANGLE_ACCURACY * (Math.random() * 2 - 1),
-      distance: targetDistance + SAM_PARAMS.DESIGNATION_DISTANCE_ACCURACY * (Math.random() * 2 - 1),
+      distance: targetDistance > SAM_PARAMS.MAX_DISTANCE ? SAM_PARAMS.MAX_DISTANCE - SAM_PARAMS.RADAR_DISTANCE_WINDOW : targetDistance + SAM_PARAMS.DESIGNATION_DISTANCE_ACCURACY * (Math.random() * 2 - 1),
     }
   }
   private tick() {
