@@ -1,9 +1,9 @@
 <template>
-  <v-group :config="{
+  <vk-group :config="{
     x: 0,
     y: 0,
   }">
-    <v-rect :config="{
+    <vk-rect :config="{
       x: 0,
       y: 0,
       width: 800,
@@ -11,8 +11,8 @@
       fill: 'grey', shadowBlur: 10, cornerRadius: 6,
     }" />
     <!-- Power -->
-    <v-group :config="{ x: 20, y: 20 }">
-      <v-text :config="{
+    <vk-group :config="{ x: 20, y: 20 }">
+      <vk-text :config="{
         x: 0,
         y: 10,
         height: 20,
@@ -22,7 +22,7 @@
         fontFamily: 'Russo One, sans-serif',
         fontSize: 12
       }" />
-      <v-circle :config="{
+      <vk-circle :config="{
         name: 'powerIndicator',
         x: 95,
         y: 20,
@@ -35,11 +35,11 @@
         @click="supplyPanel.setEnabledPower(true)" />
       <SAMButton label="Выкл" :x="65" :y="50" name="powerOff" :value="!supplyPanel.isEnabledPower"
         @click="supplyPanel.setEnabledPower(false)" />
-    </v-group>
+    </vk-group>
 
     <!-- SOC mechanization -->
-    <v-group :config="{ x: 160, y: 20 }">
-      <v-text :config="{
+    <vk-group :config="{ x: 160, y: 20 }">
+      <vk-text :config="{
         x: 0,
         y: 10,
         height: 20,
@@ -49,7 +49,7 @@
         fontFamily: 'Russo One, sans-serif',
         fontSize: 12
       }" />
-      <v-circle :config="{
+      <vk-circle :config="{
         name: 'rotationIndicator',
         x: 95,
         y: 20,
@@ -62,11 +62,11 @@
         @click="supplyPanel.setEnablerMainRadar(true)" />
       <SAMButton label="Выкл" :x="65" :y="50" name="rotationOff" :value="!supplyPanel.isEnabledMainRadar"
         @click="supplyPanel.setEnablerMainRadar(false)" />
-    </v-group>
+    </vk-group>
 
     <!-- SNR antenna -->
-    <v-group :config="{ x: 300, y: 20 }">
-      <v-text :config="{
+    <vk-group :config="{ x: 300, y: 20 }">
+      <vk-text :config="{
         x: 0,
         y: 10,
         height: 20,
@@ -76,7 +76,7 @@
         fontFamily: 'Russo One, sans-serif',
         fontSize: 12
       }" />
-      <v-circle :config="{
+      <vk-circle :config="{
         name: 'targetRadarIndicator',
         x: 95,
         y: 20,
@@ -89,10 +89,10 @@
         @click="supplyPanel.setIsEnabledTargetRadarTransmitter(true)" />
       <SAMButton label="Выкл" :x="65" :y="50" name="snrOff" :value="!supplyPanel.isEnabledTargetRadarTransmitter"
         @click="supplyPanel.setIsEnabledTargetRadarTransmitter(false)" />
-    </v-group>
+    </vk-group>
     <!-- OLS power -->
-    <v-group :config="{ x: 440, y: 20 }">
-      <v-text :config="{
+    <vk-group :config="{ x: 440, y: 20 }">
+      <vk-text :config="{
         x: 0,
         y: 10,
         height: 20,
@@ -102,7 +102,7 @@
         fontFamily: 'Russo One, sans-serif',
         fontSize: 12
       }" />
-      <v-circle :config="{
+      <vk-circle :config="{
         name: 'thermalCameraIndicator',
         x: 95,
         y: 20,
@@ -115,9 +115,9 @@
         @click="supplyPanel.setIsEnabledThermalCamera(true)" />
       <SAMButton label="Выкл" :x="65" :y="50" name="thermalCameraOff" :value="!supplyPanel.isEnabledThermalCamera"
         @click="supplyPanel.setIsEnabledThermalCamera(false)" />
-    </v-group>
+    </vk-group>
 
-    <v-rect :config="{
+    <vk-rect :config="{
       x: 670,
       y: 20,
       width: 110,
@@ -125,7 +125,7 @@
       fill: 'white',
       stroke: '#181818',
     }" />
-    <v-circle ref="clocksRef"  :config="{
+    <vk-circle ref="clocksRef"  :config="{
       x: 725,
       y: 75,
       width: 110,
@@ -134,7 +134,7 @@
       strokeWidth: 2,
       sceneFunc: drawClock
     }" />
-  </v-group>
+  </vk-group>
 </template>
 
 <script setup lang="ts">

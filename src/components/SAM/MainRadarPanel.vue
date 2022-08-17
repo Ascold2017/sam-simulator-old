@@ -1,9 +1,9 @@
 <template>
-  <v-group :config="{
+  <vk-group :config="{
     x: 0,
     y: 160,
   }">
-    <v-rect :config="{
+    <vk-rect :config="{
       name: 'panel',
       x: 0,
       y: 0,
@@ -14,8 +14,8 @@
       cornerRadius: 6,
     }" />
 
-    <v-group :config="{ x: 730, y: 20 }">
-     <v-text :config="{
+    <vk-group :config="{ x: 730, y: 20 }">
+     <vk-text :config="{
         x: 0, y: 0,
         width: 60,
         text: 'Яркость отметок',
@@ -25,9 +25,9 @@
         align: 'center'
       }" />
         <SAMPotentiometer :x="5" :y="30" :delta-value="0.1" @change="targetRadar.incrementBrightness" />
-    </v-group>
-    <v-group :config="{ x: 730, y: 120 }">
-     <v-text :config="{
+    </vk-group>
+    <vk-group :config="{ x: 730, y: 120 }">
+     <vk-text :config="{
         x: 0, y: 0,
         width: 60,
         text: 'Размер отметок',
@@ -37,7 +37,7 @@
         align: 'center'
       }" />
         <SAMPotentiometer :x="5" :y="30" :delta-value="50" @change="targetRadar.incrementGain" />
-    </v-group>
+    </vk-group>
 
     <SAMButton :x="730" :y="250" name="bipMode" :value="mainRadar.viewMode === ViewModes.BIP" label="БИП"
       @click="mainRadar.setViewMode(ViewModes.BIP)" />
@@ -49,7 +49,7 @@
       label="ТОВ" @click="mainRadar.setViewMode(ViewModes.Television)" />
 
    
-  </v-group>
+  </vk-group>
 </template>
 
 <script setup lang="ts">

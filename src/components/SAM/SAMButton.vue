@@ -1,5 +1,5 @@
 <template>
-  <v-rect :config="{
+  <vk-rect :config="{
     name: props.name,
     x: props.x,
     y: props.y,
@@ -10,7 +10,7 @@
     cornerRadius: props.circle ? 60 : 0
   }" />
 
-  <v-text :config="{
+  <vk-text :config="{
     x: props.x,
     y: props.y,
     width: props.small ? 40 : 60,

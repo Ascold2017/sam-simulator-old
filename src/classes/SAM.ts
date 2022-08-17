@@ -14,7 +14,12 @@ export const SAM_PARAMS = {
   RADAR_DISTANCE_WINDOW: 4, // 4 km
   TARGET_RADAR_RAY_WIDTH: 4 *  (Math.PI / 180),
   TARGET_RADAR_RAY_HEIGHT: 18 * (Math.PI / 180),
-  RADAR_UPDATE_INTERVAL: 2000
+  RADAR_UPDATE_INTERVAL: 2000,
+  MISSILE_VELOCITY: 1200,
+  MISSILE_MAX_DISTANCE: 50,
+  BIP_SIDE: 400,
+  DESIGNATION_ANGLE_ACCURACY: 1 * (Math.PI / 180),
+  DESIGNATION_DISTANCE_ACCURACY: 1
 };
 
 export interface IRecognizedTargets {
@@ -45,7 +50,7 @@ export interface IEventListenerPayload {
   targets: IRecognizedTargets[];
   missiles: IFlightMissiles[];
 }
-type EventListener = (eventName: string, arg: IEventListenerPayload | string) => void;
+type EventListener = (eventName: string, arg: IEventListenerPayload | string | FlightObject[]) => void;
 
 export default class SAM {
   private isEnabled = false;
@@ -78,6 +83,31 @@ export default class SAM {
   public getFlightObject(id: string) {
     return this.flightObjects.find(fo =>fo.identifier === id)
   }
+  public getFlightObjectDesignation(id: string) {
+    const target = this.getFlightObject(id);
+    if (!target || target && target.isDestroyed) return null;
+    // Distance from SNR to target
+    const targetDistance = Math.hypot(
+      target.currentPoint.x,
+      target.currentPoint.y,
+    );
+    // Azimut from SNR to target
+    const targetAzimut = Math.atan2(
+      target.currentPoint.y,
+      target.currentPoint.x,
+    );
+    // Difference from SNR and target heights
+    const targetHeightOffset = target.currentPoint.z -
+      SAM_PARAMS.RADAR_HEIGHT;
+    // Vertical angle from SNR to target
+    const targetElevation = (targetHeightOffset / targetDistance);
+
+    return {
+      azimut: targetAzimut + SAM_PARAMS.DESIGNATION_ANGLE_ACCURACY * (Math.random() * 2 - 1),
+      elevation: targetElevation + SAM_PARAMS.DESIGNATION_ANGLE_ACCURACY * (Math.random() * 2 - 1),
+      distance: targetDistance + SAM_PARAMS.DESIGNATION_DISTANCE_ACCURACY * (Math.random() * 2 - 1),
+    }
+  }
   private tick() {
     setInterval(() => {
       if (this.isEnabled) {
@@ -90,6 +120,12 @@ export default class SAM {
         });
       }
     });
+
+    setInterval(() => {
+      if (this.isEnabled) {
+        this.eventListener!('updateBIP', [...this.flightObjects])
+      }
+    }, SAM_PARAMS.RADAR_UPDATE_INTERVAL)
   }
 
   private isInVision(flightObject: FlightObject, targetDistance: number) {

@@ -9,11 +9,12 @@ import mitt from 'mitt'
 import App from "./App.vue";
 import SAM, { type IEventListenerPayload } from "./classes/SAM";
 import { createPinia } from "pinia";
+import type FlightObject from "./classes/FlightObject";
 
 const pinia = createPinia();
 
 const bus = mitt();
-const sam = new SAM((eventName: string, eventPayload: IEventListenerPayload | string) => bus.emit(eventName, eventPayload));
+const sam = new SAM((eventName: string, eventPayload: IEventListenerPayload | string | FlightObject[]) => bus.emit(eventName, eventPayload));
 
 pinia.use(() => ({ sam }));
 
@@ -28,7 +29,7 @@ const vuetify = createVuetify({
 const app = createApp(App);
 app.use(pinia);
 app.use(vuetify);
-app.use(VueKonva)
+app.use(VueKonva, { prefix: 'vk' })
 app.provide('samEventBus', bus)
 app.provide('sam', sam)
 app.mount("#app");

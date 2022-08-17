@@ -1,9 +1,9 @@
 <template>
-  <v-group ref="tvPanel" :config="{
+  <vk-group ref="tvPanel" :config="{
     x: 810,
     y: 540,
   }">
-    <v-rect :config="{
+    <vk-rect :config="{
       name: 'panel',
       x: 0,
       y: 0,
@@ -13,7 +13,7 @@
       shadowBlur: 10,
       cornerRadius: 6,
     }" />
-    <v-rect :config="{
+    <vk-rect :config="{
       name: 'display',
       x: 20,
       y: 20,
@@ -23,19 +23,19 @@
     }" />
 
     <!-- target cross -->
-    <v-line :config="{
+    <vk-line :config="{
       points: [40, 180, 160, 180],
       stroke: 'white'
     }" />
-    <v-line :config="{
+    <vk-line :config="{
       points: [200, 180, 320, 180],
       stroke: 'white'
     }" />
-    <v-line :config="{
+    <vk-line :config="{
       points: [180, 40, 180, 160],
       stroke: 'white'
     }" />
-    <v-line :config="{
+    <vk-line :config="{
       points: [180, 200, 180, 320],
       stroke: 'white'
     }" />
@@ -48,7 +48,7 @@
     <SAMButton :x="350" :y="255" name="on" label="2.5X" :value="zoom === 2.5" small @click="zoom = 2.5" />
     <SAMButton :x="350" :y="300" name="on" label="5X" :value="zoom === 5" small @click="zoom = 5" />
 
-  </v-group>
+  </vk-group>
 </template>
 
 <script setup lang="ts">

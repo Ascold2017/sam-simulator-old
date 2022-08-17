@@ -1,9 +1,9 @@
 <template>
-  <v-group :config="{
+  <vk-group :config="{
     x: 810,
     y: 630,
   }">
-    <v-rect :config="{
+    <vk-rect :config="{
       name: 'panelWeapon',
       x: 0,
       y: 0,
@@ -16,10 +16,10 @@
 
 
     <!-- Missile indicators-->
-    <v-group :config="{ x: 20, y: 0 }">
-      <v-circle
+    <vk-group :config="{ x: 20, y: 0 }">
+      <vk-circle
         :config="{ width: 20, x: 60, y: 30, fill: weaponPanel.isMissileReady ? 'rgb(150, 249, 123)' : 'red', shadowBlur: 5 }" />
-      <v-text :config="{
+      <vk-text :config="{
         x: 20,
         y: 50,
         width: 80,
@@ -30,9 +30,9 @@
         align: 'center'
       }" />
 
-      <v-circle
+      <vk-circle
         :config="{ width: 20, x: 140, y: 30, fill: inRange ? 'rgb(150, 249, 123)' : 'red', shadowBlur: 5 }" />
-      <v-text :config="{
+      <vk-text :config="{
         x: 100,
         y: 50,
         width: 80,
@@ -43,9 +43,9 @@
         align: 'center'
       }" />
 
-      <v-circle
+      <vk-circle
         :config="{ width: 20, x: 220, y: 30, fill: isLaunched ? 'rgb(150, 249, 123)' : 'red', shadowBlur: 5 }" />
-      <v-text :config="{
+      <vk-text :config="{
         x: 180,
         y: 50,
         width: 80,
@@ -56,9 +56,9 @@
         align: 'center'
       }" />
 
-      <v-circle
+      <vk-circle
         :config="{ width: 20, x: 300, y: 30, fill: isReset ? 'rgb(150, 249, 123)' : 'red', shadowBlur: 5 }" />
-      <v-text :config="{
+      <vk-text :config="{
         x: 260,
         y: 50,
         width: 80,
@@ -68,11 +68,11 @@
         fontSize: 13,
         align: 'center'
       }" />
-    </v-group>
+    </vk-group>
     <!-- Missile selector -->
-    <v-group :config="{ x: 20, y: 80 }">
-      <v-line :config="{ points: [0, 0, 140, 0], stroke: '#181818', shadowBlur: 2 }" />
-      <v-text :config="{
+    <vk-group :config="{ x: 20, y: 80 }">
+      <vk-line :config="{ points: [0, 0, 140, 0], stroke: '#181818', shadowBlur: 2 }" />
+      <vk-text :config="{
         x: 140,
         y: -10,
         width: 100,
@@ -85,17 +85,17 @@
         align: 'center',
         verticalAlign: 'middle',
       }" />
-      <v-line :config="{ points: [240, 0, 360, 0], stroke: '#181818', shadowBlur: 2 }" />
+      <vk-line :config="{ points: [240, 0, 360, 0], stroke: '#181818', shadowBlur: 2 }" />
       <SAMButton v-for="missile in weaponPanel.missiles" :x="45.75 * (missile.id - 1)" :y="15"
         :name="'missile_' + missile.id" small :label="`${missile.id}`"
         :value="weaponPanel.currentMissileId === missile.id" @click="weaponPanel.selectMissile(missile.id)" />
-    </v-group>
-    <v-group :config="{ x: 400, y: 10 }">
+    </vk-group>
+    <vk-group :config="{ x: 400, y: 10 }">
       
       <SAMButton :x="120" :y="0" name="launch" label="ПУСК" :value="false" color="red" @click="weaponPanel.launchMissile" />
       <SAMButton :x="120" :y="70" name="reset" label="СБРОС" :value="false" @click="weaponPanel.resetMissile" />
 
-      <v-text :config="{
+      <vk-text :config="{
         x: 0,
         y: 0,
         height: 40,
@@ -122,7 +122,7 @@
         @click="weaponPanel.setTrackingMode(TrackingModes.HALF_STRAIGHTENING)"
       />
 
-      <v-text :config="{
+      <vk-text :config="{
         x: 0,
         y: 65,
         height: 40,
@@ -148,8 +148,8 @@
         :value="weaponPanel.detonatorMode === DetonatorModes.ON_2_SEC"
         @click="weaponPanel.setDetonatorMode(DetonatorModes.ON_2_SEC)"
       />
-    </v-group>
-  </v-group>
+    </vk-group>
+  </vk-group>
 </template>
 
 <script setup lang="ts">

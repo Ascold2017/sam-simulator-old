@@ -1,6 +1,8 @@
+import type FlightObject from "@/classes/FlightObject";
 import { type IRecognizedTargets, SAM_PARAMS } from "@/classes/SAM";
 import Vector3D from "@/classes/Vector3D";
 import { defineStore } from "pinia";
+import { CaptureModes, useCapturePanelStore } from "./capturePanel";
 import { useMainRadarStore, ViewModes } from "./mainRadarPanel";
 import { useSupplyPanelStore } from "./supplyPanel";
 import { useWeaponPanelStore } from "./weaponPanel";
@@ -146,6 +148,20 @@ export const useTargetRadarStore = defineStore("targetRadar", {
 
       this.isCapturedDistance = !!capturedTargetId;
       capturedTargetId && (this.capturedTargetId = capturedTargetId);
+    },
+
+    captureTargetByDesignation(targetId: string) {
+      const capturePanel = useCapturePanelStore();
+      if (capturePanel.captureMode === CaptureModes.Designation) {
+        // @ts-ignore
+        const designation = this.sam.getFlightObjectDesignation(targetId);
+        if (designation) {
+          this.targetCursorAngle = designation.azimut;
+          this.targetCursorElevation = designation.elevation;
+          this.targetCursorDistance = designation.distance;
+        }
+       
+      }
     },
 
     resetCaptureAll() {

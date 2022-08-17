@@ -1,9 +1,9 @@
 <template>
-  <v-group :config="{
+  <vk-group :config="{
     x: 20,
     y: 180,
   }">
-    <v-rect :config="{
+    <vk-rect :config="{
       name: 'display',
       x: 0,
       y: 0,
@@ -12,7 +12,7 @@
       fill: 'black',
     }" />
 
-    <v-text v-if="supplyPanel.isEnabledPower" :config="{
+    <vk-text v-if="supplyPanel.isEnabledPower" :config="{
       x: 10,
       y: 10,
       text: `Азимут: ${azimutLabel}°`,
@@ -20,7 +20,7 @@
       fontSize: 12,
       fill: 'rgb(150, 249, 123)',
     }" />
-    <v-text v-if="supplyPanel.isEnabledPower" :config="{
+    <vk-text v-if="supplyPanel.isEnabledPower" :config="{
       x: 10,
       y: 30,
       text: `Угол места: ${elevationLabel}°`,
@@ -28,7 +28,7 @@
       fontSize: 12,
       fill: 'rgb(150, 249, 123)',
     }" />
-    <v-text v-if="supplyPanel.isEnabledPower" :config="{
+    <vk-text v-if="supplyPanel.isEnabledPower" :config="{
       x: 10,
       y: 680,
       text: `Дальность: ${targetRadarStore.targetCursorDistance.toFixed(1)} км`,
@@ -37,11 +37,11 @@
       fill: 'rgb(150, 249, 123)',
     }" />
 
-    <v-group v-if="supplyPanel.isEnabledPower && !targetRadarStore.isCapturedAll" :config="{
+    <vk-group v-if="supplyPanel.isEnabledPower && !targetRadarStore.isCapturedAll" :config="{
       x: 350, y: 350,
       rotation: targetRadarStore.targetCursorAngle * (180 / Math.PI)
     }">
-      <v-rect :config="{
+      <vk-rect :config="{
         width: canvasWidth,
         height: canvasHeight,
         fill: 'rgb(15, 33, 19)',
@@ -49,14 +49,14 @@
         offsetY: canvasHeight/2,
       }" />
       <!-- Center line -->
-      <v-line :config="{
+      <vk-line :config="{
         stroke: 'rgb(150, 249, 123)',
         strokeWidth: 0.5,
         offsetY: canvasHeight/2,
         points: [0, canvasHeight/2, canvasWidth, canvasHeight/2]
       }" />
       <!-- Distance lines -->
-      <v-line :config="{
+      <vk-line :config="{
         stroke: 'rgb(150, 249, 123)',
         strokeWidth: 0.5,
         points: [lineY, 0, lineY, canvasHeight],
@@ -64,21 +64,21 @@
         offsetY: canvasHeight/2
       }" v-for="lineY in canvasDistanceLinesY" />
       <!-- Distance window lines -->
-      <v-line :config="{
+      <vk-line :config="{
         stroke: 'rgb(150, 249, 123)',
         strokeWidth: 0.5,
         points: [canvasDistanceWindow.start, 0, canvasDistanceWindow.start, canvasHeight],
         offsetY: canvasHeight/2
       }" />
-      <v-line :config="{
+      <vk-line :config="{
         stroke: 'rgb(150, 249, 123)',
         strokeWidth: 0.5,
         points: [canvasDistanceWindow.end, 0, canvasDistanceWindow.end, canvasHeight],
         offsetY: canvasHeight/2
       }" />
-      <v-group v-if="!targetRadarStore.isEquivalent">
+      <vk-group v-if="!targetRadarStore.isEquivalent">
         <!-- Targets -->
-        <v-rect v-for="canvasTarget in canvasTargets" :config="{
+        <vk-rect v-for="canvasTarget in canvasTargets" :config="{
           x: canvasTarget.x,
           y: canvasTarget.y,
           stroke: `rgba(150, 249, 123, ${canvasTarget.alpha})`,
@@ -88,20 +88,20 @@
           offsetX: canvasTarget.length / 2,
           offsetY: canvasTarget.width / 2,
         }" />
-      </v-group>
+      </vk-group>
 
-    </v-group>
+    </vk-group>
 
-    <v-group v-else-if="targetRadarStore.isCapturedAll" :config="{
+    <vk-group v-else-if="targetRadarStore.isCapturedAll" :config="{
       x: 0, y: 0,
     }">
-      <v-circle :config="{ x: 350, y: 350, width: (SAM_PARAMS.MIN_CAPTURE_RANGE/SAM_PARAMS.MAX_DISTANCE) * 700, stroke: 'white', strokeWidth: 0.5,}" />
-      <v-circle :config="{ x: 350, y: 350, width: (50/SAM_PARAMS.MAX_DISTANCE) * 700, stroke: 'red', strokeWidth: 0.5, dash: [5, 5]}" />
-      <v-circle :config="{ x: canvasCapturedTarget.x, y: canvasCapturedTarget.y, width: 5, fill: 'rgb(150, 249, 123)', }" />
-      <v-circle :config="{ x: canvasCapturedTarget.hitX, y: canvasCapturedTarget.hitY,width: 5, fill: 'white', }" />
-      <v-circle v-for="canvasMissile in canvasMissiles" :config="{ x: canvasMissile.x, y: canvasMissile.y, width: 5, fill: 'red', }" />
-    </v-group>
-  </v-group>
+      <vk-circle :config="{ x: 350, y: 350, width: (SAM_PARAMS.MIN_CAPTURE_RANGE/SAM_PARAMS.MAX_DISTANCE) * 700, stroke: 'white', strokeWidth: 0.5,}" />
+      <vk-circle :config="{ x: 350, y: 350, width: (50/SAM_PARAMS.MAX_DISTANCE) * 700, stroke: 'red', strokeWidth: 0.5, dash: [5, 5]}" />
+      <vk-circle :config="{ x: canvasCapturedTarget.x, y: canvasCapturedTarget.y, width: 5, fill: 'rgb(150, 249, 123)', }" />
+      <vk-circle :config="{ x: canvasCapturedTarget.hitX, y: canvasCapturedTarget.hitY,width: 5, fill: 'white', }" />
+      <vk-circle v-for="canvasMissile in canvasMissiles" :config="{ x: canvasMissile.x, y: canvasMissile.y, width: 5, fill: 'red', }" />
+    </vk-group>
+  </vk-group>
 </template>
 
 <script setup lang="ts">

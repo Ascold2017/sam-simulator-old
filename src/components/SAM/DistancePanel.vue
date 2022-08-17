@@ -1,6 +1,6 @@
 <template>
-  <v-group :config="{ x: 810, y: 190 }">
-    <v-rect :config="{
+  <vk-group :config="{ x: 810, y: 190 }">
+    <vk-rect :config="{
       name: 'panelDistance',
       x: 0,
       y: 0,
@@ -11,7 +11,7 @@
       cornerRadius: 6,
     }" />
 
-    <v-rect :config="{
+    <vk-rect :config="{
       name: 'distanceDisplay',
       x: 20,
       y: 20,
@@ -20,8 +20,8 @@
       fill: 'black',
     }" />
     <!-- Targets and lines-->
-    <v-group v-if="supplyPanel.isEnabledPower" :config="{ x: 20, y: 20 }">
-      <v-text :config="{
+    <vk-group v-if="supplyPanel.isEnabledPower" :config="{ x: 20, y: 20 }">
+      <vk-text :config="{
         x: 5,
         y: 5,
         text: `Дальность: ${targetRadarStore.targetCursorDistance.toFixed(1)} км`,
@@ -29,9 +29,9 @@
         fontSize: 9,
         fill: 'rgb(150, 249, 123)',
       }" />
-      <v-group v-if="supplyPanel.isEnabledTargetRadarTransmitter && !targetRadarStore.isEquivalent">
+      <vk-group v-if="supplyPanel.isEnabledTargetRadarTransmitter && !targetRadarStore.isEquivalent">
         <!-- Targets on max distance range track -->
-        <v-line v-for="canvasTarget in canvasTargets" :config="{
+        <vk-line v-for="canvasTarget in canvasTargets" :config="{
           points: [
             canvasTarget.offsetX, canvasHeight / 4 + paddingY,
             canvasTarget.offsetX, canvasHeight / 4 + paddingY - canvasTarget.height,
@@ -42,7 +42,7 @@
           strokeWidth: 0.5
         }" />
         <!-- Missiles on max distance range track -->
-        <v-line v-for="canvasMissile in canvasMissiles" :config="{
+        <vk-line v-for="canvasMissile in canvasMissiles" :config="{
           points: [
             canvasMissile.offsetX, canvasHeight / 4 + paddingY,
             canvasMissile.offsetX, canvasHeight / 4 + paddingY + canvasMissile.height,
@@ -53,7 +53,7 @@
           strokeWidth: 0.5
         }" />
         <!-- Targets on window track -->
-        <v-line v-for="canvasTarget in canvasTargets" :config="{
+        <vk-line v-for="canvasTarget in canvasTargets" :config="{
           points: canvasTarget.isInWindow ? [
             canvasTarget.offsetXInWindow, canvasHeight / 1.5 + paddingY,
             canvasTarget.offsetXInWindow, canvasHeight / 1.5 + paddingY - canvasTarget.height,
@@ -64,7 +64,7 @@
           strokeWidth: 0.5,
         }" />
         <!-- missiles on window track -->
-        <v-line v-for="canvasMissile in canvasMissiles" :config="{
+        <vk-line v-for="canvasMissile in canvasMissiles" :config="{
           points: canvasMissile.isInWindow ? [
             canvasMissile.offsetXInWindow,  canvasHeight / 1.5 + paddingY,
             canvasMissile.offsetXInWindow,  canvasHeight / 1.5 + paddingY + canvasMissile.height,
@@ -74,9 +74,9 @@
           stroke: 'red',
           strokeWidth: 0.5,
         }" />
-      </v-group>
+      </vk-group>
       <!-- Zero line -->
-      <v-line v-if="supplyPanel.isEnabledPower" :config="{
+      <vk-line v-if="supplyPanel.isEnabledPower" :config="{
         points: [
           paddingX, canvasHeight / 4 + paddingY,
           canvasWidth - paddingX, canvasHeight / 4 + paddingY,
@@ -85,7 +85,7 @@
         strokeWidth: 0.5
       }" />
       <!-- Zero line on window track -->
-      <v-line v-if="supplyPanel.isEnabledPower" :config="{
+      <vk-line v-if="supplyPanel.isEnabledPower" :config="{
         points: [
           paddingX, canvasHeight/1.5 + paddingY,
           canvasWidth - paddingX,
@@ -96,8 +96,8 @@
       }" />
 
       <!-- Distance window on max distance track -->
-      <v-group v-if="supplyPanel.isEnabledPower" :config="{ x: canvasOffsetDistanceWindow + paddingX, y: paddingY }">
-        <v-line :config="{
+      <vk-group v-if="supplyPanel.isEnabledPower" :config="{ x: canvasOffsetDistanceWindow + paddingX, y: paddingY }">
+        <vk-line :config="{
           points: [
             0, canvasHeight / 4 ,
             0, 0
@@ -106,7 +106,7 @@
           strokeWidth: 0.5,
           dash: [2, 2]
         }" />
-        <v-line :config="{
+        <vk-line :config="{
           points: [
             canvasWindowWidth, canvasHeight / 4,
             canvasWindowWidth, 0
@@ -115,12 +115,12 @@
           strokeWidth: 0.5,
           dash: [2, 2]
         }" />
-      </v-group>
-    </v-group>
+      </vk-group>
+    </vk-group>
 
     <!-- capturing site -->
-    <v-group :config="{ x: (canvasWidth + paddingX + 20) / 2 + canvasCaptureWidth / 2, y: ( canvasHeight/2 + paddingY + 20) }">
-      <v-line :config="{
+    <vk-group :config="{ x: (canvasWidth + paddingX + 20) / 2 + canvasCaptureWidth / 2, y: ( canvasHeight/2 + paddingY + 20) }">
+      <vk-line :config="{
         points: [
           0, canvasHeight / 4 + paddingY,
           0, 0
@@ -128,7 +128,7 @@
         stroke: 'white',
         strokeWidth: 0.5
       }" />
-      <v-line :config="{
+      <vk-line :config="{
         points: [
           canvasCaptureWidth, canvasHeight / 4 + paddingY,
           canvasCaptureWidth, 0
@@ -136,13 +136,13 @@
         stroke: 'white',
         strokeWidth: 0.5
       }" />
-    </v-group>
+    </vk-group>
 
     <!-- Track panel -->
-    <v-group :config="{ x: 520, y: 20 }">
+    <vk-group :config="{ x: 520, y: 20 }">
       <SAMPotentiometer :x="5" :y="0" @change="targetRadarStore.incrementTargetCursorDistance" :deltaValue="0.1" />
 
-      <v-text :config="{
+      <vk-text :config="{
         x: 0,
         y: 105,
         width: 20,
@@ -153,7 +153,7 @@
         fontStyle: 'bold',
         fontSize: 14,
       }" />
-      <v-circle :config="{
+      <vk-circle :config="{
         name: 'captureDistanceIndicator',
         x: 35,
         y: 110,
@@ -167,10 +167,10 @@
         @click="targetRadarStore.captureByDistance" />
       <SAMButton :x="0" :y="200" name="resetCaptureD" :value="!targetRadarStore.isCapturedDistance" label="Сброс"
         @click="targetRadarStore.resetCaptureDistance" />
-    </v-group>
+    </vk-group>
 
 
-  </v-group>
+  </vk-group>
 </template>
 
 <script lang="ts" setup>

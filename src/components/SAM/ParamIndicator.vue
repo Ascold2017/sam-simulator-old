@@ -1,6 +1,6 @@
 <template>
-  <v-group :config="props.config">
-    <v-rect :config="{
+  <vk-group :config="props.config">
+    <vk-rect :config="{
       x: 0,
       y: 0,
       height: 140,
@@ -10,7 +10,7 @@
       cornerRadius: 2
     }" />
 
-    <v-shape :config="{
+    <vk-shape :config="{
       x: 0,
       y: 0,
       height: 140,
@@ -18,7 +18,7 @@
       stroke: '#181818',
       sceneFunc: drawStrokes
     }" />
-  </v-group>
+  </vk-group>
 </template>
 
 <script setup lang="ts">

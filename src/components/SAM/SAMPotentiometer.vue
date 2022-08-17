@@ -1,6 +1,6 @@
 <template>
-  <v-group :config="{ x: props.x, y: props.y }">
-    <v-arc :config="{
+  <vk-group :config="{ x: props.x, y: props.y }">
+    <vk-arc :config="{
       x: props.small ? 15 : props.big ? 50 : 25,
       y: 25,
       outerRadius: props.small ? 15 : props.big ? 50 : 25,
@@ -8,7 +8,7 @@
       stroke: '#181818',
       angle: 360
     }" />
-    <v-star :config="{
+    <vk-star :config="{
        x: props.small ? 15 : props.big ? 50 : 25,
       y: 25,
       innerRadius: props.small ? 10 : props.big ? 38 : 18,
@@ -19,7 +19,7 @@
       rotation
       
     }" @wheel="onWheel"/>
-    <v-text :config="{
+    <vk-text :config="{
       x: -3,
       y: props.small ? 34 : props.big ? 55 : 43,
       height: 10,
@@ -29,7 +29,7 @@
       fontSize: 12,
       fill: '#181818'
     }" />
-    <v-text :config="{
+    <vk-text :config="{
       x: props.small ? 28 : props.big ? 95 : 45,
       y:  props.small ? 34 : props.big ? 55 : 43,
       text: '+',
@@ -39,7 +39,7 @@
       fontSize: 12,
       fill: '#181818'
     }" />
-  </v-group>
+  </vk-group>
 </template>
 
 <script setup lang="ts">

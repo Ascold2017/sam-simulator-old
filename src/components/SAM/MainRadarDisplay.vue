@@ -1,9 +1,9 @@
 <template>
-  <v-group :config="{
+  <vk-group :config="{
     x: 20,
     y: 180,
   }">
-    <v-rect :config="{
+    <vk-rect :config="{
       name: 'display',
       x: 0,
       y: 0,
@@ -12,8 +12,8 @@
       fill: 'black',
     }" />
 
-    <v-group v-if="supplyPanel.isEnabledPower">
-      <v-text :config="{
+    <vk-group v-if="supplyPanel.isEnabledPower">
+      <vk-text :config="{
         x: 10,
         y: 10,
         text: `Азимут: ${azimutLabel}°`,
@@ -21,7 +21,7 @@
         fontSize: 12,
         fill: 'rgb(150, 249, 123)',
       }" />
-      <v-text :config="{
+      <vk-text :config="{
         x: 10,
         y: 680,
         text: `Дальность: ${targetRadarStore.targetCursorDistance.toFixed(1)} км`,
@@ -29,23 +29,23 @@
         fontSize: 12,
         fill: 'rgb(150, 249, 123)',
       }" />
-      <v-circle
+      <vk-circle
         :config="{ x: 350, y: 350, width: SAM_PARAMS.MAX_DISTANCE * mainRadar.scale * 2, fill: 'rgb(15, 33, 19)' }" />
       <!-- Distance circles -->
-      <v-circle
+      <vk-circle
         :config="{ x: 350, y: 350, width: i * 20 * mainRadar.scale, stroke: 'rgb(150, 249, 123)', strokeWidth: 0.1 }"
         v-for="i in countCircles" />
       <!-- Killzone circle -->
-      <v-circle
+      <vk-circle
         :config="{ x: 350, y: 350, width: 100 * mainRadar.scale, stroke: 'rgb(150, 249, 123)', strokeWidth: 0.5 }" />
       <!-- Azimut lines -->
-      <v-line :config="{
+      <vk-line :config="{
         points: [azimutLine.x0, azimutLine.y0, azimutLine.x1, azimutLine.y1,],
         stroke: 'rgb(150, 249, 123)',
         strokeWidth: 0.1
       }" v-for="azimutLine in azimutLines" />
       <!-- Azimut labels -->
-      <v-text :config="{
+      <vk-text :config="{
         x: azimutLine.x1,
         y: azimutLine.y1,
         text: azimutLine.angleLabel,
@@ -62,16 +62,16 @@
       }" v-for="azimutLine in azimutLines" />
 
       <!-- Target cursor line -->
-      <v-line v-if="!targetRadarStore.isCapturedAll" :config="{
+      <vk-line v-if="!targetRadarStore.isCapturedAll" :config="{
         points: [targetCursorLine.x0, targetCursorLine.y0, targetCursorLine.x1, targetCursorLine.y1],
         stroke: 'white',
         fill: 'white',
         strokeWidth: 1
       }" />
-    </v-group>
+    </vk-group>
     <!-- targets -->
-    <v-group v-if="supplyPanel.isEnabledPower && supplyPanel.isEnabledMainRadar">
-      <v-arc v-for="canvasTarget in canvasTargets" :config="{
+    <vk-group v-if="supplyPanel.isEnabledPower && supplyPanel.isEnabledMainRadar">
+      <vk-arc v-for="canvasTarget in canvasTargets" :config="{
         x: 350, y: 350,
         innerRadius: canvasTarget.radius,
         outerRadius: canvasTarget.radius,
@@ -80,8 +80,8 @@
         strokeWidth: canvasTarget.strokeWidth,
         stroke: `rgba(150, 249, 123, ${canvasTarget.alpha})`
       }" />
-    </v-group>
-  </v-group>
+    </vk-group>
+  </vk-group>
 </template>
 
 <script setup lang="ts">

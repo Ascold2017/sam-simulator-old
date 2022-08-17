@@ -1,10 +1,10 @@
 <template>
-  <v-group :config="{
+  <vk-group :config="{
     x: 810,
     y: 0,
   }">
 
-    <v-rect :config="{
+    <vk-rect :config="{
       x: 0,
       y: 0,
       width: 600,
@@ -38,7 +38,7 @@
     <SAMButton :x="560" :y="120" small name="400ms" label="400" :value="velocityIndicatorMaxValue === 400"
       @click="velocityIndicatorMaxValue = 400" />
     <SAMPotentiometer :x="510" :y="110" small />
-  </v-group>
+  </vk-group>
 </template>
 
 <script setup lang="ts">
