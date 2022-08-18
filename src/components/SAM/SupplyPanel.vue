@@ -90,32 +90,7 @@
       <SAMButton label="Выкл" :x="65" :y="50" name="snrOff" :value="!supplyPanel.isEnabledTargetRadarTransmitter"
         @click="supplyPanel.setIsEnabledTargetRadarTransmitter(false)" />
     </vk-group>
-    <!-- OLS power -->
-    <vk-group :config="{ x: 440, y: 20 }">
-      <vk-text :config="{
-        x: 0,
-        y: 10,
-        height: 20,
-        verticalAlign: 'middle',
-        text: 'Тепловизор',
-        fill: '#181818',
-        fontFamily: 'Russo One, sans-serif',
-        fontSize: 12
-      }" />
-      <vk-circle :config="{
-        name: 'thermalCameraIndicator',
-        x: 95,
-        y: 20,
-        width: 20,
-        height: 20,
-        fill: supplyPanel.isEnabledThermalCamera ? 'rgb(150, 249, 123)' : 'red',
-        shadowBlur: 5
-      }" />
-      <SAMButton label="Вкл" :x="0" :y="50" name="thermalCameraOn" :value="supplyPanel.isEnabledThermalCamera"
-        @click="supplyPanel.setIsEnabledThermalCamera(true)" />
-      <SAMButton label="Выкл" :x="65" :y="50" name="thermalCameraOff" :value="!supplyPanel.isEnabledThermalCamera"
-        @click="supplyPanel.setIsEnabledThermalCamera(false)" />
-    </vk-group>
+    
 
     <vk-rect :config="{
       x: 670,

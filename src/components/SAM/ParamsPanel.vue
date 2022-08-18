@@ -26,7 +26,6 @@
       @click="heightIndicatorMaxValue = 8" />
     <SAMButton :x="350" :y="120" small name="2km" label="2" :value="heightIndicatorMaxValue === 2"
       @click="heightIndicatorMaxValue = 2" />
-    <SAMPotentiometer :x="300" :y="110" small />
 
     <!-- Target velocity indicator -->
     <ParamIndicator :config="{ x: 395, y: 20 }" label="V, м/с" :min-value="0" :max-value="velocityIndicatorMaxValue"
@@ -37,7 +36,6 @@
       @click="velocityIndicatorMaxValue = 600" />
     <SAMButton :x="560" :y="120" small name="400ms" label="400" :value="velocityIndicatorMaxValue === 400"
       @click="velocityIndicatorMaxValue = 400" />
-    <SAMPotentiometer :x="510" :y="110" small />
   </vk-group>
 </template>
 

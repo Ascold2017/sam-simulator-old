@@ -11,7 +11,6 @@ export const useSupplyPanelStore = defineStore("supply", {
     isEnabledPower: false,
     isEnabledMainRadar: false,
     isEnabledTargetRadarTransmitter: false,
-    isEnabledThermalCamera: false,
   }),
 
   actions: {
@@ -19,7 +18,6 @@ export const useSupplyPanelStore = defineStore("supply", {
       this.isEnabledPower = false;
       this.isEnabledMainRadar = false;
       this.isEnabledTargetRadarTransmitter = false;
-      this.isEnabledThermalCamera = false;
     },
     setEnabledPower(value: boolean) {
       const mainRadar = useMainRadarStore();
@@ -67,17 +65,6 @@ export const useSupplyPanelStore = defineStore("supply", {
         }, 500);
       } else {
         this.isEnabledTargetRadarTransmitter = false;
-      }
-    },
-    setIsEnabledThermalCamera(value: boolean) {
-      if (!this.isEnabledPower) return;
-      if (value) {
-        const i = setTimeout(() => {
-          this.isEnabledThermalCamera = true;
-          clearTimeout(i);
-        }, 500);
-      } else {
-        this.isEnabledThermalCamera = false;
       }
     },
   },

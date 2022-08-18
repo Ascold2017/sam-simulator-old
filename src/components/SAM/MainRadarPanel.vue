@@ -45,10 +45,6 @@
       @click="mainRadar.setViewMode(ViewModes.MainRadar)" />
     <SAMButton :x="730" :y="380" name="targetRadarMode" :value="mainRadar.viewMode === ViewModes.TargetRadar"
       label="ССЦ" @click="mainRadar.setViewMode(ViewModes.TargetRadar)" />
-    <SAMButton :x="730" :y="445" name="tvRadarMode" :value="mainRadar.viewMode === ViewModes.Television"
-      label="ТОВ" @click="mainRadar.setViewMode(ViewModes.Television)" />
-
-   
   </vk-group>
 </template>
 

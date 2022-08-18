@@ -3,7 +3,6 @@ import { defineStore } from "pinia";
 export enum CaptureModes {
   Manual = "Manual",
   Designation = "Designation",
-  Optical = "Optical"
 }
 export const useCapturePanelStore = defineStore("capturePanel", {
   state: () => ({

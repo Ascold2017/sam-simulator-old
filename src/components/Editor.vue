@@ -2,7 +2,7 @@
   <v-container class="mb-6">
     <v-row justify="center">
       <v-col class="d-flex justify-center">
-        <canvas ref="editorRef" width="800" height="800" class="map-image border mx-auto"
+        <canvas ref="editorRef" width="800" height="800" class="border mx-auto"
           style="background-size: 100%; background-position: center;" @click="exportCoordinates"></canvas>
       </v-col>
       <v-col class="d-flex justify-center">

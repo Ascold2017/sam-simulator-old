@@ -1,4 +1,5 @@
 import FlightObject from "./FlightObject";
+import { SAM_PARAMS } from "./SAM";
 interface IPoint {
   x: number;
   y: number;
@@ -28,6 +29,7 @@ export default class Editor {
       x: this.ctx!.canvas.width / 2,
       y: this.ctx!.canvas.height / 2,
     };
+    canvasElement.style.backgroundImage = `url(${SAM_PARAMS.IMAGE})`;
     this._drawSite();
   }
 
@@ -101,13 +103,13 @@ export default class Editor {
 
   _drawSite() {
     if (!this.ctx) return;
-    // Draw 25 km circle killzone
+    // Draw 50 km circle killzone
     this.ctx.strokeStyle = "red";
     this.ctx.beginPath();
     this.ctx.arc(
       this.canvasCenter.x,
       this.canvasCenter.y,
-      25 * this.scale,
+      50 * this.scale,
       0,
       2 * Math.PI,
     );
