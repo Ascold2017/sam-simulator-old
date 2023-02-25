@@ -1,4 +1,4 @@
-import Sounds from "@/classes/Sounds";
+import Sounds from "@/core/Sounds";
 import { defineStore } from "pinia";
 import { useCapturePanelStore } from "./capturePanel";
 import { useMainRadarStore } from "./mainRadarPanel";

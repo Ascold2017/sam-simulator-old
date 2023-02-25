@@ -7,9 +7,9 @@ import * as components from 'vuetify/components'
 import mitt from 'mitt'
 
 import App from "./App.vue";
-import SAM, { type IEventListenerPayload } from "./classes/SAM";
+import SAM, { type IEventListenerPayload } from "./core/SAM";
 import { createPinia } from "pinia";
-import type FlightObject from "./classes/FlightObject";
+import type FlightObject from "./core/FlightObject";
 
 const pinia = createPinia();
 

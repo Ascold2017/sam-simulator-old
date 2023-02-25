@@ -9,7 +9,7 @@
         <v-card width="800">
           <v-card-text>
             <h3 class="mb-3">Нанесите точки полета и задайте параметры цели</h3>
-            <v-select label="Тип обьекта" :items="flightObjectTypes" item-title="name" item-value="id"
+            <v-select label="Тип обьекта" :items="FLIGHT_OBJECT_TYPES" item-title="name" item-value="id"
               :model-value="flightObjectType!" @update:model-value="setFlightObjectType" />
             <v-text-field label="Запустить через, сек" :model-value="timeOffset" @update:model-value="setTimeOffset" />
             <h4>Машрут | Дальность полета: {{ flightParams.range }} км | Полетное время: {{ flightParams.time }} мин
@@ -84,14 +84,13 @@
 </template>
 
 <script setup lang="ts">
-import Editor from '@/classes/Editor';
+import FLIGHT_OBJECT_TYPES from '@/const/FLIGHT_OBJECT_TYPES';
+import Editor from '@/components/Editor/Editor';
 import type SAM from '@/classes/SAM';
-import { computed } from '@vue/reactivity';
-import { onMounted, ref, inject } from 'vue';
+import { onMounted, ref, inject, computed } from 'vue';
 
 const sam = inject<SAM>('sam')
 const editorRef = ref<HTMLCanvasElement | null>(null);
-const flightObjectTypes = Editor.flightObjectTypes;
 
 const editor = ref<Editor | null>(null);
 onMounted(() => {
@@ -102,7 +101,7 @@ onMounted(() => {
 const flightObjectType = ref<number | null>(null);
 const flightObjectMaxVelocity = ref<number>(100);
 const setFlightObjectType = (value: number) => {
-  const foType = flightObjectTypes.find(fo => fo.id === value)!
+  const foType = FLIGHT_OBJECT_TYPES.find(fo => fo.id === value)!
   flightObjectType.value = value;
   editor.value!.setFlightObjectType(value);
   flightObjectMaxVelocity.value = foType.maxVelocity;

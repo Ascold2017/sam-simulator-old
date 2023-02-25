@@ -1,4 +1,4 @@
-import type FlightObject from "@/classes/FlightObject";
+import type FlightObject from "@/core/FlightObject";
 import { defineStore } from "pinia";
 
 export const useBipStore = defineStore("bip", {

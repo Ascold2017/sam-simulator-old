@@ -1,8 +1,8 @@
 import {
   type IFlightMissiles,
   type IRecognizedTargets,
-  SAM_PARAMS,
-} from "@/classes/SAM";
+} from "@/core/SAM";
+import SAM_PARAMS from "@/const/SAM_PARAMS";
 import { defineStore } from "pinia";
 import { useMainRadarStore } from "./mainRadarPanel";
 import { useTargetRadarStore } from "./targetRadar";

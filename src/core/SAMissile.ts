@@ -1,6 +1,6 @@
 import type FlightObject from "./FlightObject";
 import Sounds from "./Sounds";
-import Vector3d from '@/classes/Vector3D'
+import Vector3d from '@/core/Vector3D'
 export default class SAMissile {
   private _identifier: number | null = null;
   private target: FlightObject | null = null;

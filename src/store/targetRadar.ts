@@ -1,6 +1,7 @@
-import type FlightObject from "@/classes/FlightObject";
-import { type IRecognizedTargets, SAM_PARAMS } from "@/classes/SAM";
-import Vector3D from "@/classes/Vector3D";
+import type FlightObject from "@/core/FlightObject";
+import SAM_PARAMS from "@/const/SAM_PARAMS";
+import { type IRecognizedTargets } from "@/core/SAM";
+import Vector3D from "@/core/Vector3D";
 import { defineStore } from "pinia";
 import { CaptureModes, useCapturePanelStore } from "./capturePanel";
 import { useMainRadarStore, ViewModes } from "./mainRadarPanel";

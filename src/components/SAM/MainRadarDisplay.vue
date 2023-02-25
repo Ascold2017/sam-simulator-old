@@ -91,7 +91,7 @@ import { useMainRadarStore } from '@/store/mainRadarPanel';
 import { useTargetsStore } from '@/store/targets';
 import { useTargetRadarStore } from '@/store/targetRadar';
 import { computed, onMounted, onUnmounted, ref } from 'vue';
-import { SAM_PARAMS } from '@/classes/SAM';
+import SAM_PARAMS from '@/const/SAM_PARAMS';
 
 interface ICanvasTarget {
   radius: number;

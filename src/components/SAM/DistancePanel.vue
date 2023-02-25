@@ -180,7 +180,7 @@ import SAMButton from "./SAMButton.vue";
 import { useTargetRadarStore } from '@/store/targetRadar'
 import { useSupplyPanelStore } from "@/store/supplyPanel";
 import { useTargetsStore } from "@/store/targets";
-import { SAM_PARAMS } from "@/classes/SAM";
+import SAM_PARAMS from '@/const/SAM_PARAMS';
 
 const targetRadarStore = useTargetRadarStore();
 const supplyPanel = useSupplyPanelStore();

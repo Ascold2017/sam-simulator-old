@@ -118,7 +118,7 @@
 </template>
 
 <script setup lang="ts">
-import { SAM_PARAMS } from '@/classes/SAM';
+import SAM_PARAMS from '@/const/SAM_PARAMS';
 import { useBipStore } from '@/store/bip';
 import { useSupplyPanelStore } from '@/store/supplyPanel';
 import { useTargetRadarStore } from '@/store/targetRadar'

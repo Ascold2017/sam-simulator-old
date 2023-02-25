@@ -1,6 +1,6 @@
 import { defineStore } from "pinia";
 import { useSupplyPanelStore } from "@/store/supplyPanel";
-import SAMissile from "@/classes/SAMissile";
+import SAMissile from "@/core/SAMissile";
 import { useTargetRadarStore } from "./targetRadar";
 export enum MissileStates {
   READY = "READY",
