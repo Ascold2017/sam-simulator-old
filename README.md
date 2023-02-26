@@ -13,5 +13,8 @@ Pseudo-simulator of the surface-to-air system, based on Vue 3, Canvas&Konva.js
 
 https://t.me/sam_simulator
 
-![image](https://user-images.githubusercontent.com/29858671/218690542-de7475e4-dce3-460c-b87c-f2452abaa76b.png)
+![image](/public/Screenshot_1.png)
+![image](/public/Screenshot_2.png)
+![image](/public/Screenshot_3.png)
+![image](/public/Screenshot_4.png)
 
