@@ -93,7 +93,6 @@
     <vk-group :config="{ x: 400, y: 10 }">
       
       <SAMButton :x="120" :y="0" name="launch" label="ПУСК" :value="false" color="red" @click="weaponPanel.launchMissile" />
-      <SAMButton :x="120" :y="70" name="reset" label="СБРОС" :value="false" @click="weaponPanel.resetMissile" />
 
       <vk-text :config="{
         x: 0,

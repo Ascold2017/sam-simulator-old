@@ -13,14 +13,13 @@
 import { inject, onMounted, ref } from 'vue'
 import { useTargetsStore } from '@/store/targets';
 import { useTargetRadarStore } from '@/store/targetRadar';
-import type { IFlightMissiles, IRecognizedTargets } from './core/SAM';
 import type { Emitter, EventType } from 'mitt';
 import AppMenu from '@/components/AppMenu.vue'
 import SAMScreen from '@/components/SAM/SAM.vue';
 import EditorScreen from '@/components/Editor/EditorScreen.vue'
 import { useBipStore } from './store/bip';
-import type FlightObject from './core/FlightObject';
 import MISSIONS from './const/MISSIONS';
+import type { IFlightMissiles, IRecognizedFlightObjects } from './SAM/SAM';
 const editorRef = ref()
 
 enum ScreensEnum {
@@ -29,20 +28,20 @@ enum ScreensEnum {
   Editor = 'Editor'
 }
 
-const activeScreen = ref(ScreensEnum.SAM);
+const activeScreen = ref(ScreensEnum.Editor);
 const openScreen = (screen: string) => activeScreen.value = screen as ScreensEnum;
 const selectMission = (missionId: number) => {
   editorRef.value.loadMission(MISSIONS.find(m => m.id === missionId)!.data)
 }
 const samEventBus = inject<Emitter<Record<EventType, any>>>('samEventBus');
 const targetsStore = useTargetsStore()
-const targetRadar = useTargetRadarStore()
-const bipStore = useBipStore()
+//const targetRadar = useTargetRadarStore()
+//const bipStore = useBipStore()
 
 onMounted(() => {
-  samEventBus!.on('delete', (e: string) => targetRadar.resetCaptureTarget(e))
-  samEventBus!.on('update', (e: { targets: IRecognizedTargets[], missiles: IFlightMissiles[] }) => targetsStore.setTargets(e.targets, e.missiles))
-  samEventBus!.on('updateBIP', (e: FlightObject[]) => bipStore.updateBip(e))
+  // samEventBus!.on('delete', (e: string) => targetRadar.resetCaptureTarget(e))
+  samEventBus!.on('update', (e: { targets: IRecognizedFlightObjects[],  missiles: IFlightMissiles[] }) => targetsStore.setTargets(e.targets, e.missiles))
+  //samEventBus!.on('updateBIP', (e: FlightObject[]) => bipStore.updateBip(e))
 });
 </script>
 

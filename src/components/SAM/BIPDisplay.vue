@@ -135,7 +135,7 @@ onMounted(() => {
 })
 
 const canvasTargets = computed(() => bipStore.flightObjects.map((fo, i) => {
-  const startPoint = bipStore.wayPoints[fo.identifier!][0];
+  const startPoint = bipStore.wayPoints[fo.name][0];
   return {
     identifier: fo.identifier,
     x: (2 * startPoint.x / SAM_PARAMS.BIP_SIDE) * 350 + 350,

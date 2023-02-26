@@ -201,7 +201,7 @@ const canvasTargets = computed(() => {
       : (target.elevation - targetRadarStore.targetCursorElevation);
 
     const offsetElevationK = 2 * offsetElevation / SAM_PARAMS.TARGET_RADAR_RAY_HEIGHT;
-    const azimutOffsetK = 1 - 2 * Math.abs(targetRadarStore.targetCursorAngle - target.azimut) / SAM_PARAMS.TARGET_RADAR_RAY_WIDTH;
+    const azimutOffsetK = 1 - 2 * Math.abs(targetRadarStore.targetCursorAngle - target.azimuth) / SAM_PARAMS.TARGET_RADAR_RAY_WIDTH;
     const spotHeight = target.visibilityK * azimutOffsetK * (1 - Math.abs(offsetElevationK)) * targetRadarStore.brightness * (canvasHeight/4);
     const offsetXInWindow = ((target.distance - targetRadarStore.targetCursorDistance) / SAM_PARAMS.RADAR_DISTANCE_WINDOW) * (canvasWidth - paddingX) + (canvasWidth - paddingX) / 2
     const offsetX = (target.distance / SAM_PARAMS.MAX_DISTANCE) * (canvasWidth - paddingX);

@@ -27,7 +27,7 @@
 
 
 <script setup lang="ts">
-import Sounds from '@/core/Sounds';
+import Sounds from '@/SAM/Sounds';
 
 const props = defineProps<{ x: number; y: number; name: string; value: boolean; label: string; small?: boolean; circle?: boolean; color?: string; }>();
 const emit = defineEmits<{ (e: 'click'): void }>();

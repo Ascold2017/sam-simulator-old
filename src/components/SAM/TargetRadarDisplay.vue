@@ -153,7 +153,7 @@ const canvasTargets = computed<ICanvasTarget[]>(() => {
       const canvasOffsetElevation = offsetElevationK * canvasHeight/2;  // Half of rect width
 
       const rayWidth = ((Math.PI * SAM_PARAMS.TARGET_RADAR_RAY_HEIGHT * target.distance) / 180);
-      const azimutOffsetK = 1 - 2 * Math.abs(targetRadarStore.targetCursorAngle - target.azimut) / SAM_PARAMS.TARGET_RADAR_RAY_WIDTH;
+      const azimutOffsetK = 1 - 2 * Math.abs(targetRadarStore.targetCursorAngle - target.azimuth) / SAM_PARAMS.TARGET_RADAR_RAY_WIDTH;
       const alpha = target.visibilityK * azimutOffsetK * (1 - Math.abs(offsetElevationK)) * targetRadarStore.brightness
       return {
         x: offsetDistanceCanvas,

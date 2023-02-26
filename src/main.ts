@@ -7,18 +7,18 @@ import * as components from 'vuetify/components'
 import mitt from 'mitt'
 
 import App from "./App.vue";
-import SAM, { type IEventListenerPayload } from "./core/SAM";
+import Engine from "./SAM/Engine";
 import { createPinia } from "pinia";
-import type FlightObject from "./core/FlightObject";
+import type { IEventListenerPayload } from "./SAM/Engine";
 
 const pinia = createPinia();
 
 const bus = mitt();
-const sam = new SAM((eventName: string, eventPayload: IEventListenerPayload | string | FlightObject[]) => bus.emit(eventName, eventPayload));
 
-pinia.use(() => ({ sam }));
+const eventListener = (name: string, payload: IEventListenerPayload | string) => bus.emit(name, payload)
+const engine = new Engine(eventListener);
 
-(window as any).__ACCELERATION__ = 1;
+pinia.use(() => ({ engine }));
 
 const vuetify = createVuetify({
   components,
@@ -31,5 +31,5 @@ app.use(pinia);
 app.use(vuetify);
 app.use(VueKonva, { prefix: 'vk' })
 app.provide('samEventBus', bus)
-app.provide('sam', sam)
+app.provide('engine', engine)
 app.mount("#app");

@@ -1,5 +1,5 @@
 import type FlightObject from "./FlightObject";
-import type SAMissile from "./SAMissile";
+import type SAMissile from "./OSAMissile";
 import SAM_PARAMS from "@/const/SAM_PARAMS";
 import LoopHelper from "./LoopHelper";
 
@@ -54,13 +54,16 @@ export default class SAM {
     this.isEnabled = value;
   }
 
+  startMission(mission) {}
+  launchMissile() {}
+  /*
   public addFlightObject(flightObject: FlightObject) {
     this.flightObjects.push(flightObject);
   }
 
   public addMissile(missile: SAMissile) {
     this.missiles.push(missile);
-  }
+  }*/
 
   public getFlightObject(id: string) {
     return this.flightObjects.find(fo => fo.identifier === id)
@@ -91,7 +94,7 @@ export default class SAM {
     }
   }
   private update() {
-    
+
     this.loopHelper.addLoop('recalulateLoop', () => {
       if (this.isEnabled) {
         this.recalculateTargets();

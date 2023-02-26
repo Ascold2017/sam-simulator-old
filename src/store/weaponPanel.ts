@@ -1,6 +1,5 @@
 import { defineStore } from "pinia";
 import { useSupplyPanelStore } from "@/store/supplyPanel";
-import SAMissile from "@/core/SAMissile";
 import { useTargetRadarStore } from "./targetRadar";
 export enum MissileStates {
   READY = "READY",
@@ -39,7 +38,6 @@ export const useWeaponPanelStore = defineStore("weaponPanel", {
     currentMissileId: null as number | null,
     isMissileReady: false,
     detonatorMode: DetonatorModes.AUTO,
-    launchedMissiles: [] as SAMissile[],
   }),
 
   getters: {
@@ -93,6 +91,12 @@ export const useWeaponPanelStore = defineStore("weaponPanel", {
         !this.currentMissile.isLaunched &&
         this.isMissileReady
       ) {
+        //@ts-ignore
+        this.engine.launchMissile(targetRadar.capturedTargetId)
+        this.missiles = this.missiles.map((m) =>
+          m.id === this.currentMissileId ? { ...m, isLaunched: true } : m
+        );
+        /*
         const missile = new SAMissile(
           this.currentMissileId!,
           this.currentMissile.maxDistance,
@@ -108,19 +112,10 @@ export const useWeaponPanelStore = defineStore("weaponPanel", {
         this.missiles = this.missiles.map((m) =>
           m.id === this.currentMissileId ? { ...m, isLaunched: true } : m
         );
+        */
         this.isMissileReady = false;
       }
     },
 
-    resetMissile() {
-      if (this.currentMissileId) {
-        this.launchedMissiles.find((m) =>
-          m.identifier === this.currentMissileId
-        )?.destroyMissile();
-        this.launchedMissiles = this.launchedMissiles.filter((m) =>
-          m.identifier !== this.currentMissileId
-        );
-      }
-    },
   },
 });

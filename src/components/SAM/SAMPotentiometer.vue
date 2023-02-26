@@ -43,7 +43,7 @@
 </template>
 
 <script setup lang="ts">
-import Sounds from '@/core/Sounds'
+import Sounds from '@/SAM/Sounds'
 import { ref } from 'vue';
 const emit = defineEmits<{ (e: 'change', v: number): void }>()
 const props = defineProps<{ x: number; y: number; small?: boolean; big?: boolean; deltaValue?: number }>();

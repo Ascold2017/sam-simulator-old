@@ -1,7 +1,6 @@
-import type FlightObject from "@/core/FlightObject";
 import SAM_PARAMS from "@/const/SAM_PARAMS";
-import { type IRecognizedTargets } from "@/core/SAM";
-import Vector3D from "@/core/Vector3D";
+import type { IRecognizedFlightObjects } from "@/SAM/SAM";
+import Vector3D from "@/SAM/Vector3D";
 import { defineStore } from "pinia";
 import { CaptureModes, useCapturePanelStore } from "./capturePanel";
 import { useMainRadarStore, ViewModes } from "./mainRadarPanel";
@@ -13,7 +12,7 @@ export const useTargetRadarStore = defineStore("targetRadar", {
     capturedTargetId: null as null | string,
     isCapturedDirection: false,
     isCapturedDistance: false,
-    capturedTarget: null as IRecognizedTargets | null,
+    capturedTarget: null as IRecognizedFlightObjects | null,
     targetCursorAngle: 1.5 * Math.PI,
     targetCursorDistance: 30,
     targetCursorElevation: 0,
@@ -124,7 +123,7 @@ export const useTargetRadarStore = defineStore("targetRadar", {
       }
 
       // @ts-ignore
-      const capturedTargetId = this.sam.getTargetOnAzimutAndElevation(
+      const capturedTargetId = this.engine.getTargetOnAzimutAndElevation(
         this.targetCursorAngle,
         this.targetCursorElevation,
       );
@@ -142,7 +141,7 @@ export const useTargetRadarStore = defineStore("targetRadar", {
         return;
       }
       // @ts-ignore
-      const capturedTargetId = this.sam.getTargetOnAzimutElevationAndDistance(
+      const capturedTargetId = this.engine.getTargetOnAzimutElevationAndDistance(
         this.targetCursorAngle,
         this.targetCursorElevation,
         this.targetCursorDistance,
@@ -156,7 +155,7 @@ export const useTargetRadarStore = defineStore("targetRadar", {
       const capturePanel = useCapturePanelStore();
       if (capturePanel.captureMode === CaptureModes.Designation) {
         // @ts-ignore
-        const designation = this.sam.getFlightObjectDesignation(targetId);
+        const designation = this.engine.getFlightObjectDesignation(targetId);
         if (designation) {
           this.targetCursorAngle = designation.azimut;
           this.targetCursorElevation = designation.elevation;

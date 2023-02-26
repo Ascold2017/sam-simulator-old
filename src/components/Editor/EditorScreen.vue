@@ -10,7 +10,7 @@
           <v-card-text>
             <h3 class="mb-3">Нанесите точки полета и задайте параметры цели</h3>
             <v-select label="Тип обьекта" :items="FLIGHT_OBJECT_TYPES" item-title="name" item-value="id"
-              :model-value="flightObjectType!" @update:model-value="setFlightObjectType" />
+              :model-value="flightObjectType" @update:model-value="setFlightObjectType" />
             <v-text-field label="Запустить через, сек" :model-value="timeOffset" @update:model-value="setTimeOffset" />
             <h4>Машрут | Дальность полета: {{ flightParams.range }} км | Полетное время: {{ flightParams.time }} мин
             </h4>
@@ -86,10 +86,10 @@
 <script setup lang="ts">
 import FLIGHT_OBJECT_TYPES from '@/const/FLIGHT_OBJECT_TYPES';
 import Editor from '@/components/Editor/Editor';
-import type SAM from '@/classes/SAM';
 import { onMounted, ref, inject, computed } from 'vue';
+import type Engine from '@/SAM/Engine';
 
-const sam = inject<SAM>('sam')
+const engine = inject<Engine>('engine')
 const editorRef = ref<HTMLCanvasElement | null>(null);
 
 const editor = ref<Editor | null>(null);
@@ -133,10 +133,7 @@ const importFlightMissions = (e: Event) => {
   editor.value?.importFlightMissions(file);
 }
 const startFlightMissions = () => {
-  editor.value?.startFlightMissions(flightObject => {
-    flightObject.launch()
-    sam?.addFlightObject(flightObject)
-  });
+  engine?.startMission(editor.value!.getFlightMissions())
 }
 function addFlightMission() {
   if (points.value.length < 2) return

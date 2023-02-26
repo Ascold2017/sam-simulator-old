@@ -1,17 +1,17 @@
-import type FlightObject from "@/core/FlightObject";
+import type Enemy from "@/SAM/FlightObject/Enemy";
 import { defineStore } from "pinia";
 
 export const useBipStore = defineStore("bip", {
   state: () => ({
-    flightObjects: [] as FlightObject[],
+    flightObjects: [] as Enemy[],
     wayPoints: {} as Record<string, { x: number, y: number }[]>
   }),
 
   actions: {
-    updateBip(flightObjects: FlightObject[]) {
+    updateBip(flightObjects: Enemy[]) {
       this.flightObjects = [...flightObjects];
       this.wayPoints = flightObjects.reduce((acc, fo) => {
-        const updatedWayPoints = this.wayPoints[fo.identifier!] || [];
+        const updatedWayPoints = this.wayPoints[fo.name!] || [];
         const lastWayPoint = updatedWayPoints[updatedWayPoints.length -1]
         if ((lastWayPoint && fo.currentPoint.x !== lastWayPoint.x && fo.currentPoint.y !== lastWayPoint.y) || !lastWayPoint) {
           updatedWayPoints.push({ x: fo.currentPoint.x, y: fo.currentPoint.y })

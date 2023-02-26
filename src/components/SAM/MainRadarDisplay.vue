@@ -143,7 +143,7 @@ const refreshTargets = () => {
 
         return {
           radius: target.distance * mainRadar.scale,
-          rotation: target.azimut * (180 / Math.PI) - canvasTargetArcAngle / 2,
+          rotation: target.azimuth * (180 / Math.PI) - canvasTargetArcAngle / 2,
           angle: canvasTargetArcAngle,
           strokeWidth: targetSpotDistance,
           alpha: target.visibilityK * targetRadarStore.brightness

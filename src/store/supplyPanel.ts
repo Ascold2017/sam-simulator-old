@@ -1,4 +1,4 @@
-import Sounds from "@/core/Sounds";
+import Sounds from "@/SAM/Sounds";
 import { defineStore } from "pinia";
 import { useCapturePanelStore } from "./capturePanel";
 import { useMainRadarStore } from "./mainRadarPanel";
@@ -30,13 +30,14 @@ export const useSupplyPanelStore = defineStore("supply", {
         const i = setTimeout(() => {
           this.isEnabledPower = true;
           //@ts-ignore
-          this.sam.setIsEnabled(true);
+          this.engine.setIsEnabled(true);
           clearTimeout(i);
         }, 3000);
       } else {
         Sounds.stopEngine();
+        this.isEnabledPower = false;
         //@ts-ignore
-        this.sam.setIsEnabled(false);
+        this.engine.setIsEnabled(false);
         this.setDefaultValues();
         mainRadar.setDefaultValues();
         capturePanel.setDefaultValues();

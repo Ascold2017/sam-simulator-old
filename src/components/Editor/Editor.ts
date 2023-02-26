@@ -1,13 +1,8 @@
-import FlightObject from "../../core/FlightObject";
 import SAM_PARAMS from "@/const/SAM_PARAMS";
 import FLIGHT_OBJECT_TYPES from "@/const/FLIGHT_OBJECT_TYPES";
-interface IPoint {
-  x: number;
-  y: number;
-  z: number;
-  v: number;
-}
-interface IFlightMission {
+import type { IPoint } from "@/SAM/Engine";
+
+export interface IFlightMission {
   points: IPoint[];
   rcs: number;
   time: number;
@@ -202,6 +197,10 @@ export default class Editor {
     this._flightMissions = JSON.parse(string);
   }
 
+  getFlightMissions() {
+    return  [...this._flightMissions];
+  }
+/*
   startFlightMissions(listener: (arg0: FlightObject) => void) {
     const startTime = Date.now();
     let flightMissions = [...this._flightMissions];
@@ -229,4 +228,5 @@ export default class Editor {
       });
     });
   }
+  */
 }

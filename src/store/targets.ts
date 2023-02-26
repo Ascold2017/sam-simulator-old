@@ -1,24 +1,22 @@
-import {
-  type IFlightMissiles,
-  type IRecognizedTargets,
-} from "@/core/SAM";
+import type {
+  IFlightMissiles,
+  IRecognizedFlightObjects,
+} from "@/SAM/SAM";
 import SAM_PARAMS from "@/const/SAM_PARAMS";
 import { defineStore } from "pinia";
-import { useMainRadarStore } from "./mainRadarPanel";
 import { useTargetRadarStore } from "./targetRadar";
-import { MissileStates, useWeaponPanelStore } from "./weaponPanel";
 
 export const useTargetsStore = defineStore("targets", {
   state: () => ({
-    targets: [] as IRecognizedTargets[],
+    targets: [] as IRecognizedFlightObjects[],
     missiles: [] as IFlightMissiles[],
   }),
   getters: {
-    targetsInRay(): IRecognizedTargets[] {
+    targetsInRay(): IRecognizedFlightObjects[] {
       const targetRadar = useTargetRadarStore();
       return this.targets.filter((target) => {
         const intoAzimut =
-          Math.abs(target.azimut - targetRadar.targetCursorAngle) <
+          Math.abs(target.azimuth - targetRadar.targetCursorAngle) <
             SAM_PARAMS.TARGET_RADAR_RAY_WIDTH / 2;
         const intoElevation =
           Math.abs(target.elevation - targetRadar.targetCursorElevation) <
@@ -28,7 +26,7 @@ export const useTargetsStore = defineStore("targets", {
     },
   },
   actions: {
-    setTargets(targets: IRecognizedTargets[], missiles: IFlightMissiles[]) {
+    setTargets(targets: IRecognizedFlightObjects[], missiles: IFlightMissiles[]) {
       const targetRadar = useTargetRadarStore();
       this.targets = targets;
       this.missiles = missiles;
@@ -36,7 +34,7 @@ export const useTargetsStore = defineStore("targets", {
         t.identifier === targetRadar.capturedTargetId
       ) || null;
       if (targetRadar.isCapturedDirection && targetRadar.capturedTarget) {
-        targetRadar.targetCursorAngle = targetRadar.capturedTarget.azimut;
+        targetRadar.targetCursorAngle = targetRadar.capturedTarget.azimuth;
         targetRadar.targetCursorElevation =
           targetRadar.capturedTarget.elevation;
       }
