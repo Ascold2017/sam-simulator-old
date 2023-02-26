@@ -1,6 +1,5 @@
 import Sounds from "@/SAM/Sounds";
 import { defineStore } from "pinia";
-import { useCapturePanelStore } from "./capturePanel";
 import { useMainRadarStore } from "./mainRadarPanel";
 import { useTargetRadarStore } from "./targetRadar";
 import { useTargetsStore } from "./targets";
@@ -22,7 +21,6 @@ export const useSupplyPanelStore = defineStore("supply", {
     setEnabledPower(value: boolean) {
       const mainRadar = useMainRadarStore();
       const targetRadar = useTargetRadarStore();
-      const capturePanel = useCapturePanelStore();
       const targets = useTargetsStore()
       const weaponPanel = useWeaponPanelStore()
       if (value) {
@@ -40,7 +38,6 @@ export const useSupplyPanelStore = defineStore("supply", {
         this.engine.setIsEnabled(false);
         this.setDefaultValues();
         mainRadar.setDefaultValues();
-        capturePanel.setDefaultValues();
         targetRadar.setDefaultValues();
         targets.setTargets([], []);
         weaponPanel.setDefaultValues()

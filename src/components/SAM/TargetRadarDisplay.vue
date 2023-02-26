@@ -76,7 +76,7 @@
         points: [canvasDistanceWindow.end, 0, canvasDistanceWindow.end, canvasHeight],
         offsetY: canvasHeight/2
       }" />
-      <vk-group v-if="!targetRadarStore.isEquivalent">
+      <vk-group>
         <!-- Targets -->
         <vk-rect v-for="canvasTarget in canvasTargets" :config="{
           x: canvasTarget.x,

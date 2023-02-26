@@ -1,8 +1,7 @@
 import SAM_PARAMS from "@/const/SAM_PARAMS";
-import type { IRecognizedFlightObjects } from "@/SAM/SAM";
+import type { IRecognizedFlightObject } from "@/SAM/SAM";
 import Vector3D from "@/SAM/Vector3D";
 import { defineStore } from "pinia";
-import { CaptureModes, useCapturePanelStore } from "./capturePanel";
 import { useMainRadarStore, ViewModes } from "./mainRadarPanel";
 import { useSupplyPanelStore } from "./supplyPanel";
 import { useWeaponPanelStore } from "./weaponPanel";
@@ -12,11 +11,10 @@ export const useTargetRadarStore = defineStore("targetRadar", {
     capturedTargetId: null as null | string,
     isCapturedDirection: false,
     isCapturedDistance: false,
-    capturedTarget: null as IRecognizedFlightObjects | null,
+    capturedTarget: null as IRecognizedFlightObject | null,
     targetCursorAngle: 1.5 * Math.PI,
     targetCursorDistance: 30,
     targetCursorElevation: 0,
-    isEquivalent: true,
     gain: SAM_PARAMS.RADAR_SPOT_AZIMUT_GAIN,
     brightness: 1,
   }),
@@ -65,7 +63,6 @@ export const useTargetRadarStore = defineStore("targetRadar", {
       this.targetCursorAngle = 1.5 * Math.PI;
       this.targetCursorDistance = 30;
       this.targetCursorElevation = 0;
-      this.isEquivalent = true;
       this.gain = SAM_PARAMS.RADAR_SPOT_AZIMUT_GAIN;
       this.brightness = 1;
     },
@@ -100,9 +97,6 @@ export const useTargetRadarStore = defineStore("targetRadar", {
         return;
       }
       this.targetCursorDistance += value;
-    },
-    setEquivalent(value: boolean) {
-      this.isEquivalent = value;
     },
     incrementGain(value: number) {
       if (this.gain + value <= 0) return;
@@ -149,20 +143,6 @@ export const useTargetRadarStore = defineStore("targetRadar", {
 
       this.isCapturedDistance = !!capturedTargetId;
       capturedTargetId && (this.capturedTargetId = capturedTargetId);
-    },
-
-    captureTargetByDesignation(targetId: string) {
-      const capturePanel = useCapturePanelStore();
-      if (capturePanel.captureMode === CaptureModes.Designation) {
-        // @ts-ignore
-        const designation = this.engine.getFlightObjectDesignation(targetId);
-        if (designation) {
-          this.targetCursorAngle = designation.azimut;
-          this.targetCursorElevation = designation.elevation;
-          this.targetCursorDistance = designation.distance;
-        }
-       
-      }
     },
 
     resetCaptureAll() {

@@ -1,5 +1,5 @@
 <template>
-  <vk-group :config="{ x: 810, y: 190 }">
+  <vk-group :config="{ x: 810, y: 350 }">
     <vk-rect :config="{
       name: 'panelDistance',
       x: 0,
@@ -29,7 +29,7 @@
         fontSize: 9,
         fill: 'rgb(150, 249, 123)',
       }" />
-      <vk-group v-if="supplyPanel.isEnabledTargetRadarTransmitter && !targetRadarStore.isEquivalent">
+      <vk-group v-if="supplyPanel.isEnabledTargetRadarTransmitter">
         <!-- Targets on max distance range track -->
         <vk-line v-for="canvasTarget in canvasTargets" :config="{
           points: [
@@ -119,7 +119,7 @@
     </vk-group>
 
     <!-- capturing site -->
-    <vk-group :config="{ x: (canvasWidth + paddingX + 20) / 2 + canvasCaptureWidth / 2, y: ( canvasHeight/2 + paddingY + 20) }">
+    <vk-group  v-if="supplyPanel.isEnabledPower" :config="{ x: (canvasWidth + paddingX + 20) / 2 + canvasCaptureWidth / 2, y: ( canvasHeight/2 + paddingY + 20) }">
       <vk-line :config="{
         points: [
           0, canvasHeight / 4 + paddingY,

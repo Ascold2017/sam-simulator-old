@@ -8,16 +8,6 @@ export enum MissileStates {
   RESET = "RESET",
 }
 
-export enum DetonatorModes {
-  AUTO = "AUTO",
-  ON_2_SEC = "ON_2_SEC",
-}
-
-export enum TrackingModes {
-  THREE_POINTS = 'THREE_POINTS',
-  HALF_STRAIGHTENING = 'HALF_STRAIGHTENING'
-}
-
 interface IMissile {
   id: number;
   isLaunched: boolean;
@@ -34,10 +24,8 @@ export const useWeaponPanelStore = defineStore("weaponPanel", {
       velocity: 1200,
       maxDistance: 50,
     })) as IMissile[],
-    trackingMode: TrackingModes.THREE_POINTS,
     currentMissileId: null as number | null,
     isMissileReady: false,
-    detonatorMode: DetonatorModes.AUTO,
   }),
 
   getters: {
@@ -57,16 +45,6 @@ export const useWeaponPanelStore = defineStore("weaponPanel", {
       }));
       this.currentMissileId = null;
       this.isMissileReady = false;
-      this.detonatorMode = DetonatorModes.AUTO;
-    },
-    setTrackingMode(mode: TrackingModes) {
-      this.trackingMode = mode
-    },
-    setDetonatorMode(mode: DetonatorModes) {
-      const supplyPanel = useSupplyPanelStore();
-      if (!supplyPanel.isEnabledPower) return;
-
-      this.detonatorMode = mode;
     },
     selectMissile(missileId: number) {
       const supplyPanel = useSupplyPanelStore();
@@ -96,23 +74,7 @@ export const useWeaponPanelStore = defineStore("weaponPanel", {
         this.missiles = this.missiles.map((m) =>
           m.id === this.currentMissileId ? { ...m, isLaunched: true } : m
         );
-        /*
-        const missile = new SAMissile(
-          this.currentMissileId!,
-          this.currentMissile.maxDistance,
-          this.currentMissile.velocity,
-          { x: 0.2, y: 0.2, z: 0.025 },
-          //@ts-ignore
-          this.sam.getFlightObject(targetRadar.capturedTargetId),
-        );
-        missile.launch();
-        //@ts-ignore
-        this.sam.addMissile(missile);
-        this.launchedMissiles.push(missile);
-        this.missiles = this.missiles.map((m) =>
-          m.id === this.currentMissileId ? { ...m, isLaunched: true } : m
-        );
-        */
+        
         this.isMissileReady = false;
       }
     },

@@ -3,8 +3,6 @@ import { defineStore } from "pinia";
 export enum ViewModes {
   MainRadar = "MainRadar",
   TargetRadar = 'TargetRadar',
-  Television = 'Television',
-  BIP = "BIP",
   LOGS = "LOGS",
 }
 export const useMainRadarStore = defineStore("mainRadar", {

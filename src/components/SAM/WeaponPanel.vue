@@ -1,7 +1,7 @@
 <template>
   <vk-group :config="{
     x: 810,
-    y: 630,
+    y: 0,
   }">
     <vk-rect :config="{
       name: 'panelWeapon',
@@ -94,66 +94,14 @@
       
       <SAMButton :x="120" :y="0" name="launch" label="ПУСК" :value="false" color="red" @click="weaponPanel.launchMissile" />
 
-      <vk-text :config="{
-        x: 0,
-        y: 0,
-        height: 40,
-        text: 'Наведение',
-        fontFamily: 'Russo One, sans-serif',
-        fill: '#181818',
-        fontSize: 12,
-      }" />
       
-      <SAMButton
-        :x="0" :y="20"
-        small
-        name="threePoints"
-        label="3-Т"
-        :value="weaponPanel.trackingMode === TrackingModes.THREE_POINTS"
-        @click="weaponPanel.setTrackingMode(TrackingModes.THREE_POINTS)"
-      />
-       <SAMButton
-        :x="45" :y="20"
-        small
-        name="threePoints"
-        label="1/2"
-        :value="weaponPanel.trackingMode === TrackingModes.HALF_STRAIGHTENING"
-        @click="weaponPanel.setTrackingMode(TrackingModes.HALF_STRAIGHTENING)"
-      />
-
-      <vk-text :config="{
-        x: 0,
-        y: 65,
-        height: 40,
-        text: 'Взрыватель',
-        fontFamily: 'Russo One, sans-serif',
-        fill: '#181818',
-        fontSize: 12,
-      }" />
-      
-      <SAMButton
-        :x="0" :y="85"
-        small
-        name="auto"
-        label="Авто"
-        :value="weaponPanel.detonatorMode === DetonatorModes.AUTO"
-        @click="weaponPanel.setDetonatorMode(DetonatorModes.AUTO)"
-      />
-       <SAMButton
-        :x="45" :y="85"
-        small
-        name="2sec"
-        label="2 сек"
-        :value="weaponPanel.detonatorMode === DetonatorModes.ON_2_SEC"
-        @click="weaponPanel.setDetonatorMode(DetonatorModes.ON_2_SEC)"
-      />
     </vk-group>
   </vk-group>
 </template>
 
 <script setup lang="ts">
 import { useTargetRadarStore } from "@/store/targetRadar";
-import { useWeaponPanelStore, DetonatorModes, MissileStates, TrackingModes } from "@/store/weaponPanel";
+import { useWeaponPanelStore } from "@/store/weaponPanel";
 import { computed } from "@vue/reactivity";
 import SAMButton from "./SAMButton.vue";
 

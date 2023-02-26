@@ -38,13 +38,21 @@
       }" />
         <SAMPotentiometer :x="5" :y="30" :delta-value="50" @change="targetRadar.incrementGain" />
     </vk-group>
-
-    <SAMButton :x="730" :y="250" name="bipMode" :value="mainRadar.viewMode === ViewModes.BIP" label="БИП"
-      @click="mainRadar.setViewMode(ViewModes.BIP)" />
     <SAMButton :x="730" :y="315" name="mainRadarMode" :value="mainRadar.viewMode === ViewModes.MainRadar" label="СОЦ"
       @click="mainRadar.setViewMode(ViewModes.MainRadar)" />
     <SAMButton :x="730" :y="380" name="targetRadarMode" :value="mainRadar.viewMode === ViewModes.TargetRadar"
       label="ССЦ" @click="mainRadar.setViewMode(ViewModes.TargetRadar)" />
+
+      <SAMButton :x="730" :y="590" name="captureDir" :value="targetRadar.isCapturedDirection" label="АС ϕ"
+      @click="targetRadar.captureByDirection" />
+      <SAMButton
+        label="Сброс"
+        :x="730"
+        :y="660"
+        name="asc"
+        :value="!targetRadar.isCapturedAll"
+        @click="targetRadar.resetCaptureAll"
+      />
   </vk-group>
 </template>
 

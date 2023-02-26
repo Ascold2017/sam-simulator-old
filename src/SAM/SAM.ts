@@ -3,7 +3,7 @@ import Engine from "./Engine";
 import type BaseFlightObject from "./FlightObject/BaseFlightObject";
 import type Enemy from "./FlightObject/Enemy";
 
-export interface IRecognizedFlightObjects {
+export interface IRecognizedFlightObject {
     identifier: string;
     distance: number;
     azimuth: number;
@@ -19,20 +19,20 @@ export interface IRecognizedFlightObjects {
     visibilityK: number;
 }
 
-export interface IFlightMissiles {
-    identifier: number;
+export interface IFlightMissile {
+    identifier: string;
     x: number;
     y: number;
     z: number;
     velocity: number;
-  }
+}
 
 
 export default class SAM {
-   
+
 
     recaclulateRecognizedFlightObjects(flightObjects: Enemy[]) {
-        const recognizedFlightObjects: IRecognizedFlightObjects[] = [];
+        const recognizedFlightObjects: IRecognizedFlightObject[] = [];
         for (const flightObject of flightObjects) {
 
             // Distance from SNR to target
