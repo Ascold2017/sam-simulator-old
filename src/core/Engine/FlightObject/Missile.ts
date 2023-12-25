@@ -1,6 +1,6 @@
 import SAM_PARAMS from "@/const/SAM_PARAMS";
 import type Engine from "../Engine";
-import Vector3D from "../Vector3D";
+import Vector3D from "../../Vector3D";
 import BaseFlightObject from "./BaseFlightObject";
 import type Enemy from "./Enemy";
 
@@ -16,7 +16,7 @@ export default class Missile extends BaseFlightObject {
     target: Enemy,
   ) {
     const name = `Missile-${+new Date()}`
-    super(engine, name);
+    super(engine, name, 1);
     this.target = target;
     this.maxDistance = SAM_PARAMS.MISSILE_MAX_DISTANCE;
     this.killRadius = SAM_PARAMS.MISSILE_KILL_RADIUS;
@@ -24,10 +24,10 @@ export default class Missile extends BaseFlightObject {
   }
 
   update(time: number): void {
-    const dTime = (time - this.timeInAir) / 1000;
+    const dTime = (time - this.timeInAir);
     super.update(time);
     if (!this.target) return this.destroy();
-    const dFlightDistance = dTime * this.velocity / 1000;
+    const dFlightDistance = dTime * this.velocity;
     this.traveledDistance += dFlightDistance;
 
     const targetVector = new Vector3D(this.target.getCurrentPoint());
@@ -61,8 +61,9 @@ export default class Missile extends BaseFlightObject {
     const b = -2 * prevMissileVector.dot(targetVector);
     const c = prevMissileVector.dot(prevMissileVector) - distance ** 2;
     const d = b ** 2 - 4 * a * c;
-    const t1 = (-b - Math.sqrt(d >= 0 ? d : 0)) / (2 * a);
-    const t2 = (-b + Math.sqrt(d >= 0 ? d : 0)) / (2 * a);
+    const sqrt = Math.sqrt(d >= 0 ? d : 0);
+    const t1 = (-b - sqrt) / (2 * a);
+    const t2 = (-b + sqrt) / (2 * a);
     return targetVector.scale(t1 > t2 ? t1 : t2);
   }
   

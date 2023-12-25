@@ -12,12 +12,10 @@
 <script setup lang="ts">
 import { inject, onMounted, ref } from 'vue'
 import { useTargetsStore } from '@/store/targets';
-import type { Emitter, EventType } from 'mitt';
 import AppMenu from '@/components/AppMenu.vue'
 import SAMScreen from '@/components/SAM/SAM.vue';
 import EditorScreen from '@/components/Editor/EditorScreen.vue'
 import MISSIONS from './const/MISSIONS';
-import type { IFlightMissile, IRecognizedFlightObject } from './SAM/SAM';
 const editorRef = ref()
 
 enum ScreensEnum {
@@ -30,12 +28,7 @@ const openScreen = (screen: string) => activeScreen.value = screen as ScreensEnu
 const selectMission = (missionId: number) => {
   editorRef.value.loadMission(MISSIONS.find(m => m.id === missionId)!.data)
 }
-const samEventBus = inject<Emitter<Record<EventType, any>>>('samEventBus');
-const targetsStore = useTargetsStore()
 
-onMounted(() => {
-  samEventBus!.on('update', (e: { targets: IRecognizedFlightObject[],  missiles: IFlightMissile[] }) => targetsStore.setTargets(e.targets, e.missiles))
-});
 </script>
 
 <style>

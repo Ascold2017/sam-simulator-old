@@ -1,6 +1,6 @@
 import SAM_PARAMS from "@/const/SAM_PARAMS";
 import type { IRecognizedFlightObject } from "@/SAM/SAM";
-import Vector3D from "@/SAM/Vector3D";
+import Vector3D from "@/core/Vector3D";
 import { defineStore } from "pinia";
 import { useMainRadarStore, ViewModes } from "./mainRadarPanel";
 import { useSupplyPanelStore } from "./supplyPanel";

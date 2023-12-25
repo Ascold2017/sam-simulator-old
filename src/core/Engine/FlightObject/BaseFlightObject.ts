@@ -2,18 +2,26 @@ import type { IPoint } from "../Engine";
 import type Engine from "../Engine";
 
 export default class BaseFlightObject {
-    readonly name: string;
+    readonly id: string;
+    public visibilityK: number;
     protected currentPoint: IPoint = { x: 0, y: 0, z: 0, v: 0 };
+    protected currentRotation: number = 0;
     protected isDestroyed = false;
     protected timeInAir = 0;
     protected readonly engine: Engine;
-    constructor(engine: Engine, name: string) {
-      this.name = name;
+
+    constructor(engine: Engine, id: string, visibilityK: number) {
+      this.id = id;
       this.engine = engine;
+      this.visibilityK = visibilityK;
     }
   
     getCurrentPoint() {
       return { ...this.currentPoint };
+    }
+
+    getCurrentRotation() {
+      return this.currentRotation;
     }
     
     update(time: number) {
@@ -21,6 +29,7 @@ export default class BaseFlightObject {
     }
   
     destroy() {
-      this.engine.removeFlightObject(this.name!);
+      this.isDestroyed = true;
+      this.engine.removeFlightObject(this.id);
     }
   }

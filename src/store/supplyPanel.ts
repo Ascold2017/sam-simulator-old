@@ -1,4 +1,4 @@
-import Sounds from "@/SAM/Sounds";
+import Sounds from "@/core/Sounds";
 import { defineStore } from "pinia";
 import { useMainRadarStore } from "./mainRadarPanel";
 import { useTargetRadarStore } from "./targetRadar";
