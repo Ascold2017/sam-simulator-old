@@ -9,10 +9,10 @@ export class SAM {
     private detectedFlightObjects: DetectedFlightObject[] = [];
     constructor(engine: Engine) {
         this.engine = engine;
-        this.engine.addFPSLoop("updateRadar", this.updateRadar);
+        this.engine.addFPSLoop("updateRadar", () => this.updateRadar);
     }
 
-    private updateRadar(delta: number) {
+    private updateRadar() {
         this.detectedFlightObjects = this.engine.getFlightObjects().map(fo => new DetectedFlightObject(fo));
     }
 

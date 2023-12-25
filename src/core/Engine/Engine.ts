@@ -26,7 +26,7 @@ export default class Engine extends LoopEngine {
 
     public addFlightObject(flightObject: BaseFlightObject) {
         this.flightObjects.push(flightObject);
-        this.addFPSLoop(flightObject.id, flightObject.update);
+        this.addFPSLoop(flightObject.id, (delta) => flightObject.update(delta));
     }
 
     public removeFlightObject(id: string) {
