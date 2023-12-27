@@ -3,7 +3,7 @@
     <div class="d-flex justify-center">
       <vk-stage :config="{ width: 1200, height: 660 }">
         <vk-layer>
-          <TopPanel />
+          <ControlPanel />
           <MainRadarPanel />
         </vk-layer>
         <vk-layer>
@@ -17,7 +17,6 @@
 
 <script setup lang="ts">
 import MainRadarPanel from './MainRadarPanel.vue';
-import TopPanel from './TopPanel.vue';
+import ControlPanel from './ControlPanel.vue';
 import MainRadarDisplay from './MainRadarDisplay.vue';
-
 </script>

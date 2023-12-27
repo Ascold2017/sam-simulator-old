@@ -1,10 +1,12 @@
+import DetectedRadarObject from "@/core/SAM/RadarObject/DetectedRadarObject";
 import Sounds from "@/core/Sounds";
 import { defineStore } from "pinia";
 
 
 export const useMainStore = defineStore('mainStore', {
   state: () => ({
-    isEnabled: false
+    isEnabled: false,
+    currentTargetIndex: 0
   }),
   actions: {
     setIsEnabled(value: boolean) {
@@ -22,6 +24,16 @@ export const useMainStore = defineStore('mainStore', {
         //@ts-ignore
         this.sam.setIsEnabled(false);
       }
+    },
+    seekTarget() {
+      this.currentTargetIndex++;
+      // @ts-ignore
+      if (this.currentTargetIndex >= this.sam!.getRadarObjects().filter(fo => fo instanceof DetectedRadarObject).length) {
+        this.currentTargetIndex = 0;
+      }
+    },
+    resetCurrentTarget() {
+      this.currentTargetIndex = 0;
     }
   }
 })

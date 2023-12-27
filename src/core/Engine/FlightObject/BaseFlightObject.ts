@@ -3,6 +3,7 @@ import type Engine from "../Engine";
 
 export default class BaseFlightObject {
     readonly id: string;
+    // TODO make visibilityK dynamic
     public visibilityK: number;
     protected currentPoint: IPoint = { x: 0, y: 0, z: 0, v: 0 };
     protected currentRotation: number = 0;

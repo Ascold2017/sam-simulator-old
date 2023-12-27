@@ -60,9 +60,10 @@
           y:  canvasObject.y + 310,
           innerRadius: 10,
           outerRadius: 10,
-          strokeWidth: 0.5,
+          strokeWidth: canvasObject.isCurrent ? 2 : 0.5,
+          dash: canvasObject.isCurrent ? [ 2, 2] : [],
           angle: 360,
-          stroke: 'rgb(150, 249, 123)'
+          stroke: canvasObject.isSelected ? 'red' : 'rgb(150, 249, 123)'
         }"/>
       </vk-group>
      
@@ -73,8 +74,13 @@
           text: targetObject.params,
           verticalAlign: 'middle',
           fontFamily: 'Russo One, sans-serif',
-          fill: 'rgb(150, 249, 123)',
+          fill: targetObject.isSelected ? 'red' : 'rgb(150, 249, 123)',
           fontSize: 9,
+        }" />
+        <vk-line v-if="targetObject.isCurrent" :config="{
+          points: [-2, 0, -2, 30],
+          stroke: 'white',
+          strokeWidth: 1
         }" />
       </vk-group>
 
@@ -102,9 +108,11 @@ interface ICanvasObject {
   alpha: number;
   isDetected: boolean;
   isEnemy: boolean;
+  isSelected: boolean;
+  isCurrent: boolean;
 };
 
-interface ITargetObject { params: string };
+interface ITargetObject { params: string, isCurrent: boolean, isSelected: boolean };
 
 const engine = inject<Engine>("engine");
 const sam = inject<SAM>("sam");
@@ -142,15 +150,19 @@ const targetObjects = ref<ITargetObject[]>([]);
       strokeWidth: targetSpotDistance,
       alpha: target.visibilityK * 1,
       isDetected: target instanceof DetectedRadarObject,
-      isEnemy: target instanceof DetectedRadarObject && !target.isMissile
+      isEnemy: target instanceof DetectedRadarObject && !target.isMissile,
+      isSelected: !!sam?.getSelectedObjects().find(so => so.target.id === target.id),
+      isCurrent: sam!.getRadarObjects().filter(fo => fo instanceof DetectedRadarObject).findIndex(fo => fo.id === target.id) === mainStore.currentTargetIndex
     }
   };
 const refreshTargets = () => {
   
   if (mainStore.isEnabled) {
     canvasObjects.value = sam!.getRadarObjects().map(convertFlightObjectToCanvasObject);
-    targetObjects.value = sam!.getRadarObjects().filter(fo => fo instanceof DetectedRadarObject).map(fo => ({
-      params: `|${fo.id}|\n|Azimuth: ${(fo.azimuth* (180 / Math.PI)).toFixed(1)}* |Elevation: ${(fo.elevation * (180 / Math.PI)).toFixed(1)}* |\n|D: ${(fo.distance / 1000).toFixed(1)}km |H: ${fo.height.toFixed(0)}m |V: ${fo.velocity}m/s |P: ${(fo.param / 1000).toFixed(1)}km`
+    targetObjects.value = sam!.getRadarObjects().filter(fo => fo instanceof DetectedRadarObject).map((fo, index) => ({
+      params: `|${fo.id}|\n|Azimuth: ${(fo.azimuth* (180 / Math.PI)).toFixed(1)}* |Elevation: ${(fo.elevation * (180 / Math.PI)).toFixed(1)}* |\n|D: ${(fo.distance / 1000).toFixed(1)}km |H: ${fo.height.toFixed(0)}m |V: ${fo.velocity}m/s |P: ${(fo.param / 1000).toFixed(1)}km`,
+      isCurrent: mainStore.currentTargetIndex === index,
+      isSelected: !!sam?.getSelectedObjects().find(so => so.target.id === fo.id)
     }))
   } else {
     canvasObjects.value = [];
@@ -164,4 +176,4 @@ onMounted(() => {
   })
 })
 
-</script>@/core/SAM/RadarObject/DetectedFlightObject
+</script>

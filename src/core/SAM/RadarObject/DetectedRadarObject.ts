@@ -1,4 +1,3 @@
-import SAM_PARAMS from "@/const/SAM_PARAMS";
 import type BaseFlightObject from "../../Engine/FlightObject/BaseFlightObject";
 import Missile from "../../Engine/FlightObject/Missile";
 import BaseRadarObject from "./BaseRadarObject";
@@ -19,5 +18,9 @@ export default class DetectedRadarObject extends BaseRadarObject {
 
     public getFlightObject(): BaseFlightObject {
         return this.flightObject;
+    }
+
+    static sortByVisibilityComparator(enemy1: BaseFlightObject, enemy2: BaseFlightObject): number {
+        return enemy1.visibilityK < enemy2.visibilityK ? 1 : -1;
     }
 }
