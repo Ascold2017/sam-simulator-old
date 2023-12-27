@@ -13,7 +13,6 @@
 
 <script setup lang="ts">
 import { inject, onMounted, ref } from 'vue'
-import { useTargetsStore } from '@/store/targets';
 import AppMenu from '@/components/AppMenu.vue'
 import SAMScreen from '@/components/SAM/SAM.vue';
 import EditorScreen from '@/components/Editor/EditorScreen.vue'

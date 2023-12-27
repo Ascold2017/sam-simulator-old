@@ -1,13 +1,13 @@
 <template>
   <vk-group :config="{
-    x: 0,
+    x: 890,
     y: 0,
   }">
     <vk-rect :config="{
       x: 0,
       y: 0,
-      width: 800,
-      height: 150,
+      width: 300,
+      height: 660,
       fill: 'grey', shadowBlur: 10, cornerRadius: 6,
     }" />
     <!-- Power -->
@@ -28,69 +28,14 @@
         y: 20,
         width: 20,
         height: 20,
-        fill: supplyPanel.isEnabledPower ? 'rgb(150, 249, 123)' : 'red',
+        fill: mainStore.isEnabled ? 'rgb(150, 249, 123)' : 'red',
         shadowBlur: 5
       }" />
-      <SAMButton label="Вкл" :x="0" :y="50" name="powerOn" :value="supplyPanel.isEnabledPower"
-        @click="supplyPanel.setEnabledPower(true)" />
-      <SAMButton label="Выкл" :x="65" :y="50" name="powerOff" :value="!supplyPanel.isEnabledPower"
-        @click="supplyPanel.setEnabledPower(false)" />
+      <SAMButton label="Вкл" :x="0" :y="50" name="powerOn" :value="!!mainStore.isEnabled"
+        @click="mainStore.setIsEnabled(true)" />
+      <SAMButton label="Выкл" :x="65" :y="50" name="powerOff" :value="!mainStore.isEnabled"
+        @click="mainStore.setIsEnabled(false)" />
     </vk-group>
-
-    <!-- SOC mechanization -->
-    <vk-group :config="{ x: 160, y: 20 }">
-      <vk-text :config="{
-        x: 0,
-        y: 10,
-        height: 20,
-        verticalAlign: 'middle',
-        text: 'Поиск',
-        fill: '#181818',
-        fontFamily: 'Russo One, sans-serif',
-        fontSize: 12
-      }" />
-      <vk-circle :config="{
-        name: 'rotationIndicator',
-        x: 95,
-        y: 20,
-        width: 20,
-        height: 20,
-        fill: supplyPanel.isEnabledMainRadar ? 'rgb(150, 249, 123)' : 'red',
-        shadowBlur: 5
-      }" />
-      <SAMButton label="Вкл" :x="0" :y="50" name="rotationOn" :value="supplyPanel.isEnabledMainRadar"
-        @click="supplyPanel.setEnablerMainRadar(true)" />
-      <SAMButton label="Выкл" :x="65" :y="50" name="rotationOff" :value="!supplyPanel.isEnabledMainRadar"
-        @click="supplyPanel.setEnablerMainRadar(false)" />
-    </vk-group>
-
-    <!-- SNR antenna -->
-    <vk-group :config="{ x: 300, y: 20 }">
-      <vk-text :config="{
-        x: 0,
-        y: 10,
-        height: 20,
-        verticalAlign: 'middle',
-        text: 'Передатчик',
-        fill: '#181818',
-        fontFamily: 'Russo One, sans-serif',
-        fontSize: 12
-      }" />
-      <vk-circle :config="{
-        name: 'targetRadarIndicator',
-        x: 95,
-        y: 20,
-        width: 20,
-        height: 20,
-        fill: supplyPanel.isEnabledTargetRadarTransmitter ? 'rgb(150, 249, 123)' : 'red',
-        shadowBlur: 5
-      }" />
-      <SAMButton label="Вкл" :x="0" :y="50" name="snrOn" :value="supplyPanel.isEnabledTargetRadarTransmitter"
-        @click="supplyPanel.setIsEnabledTargetRadarTransmitter(true)" />
-      <SAMButton label="Выкл" :x="65" :y="50" name="snrOff" :value="!supplyPanel.isEnabledTargetRadarTransmitter"
-        @click="supplyPanel.setIsEnabledTargetRadarTransmitter(false)" />
-    </vk-group>
-    
 
     <vk-rect :config="{
       x: 670,
@@ -115,10 +60,14 @@
 <script setup lang="ts">
 import { onMounted, ref } from "vue";
 import type Konva from "konva";
-import { useSupplyPanelStore } from '@/store/supplyPanel';
 import SAMButton from "./SAMButton.vue";
+import { inject } from "vue";
+import type { SAM } from "@/core/SAM/SAM";
+import { useMainStore } from "@/store/main";
 const clocksRef = ref();
-const supplyPanel = useSupplyPanelStore();
+const sam = inject<SAM>("sam");
+
+const mainStore = useMainStore();
 
 const drawClock = (ctx: CanvasRenderingContext2D, shape: Konva.Shape) => {
   shape.clearCache()
