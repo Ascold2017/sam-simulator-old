@@ -89,7 +89,8 @@ import { useMainStore } from '@/store/main';
 import { inject } from 'vue';
 import type Engine from '@/core/Engine/Engine';
 import type { SAM } from '@/core/SAM/SAM';
-import type DetectedFlightObject from '@/core/SAM/DetectedFlightObject';
+import type BaseRadarObject from '@/core/SAM/RadarObject/BaseRadarObject';
+import DetectedRadarObject from '@/core/SAM/RadarObject/DetectedRadarObject';
 
 interface ICanvasObject {
   x: number;
@@ -99,6 +100,7 @@ interface ICanvasObject {
   angle: number;
   rotation: number;
   alpha: number;
+  isDetected: boolean;
   isEnemy: boolean;
 };
 
@@ -128,7 +130,7 @@ const azimutLines = computed(() => {
 
 const canvasObjects = ref<ICanvasObject[]>([]);
 const targetObjects = ref<ITargetObject[]>([]);
-  const convertFlightObjectToCanvasObject = (target: DetectedFlightObject) => {
+  const convertFlightObjectToCanvasObject = (target: BaseRadarObject) => {
     const canvasTargetArcAngle = (target.size * 1000 * 180) / (target.distance * Math.PI) + SAM_PARAMS.RADAR_AZIMUT_DETECT_ACCURACY * 2;
     const targetSpotDistance = SAM_PARAMS.RADAR_DISTANCE_DETECT_ACCURACY / (scale * 2);
     return {
@@ -139,26 +141,15 @@ const targetObjects = ref<ITargetObject[]>([]);
       angle: canvasTargetArcAngle,
       strokeWidth: targetSpotDistance,
       alpha: target.visibilityK * 1,
-      isEnemy: !target.isMissile
+      isDetected: target instanceof DetectedRadarObject,
+      isEnemy: target instanceof DetectedRadarObject && !target.isMissile
     }
   };
 const refreshTargets = () => {
   
   if (mainStore.isEnabled) {
-    canvasObjects.value = [
-      ...sam!.getDetectedFlightObjects().filter(fo => fo.isVisible).map(convertFlightObjectToCanvasObject),
-      ...Array.from(Array(30)).map(() => ({
-        x: 0, y: 0,
-        radius: (SAM_PARAMS.MAX_DISTANCE / (scale * 2)) * Math.random(),
-        rotation: 360 * Math.random(),
-        angle: SAM_PARAMS.RADAR_AZIMUT_DETECT_ACCURACY * 2 + 1,
-        strokeWidth: 2 * Math.random(),
-        alpha: 2 * Math.random(),
-        isEnemy: false
-      }))
-    ];
-    targetObjects.value = sam!.getDetectedFlightObjects().filter(fo => fo.isVisible).map(fo => ({
-  
+    canvasObjects.value = sam!.getRadarObjects().map(convertFlightObjectToCanvasObject);
+    targetObjects.value = sam!.getRadarObjects().filter(fo => fo instanceof DetectedRadarObject).map(fo => ({
       params: `|${fo.id}|\n|Azimuth: ${(fo.azimuth* (180 / Math.PI)).toFixed(1)}* |Elevation: ${(fo.elevation * (180 / Math.PI)).toFixed(1)}* |\n|D: ${(fo.distance / 1000).toFixed(1)}km |H: ${fo.height.toFixed(0)}m |V: ${fo.velocity}m/s |P: ${(fo.param / 1000).toFixed(1)}km`
     }))
   } else {
@@ -173,4 +164,4 @@ onMounted(() => {
   })
 })
 
-</script>
+</script>@/core/SAM/RadarObject/DetectedFlightObject

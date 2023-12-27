@@ -1,36 +1,49 @@
+import SAM_PARAMS from "@/const/SAM_PARAMS";
 import type Engine from "../Engine/Engine";
-import type Enemy from "../Engine/FlightObject/Enemy";
+import Enemy from "../Engine/FlightObject/Enemy";
 import Missile from "../Engine/FlightObject/Missile";
 import Sounds from "../Sounds";
-import DetectedFlightObject from "./DetectedFlightObject";
+import type BaseRadarObject from "./RadarObject/BaseRadarObject";
+import DetectedRadarObject from "./RadarObject/DetectedRadarObject";
+import SnowRadarObject from "./RadarObject/SnowRadarObject";
+import UndetectedRadarObject from "./RadarObject/UndetectedRadarObject";
 
 export class SAM {
   public isEnabled = false;
   private engine: Engine;
-  private detectedFlightObjects: DetectedFlightObject[] = [];
+  private radarObjects: BaseRadarObject[] = [];
   constructor(engine: Engine) {
     this.engine = engine;
     this.engine.addFPSLoop("updateRadar", () => this.updateRadar());
   }
 
   private updateRadar() {
-    this.detectedFlightObjects = this.engine.getFlightObjects().map(fo => new DetectedFlightObject(fo));
+    const enemys = this.engine.getFlightObjects().filter(fo => fo instanceof Enemy);
+    const detectedEnemys = enemys.slice(0, SAM_PARAMS.RADAR_MAX_DETECT_COUNT - 1);
+    const undetectedEnemys = enemys.slice(SAM_PARAMS.RADAR_MAX_DETECT_COUNT);
+    const missiles = this.engine.getFlightObjects().filter(fo => fo instanceof Missile);
+    this.radarObjects = [
+      ...detectedEnemys.map(fo => new DetectedRadarObject(fo)).filter(fo => fo.isVisible),
+      ...undetectedEnemys.map(fo => new UndetectedRadarObject(fo)).filter(fo => fo.isVisible),
+      ...missiles.map(fo => new DetectedRadarObject(fo)),
+      ...Array.from(Array(50)).map(() => new SnowRadarObject())
+    ]
   }
 
   public setIsEnabled(value: boolean) {
     this.isEnabled = value;
   }
 
-  public getDetectedFlightObjects(): DetectedFlightObject[] {
-    return this.detectedFlightObjects.slice(0);
+  public getRadarObjects(): BaseRadarObject[] {
+    return this.radarObjects.slice(0);
   }
 
   public launchMissile(targetId: string) {
-    const target = this.detectedFlightObjects.find(dfo => dfo.id === targetId);
-    if (!target || (target && target.isMissile)) return;
-
-    Sounds.missileStart();
-    this.engine.addFlightObject(new Missile(this.engine, target.getFlightObject() as Enemy));
+    const target = this.radarObjects.find(dfo => dfo.id === targetId);
+    if (target && target instanceof DetectedRadarObject && !target.isMissile) {
+      Sounds.missileStart();
+      this.engine.addFlightObject(new Missile(this.engine, target.getFlightObject() as Enemy));
+    }
   }
 
   /*
