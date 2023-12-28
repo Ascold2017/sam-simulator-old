@@ -14,7 +14,7 @@
         <vk-group v-if="mainStore.isEnabled">
             <RadarIndicatorTarget v-for="radarObject in radarObjects" :scale="scale" :target="radarObject" />
             <RadarIndicatorInfo 
-                v-for="(targetObject, i) in radarObjects.filter(fo => fo instanceof DetectedRadarObject)"
+                v-for="(targetObject, i) in radarObjectjSyncronized.filter(fo => fo instanceof DetectedRadarObject)"
                 :index="i"
                 :config="{ x: 622, y: 0 }" :target="targetObject"
             />
@@ -33,6 +33,7 @@ import DetectedRadarObject from '@/core/SAM/RadarObject/DetectedRadarObject';
 import RadarLines from "@/components/SAM/MainRadarDisplay/RadarLines.vue";
 import RadarIndicatorTarget from './RadarIndicatorTarget.vue';
 import RadarIndicatorInfo from './RadarIndicatorInfo.vue';
+import SAM_PARAMS from '@/const/SAM_PARAMS';
 
 const engine = inject<Engine>("engine");
 const sam = inject<SAM>("sam");
@@ -41,11 +42,20 @@ const mainStore = useMainStore();
 const scale = 200;
 
 const radarObjects = ref<BaseRadarObject[]>([]);
+const radarObjectjSyncronized = ref<BaseRadarObject[]>([]);
 
 onMounted(() => {
-    engine?.addFPSLoop("mainRadarLoop", () => {
-        radarObjects.value = mainStore.isEnabled ? sam!.getRadarObjects() : []
+    engine?.addFPSLoop("mainRadarLoopSync", () => {
+        radarObjectjSyncronized.value = mainStore.isEnabled ? sam!.getRadarObjects() : []
     });
+    engine?.addFixedLoop("mainRadarLoop", () => {
+        radarObjects.value = mainStore.isEnabled ? sam!.getRadarObjects() : []
+    }, SAM_PARAMS.RADAR_UPDATE_INTERVAL);
+});
+
+onUnmounted(() => {
+    engine?.removeLoop("mainRadarLoopSync");
+    engine?.removeLoop("mainRadarLoop");
 })
 
 </script>

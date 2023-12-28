@@ -17,7 +17,7 @@
 
 <script setup lang="ts">
 import MainRadarPanel from './MainRadarPanel.vue';
-import ControlPanel from './ControlPanel.vue';
+import ControlPanel from './ControlPanel/Panel.vue';
 import MainRadarDisplay from './MainRadarDisplay/Display.vue';
 
 </script>
