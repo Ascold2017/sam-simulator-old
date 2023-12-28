@@ -11,11 +11,9 @@ export default class Missile extends BaseFlightObject {
   private readonly maxDistance;
   private readonly killRadius;
   private traveledDistance = 0;
-  private onDestroyMissile: () => void;
   constructor(
     engine: Engine,
     target: Enemy,
-    onDestroyMissile: () => void
   ) {
     const name = `Missile-${+new Date()}`
     super(engine, name, 1);
@@ -23,7 +21,6 @@ export default class Missile extends BaseFlightObject {
     this.maxDistance = SAM_PARAMS.MISSILE_MAX_DISTANCE;
     this.killRadius = SAM_PARAMS.MISSILE_KILL_RADIUS;
     this.velocity = SAM_PARAMS.MISSILE_VELOCITY;
-    this.onDestroyMissile = onDestroyMissile;
   }
 
   update(time: number): void {
@@ -38,26 +35,25 @@ export default class Missile extends BaseFlightObject {
     const targetDistance = targetVector.sub(prevMissileVector).r() as number;
     const currentPosition = this.calcMissilePosition(targetVector, prevMissileVector, targetDistance, dFlightDistance);;
     this.currentPoint = {
-        x: currentPosition.x() as number,
-        y: currentPosition.y() as number,
-        z: currentPosition.z() as number,
-        v: this.velocity,
+      x: currentPosition.x() as number,
+      y: currentPosition.y() as number,
+      z: currentPosition.z() as number,
+      v: this.velocity,
     }
 
     if (targetDistance <= this.killRadius) {
       this.target.kill();
       this.destroy();
-      this.onDestroyMissile();
+      return;
     }
     if (
       this.traveledDistance >= this.maxDistance
     ) {
-      
       this.destroy();
-      this.onDestroyMissile()
+      return;
     }
   }
-  
+
   private calcMissilePosition(targetVector: Vector3D, prevMissileVector: Vector3D, targetDistance: number, dFlightDistance: number) {
     const distance = dFlightDistance < targetDistance
       ? dFlightDistance
@@ -72,5 +68,4 @@ export default class Missile extends BaseFlightObject {
     const t2 = (-b + sqrt) / (2 * a);
     return targetVector.scale(t1 > t2 ? t1 : t2);
   }
-  
 }

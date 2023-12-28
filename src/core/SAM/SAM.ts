@@ -15,11 +15,12 @@ export class MissileChannel {
   constructor(id: number) {
     this.id = id;
   }
+  public set(target: DetectedRadarObject, missile: Missile) {
+    this.target = target;
+    this.missile = missile;
+  }
   public reset() {
     this.target = null;
-    this.resetMissile();
-  }
-  public resetMissile() {
     this.missile?.destroy();
     this.missile = null;
   }
@@ -54,11 +55,14 @@ export class SAM {
       ...missiles.map(fo => new DetectedRadarObject(fo)),
       ...Array.from(Array(50)).map(() => new SnowRadarObject())
     ];
+    // remove disapperead selected objects
     this.selectedObjectIds = this.selectedObjectIds.filter(selectedObjectId => {
       return detectedRadarObjects.some(dro => dro.id === selectedObjectId);
     });
+    // free missile channels with disappered targets
     for (let missileChannelId in this.missileChannels) {
-      if (!!this.missileChannels[missileChannelId].target?.id && !detectedRadarObjects.some(dro => dro.id === this.missileChannels[missileChannelId].target?.id)) {
+      const missileChannelTarget = this.missileChannels[missileChannelId].target;
+      if (!!missileChannelTarget?.id && !detectedRadarObjects.some(dro => dro.id === missileChannelTarget?.id)) {
         this.missileChannels[missileChannelId].reset();
       }
     }
@@ -88,10 +92,10 @@ export class SAM {
     const target = this.radarObjects.find(dfo => dfo.id === targetId && dfo instanceof DetectedRadarObject && !dfo.isMissile) as DetectedRadarObject;
     const channel = this.missileChannels[channelId];
     if (target && this.selectedObjectIds.includes(targetId) && this.missilesLeft > 0 && channel && !channel.missile) {
-      const missile = new Missile(this.engine, target.getFlightObject() as Enemy, () => channel.resetMissile());
+      const missile = new Missile(this.engine, target.getFlightObject() as Enemy);
       this.missilesLeft--;
-      this.missileChannels[channelId].missile = missile;
-      this.missileChannels[channelId].target = target;
+
+      channel.set(target, missile);
 
       this.engine.addFlightObject(missile);
       Sounds.missileStart();
@@ -99,7 +103,7 @@ export class SAM {
   }
 
   public resetMissile(channelId: number) {
-    this.missileChannels[channelId]?.resetMissile();
+    this.missileChannels[channelId]?.reset();
   }
 
   public selectTarget(targetId: string) {
