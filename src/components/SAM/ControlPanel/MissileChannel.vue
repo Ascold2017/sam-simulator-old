@@ -14,7 +14,7 @@
                 y: 40,
                 width: 20,
                 height: 20,
-                fill: true ? 'rgb(150, 249, 123)' : 'red',
+                fill: (!missileChannel.missile) ? 'rgb(150, 249, 123)' : 'red',
                 shadowBlur: 5
             }" />
             <vk-group>
@@ -37,13 +37,21 @@
 </template>
 
 <script setup lang="ts">
+import { inject } from 'vue';
 import SAMButton from '../SAMButton.vue';
-const props = defineProps<{ index: number }>()
+import type { MissileChannel, SAM } from '@/core/SAM/SAM';
+import DetectedRadarObject from '@/core/SAM/RadarObject/DetectedRadarObject';
+import { useMainStore } from '@/store/main';
+const props = defineProps<{ index: number; missileChannel: MissileChannel }>();
+const sam = inject<SAM>("sam");
+const mainStore = useMainStore();
 function launchMissile() {
-
+    const target = sam!.getRadarObjects().filter(fo => fo instanceof DetectedRadarObject)[mainStore.currentTargetIndex];
+    sam?.launchMissile(target.id, props.index);
 }
 
 function resetMissile() {
-
+    sam?.resetMissile(props.index);
 }
+
 </script>

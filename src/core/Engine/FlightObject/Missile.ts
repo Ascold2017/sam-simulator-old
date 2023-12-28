@@ -11,9 +11,11 @@ export default class Missile extends BaseFlightObject {
   private readonly maxDistance;
   private readonly killRadius;
   private traveledDistance = 0;
+  private onDestroyMissile: () => void;
   constructor(
     engine: Engine,
     target: Enemy,
+    onDestroyMissile: () => void
   ) {
     const name = `Missile-${+new Date()}`
     super(engine, name, 1);
@@ -21,6 +23,7 @@ export default class Missile extends BaseFlightObject {
     this.maxDistance = SAM_PARAMS.MISSILE_MAX_DISTANCE;
     this.killRadius = SAM_PARAMS.MISSILE_KILL_RADIUS;
     this.velocity = SAM_PARAMS.MISSILE_VELOCITY;
+    this.onDestroyMissile = onDestroyMissile;
   }
 
   update(time: number): void {
@@ -44,11 +47,14 @@ export default class Missile extends BaseFlightObject {
     if (targetDistance <= this.killRadius) {
       this.target.kill();
       this.destroy();
+      this.onDestroyMissile();
     }
     if (
       this.traveledDistance >= this.maxDistance
     ) {
+      
       this.destroy();
+      this.onDestroyMissile()
     }
   }
   

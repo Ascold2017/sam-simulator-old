@@ -19,6 +19,15 @@
       angle: 360,
       stroke: indicatorTarget.isSelected ? 'red' : 'rgb(150, 249, 123)'
     }" />
+    <vk-arc v-if="indicatorTarget.isDetected && !indicatorTarget.isEnemy" :config="{
+      x: indicatorTarget.x + 310,
+      y: indicatorTarget.y + 310,
+      innerRadius: 5,
+      outerRadius: 5,
+      strokeWidth: 1,
+      angle: 360,
+      stroke: 'red'
+    }" />
   </vk-group>
 </template>
 
@@ -62,7 +71,7 @@ const indicatorTarget = computed<IRadarIndicatorTarget>(() => {
         alpha: props.target.visibilityK * 1,
         isDetected: props.target instanceof DetectedRadarObject,
         isEnemy: props.target instanceof DetectedRadarObject && !props.target.isMissile,
-        isSelected: !!sam?.getSelectedObjects().find(so => so.target.id === props.target.id),
+        isSelected: !!sam?.getSelectedObjects().find(so => so.id === props.target.id),
         isCurrent: sam!.getRadarObjects().filter(fo => fo instanceof DetectedRadarObject).findIndex(fo => fo.id === props.target.id) === mainStore.currentTargetIndex
       }
 });

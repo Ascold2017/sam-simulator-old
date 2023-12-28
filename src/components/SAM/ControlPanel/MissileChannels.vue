@@ -12,25 +12,44 @@
         }" />
 
         <vk-group :config="{ x: 0, y: 35 }">
-            <vk-circle v-for="(rocket, i) in missilesRockets" :config="{
-                x: 42 * i + 20,
+            <vk-circle v-for="i in missilesCount" :config="{
+                x: 42 * i - 20,
                 y: 10,
                 width: 20,
                 height: 20,
-                fill: true ? 'rgb(150, 249, 123)' : 'red',
+                fill: missilesLeft >= i ? 'rgb(150, 249, 123)' : 'red',
                 shadowBlur: 5
             }" />
         </vk-group>
 
-        <MissileChannel v-for="(missileChannel, i) in missileChannels" :index="i" />
+        <MissileChannel v-for="(missileChannel, i) in missileChannels" :index="i" :missileChannel="missileChannel" />
     </vk-group>
 </template>
 
 <script setup lang="ts">
+import { onMounted, ref } from 'vue';
 import MissileChannel from './MissileChannel.vue'
 import SAM_PARAMS from '@/const/SAM_PARAMS';
+import { inject } from 'vue';
+import type { SAM, MissileChannel as MChannel } from '@/core/SAM/SAM';
+import type Engine from '@/core/Engine/Engine';
+import { onUnmounted } from 'vue';
 
-const missilesRockets = Array.from(Array(SAM_PARAMS.MISSILES_COUNT));
-const missileChannels = Array.from(Array(SAM_PARAMS.MISSILES_CHANNEL_COUNT))
+const missilesCount = SAM_PARAMS.MISSILES_COUNT;
+const missilesLeft = ref<number>(SAM_PARAMS.MISSILES_COUNT);
+const missileChannels = ref<MChannel[]>([]);
+const sam = inject<SAM>("sam");
+const engine = inject<Engine>("engine");
+
+onMounted(() => {
+    engine?.addFPSLoop("missileChannelsUpdate", () => {
+        missileChannels.value = [...(sam?.getMissileChannels() || [])];
+        missilesLeft.value = sam?.getMissilesCount() || 0;
+    });
+})
+
+onUnmounted(() => {
+    engine?.removeLoop("missileChannelsUpdate");
+})
 </script>
 

@@ -7,22 +7,36 @@ import type BaseRadarObject from "./RadarObject/BaseRadarObject";
 import DetectedRadarObject from "./RadarObject/DetectedRadarObject";
 import SnowRadarObject from "./RadarObject/SnowRadarObject";
 import UndetectedRadarObject from "./RadarObject/UndetectedRadarObject";
-
-class SelectedTargetObject {
-  public target: DetectedRadarObject;
-  public missiles: Missile[] = [];
-  constructor(target: DetectedRadarObject) {
-    this.target = target;
+import _ from 'lodash';
+export class MissileChannel {
+  public id: number;
+  public target: DetectedRadarObject | null = null;
+  public missile: Missile | null = null;
+  constructor(id: number) {
+    this.id = id;
+  }
+  public reset() {
+    this.target = null;
+    this.resetMissile();
+  }
+  public resetMissile() {
+    this.missile?.destroy();
+    this.missile = null;
   }
 }
 export class SAM {
   public isEnabled = false;
   private engine: Engine;
   private radarObjects: BaseRadarObject[] = [];
-  private selectedObjects = new Map<string, SelectedTargetObject>();
+  private selectedObjectIds: string[] = [];
+  private missileChannels: Record<number, MissileChannel> = {};
+  private missilesLeft = SAM_PARAMS.MISSILES_COUNT;
   constructor(engine: Engine) {
     this.engine = engine;
     this.engine.addFPSLoop("updateRadar", () => this.updateRadar());
+    for (let i = 0; i < SAM_PARAMS.MISSILES_CHANNEL_COUNT; i++) {
+      this.missileChannels[i] = new MissileChannel(i);
+    }
   }
 
   private updateRadar() {
@@ -40,13 +54,14 @@ export class SAM {
       ...missiles.map(fo => new DetectedRadarObject(fo)),
       ...Array.from(Array(50)).map(() => new SnowRadarObject())
     ];
-
-    this.selectedObjects.forEach(selectedObject => {
-      if (!detectedRadarObjects.some(dro => dro.id === selectedObject.target.id)) {
-        this.selectedObjects.delete(selectedObject.target.id);
-        // TODO destroy missiles
+    this.selectedObjectIds = this.selectedObjectIds.filter(selectedObjectId => {
+      return detectedRadarObjects.some(dro => dro.id === selectedObjectId);
+    });
+    for (let missileChannelId in this.missileChannels) {
+      if (!!this.missileChannels[missileChannelId].target?.id && !detectedRadarObjects.some(dro => dro.id === this.missileChannels[missileChannelId].target?.id)) {
+        this.missileChannels[missileChannelId].reset();
       }
-    })
+    }
   }
 
   public setIsEnabled(value: boolean) {
@@ -54,38 +69,60 @@ export class SAM {
   }
 
   public getRadarObjects(): BaseRadarObject[] {
-    return this.radarObjects.slice(0);
+    return _.cloneDeep(this.radarObjects);
   }
 
-  public getSelectedObjects(): SelectedTargetObject[] {
-    return Array.from(this.selectedObjects.values());
+  public getSelectedObjects(): DetectedRadarObject[] {
+    return this.radarObjects.filter(ro => this.selectedObjectIds.includes(ro.id)) as DetectedRadarObject[];
   }
 
-  public launchMissile(targetId: string) {
-    const target = this.radarObjects.find(dfo => dfo.id === targetId);
-    if (target && target instanceof DetectedRadarObject && !target.isMissile) {
+  public getMissileChannels(): MissileChannel[] {
+    return _.cloneDeep(Object.values(this.missileChannels));
+  }
+
+  public getMissilesCount() {
+    return this.missilesLeft;
+  }
+
+  public launchMissile(targetId: string, channelId: number) {
+    const target = this.radarObjects.find(dfo => dfo.id === targetId && dfo instanceof DetectedRadarObject && !dfo.isMissile) as DetectedRadarObject;
+    const channel = this.missileChannels[channelId];
+    if (target && this.selectedObjectIds.includes(targetId) && this.missilesLeft > 0 && channel && !channel.missile) {
+      const missile = new Missile(this.engine, target.getFlightObject() as Enemy, () => channel.resetMissile());
+      this.missilesLeft--;
+      this.missileChannels[channelId].missile = missile;
+      this.missileChannels[channelId].target = target;
+
+      this.engine.addFlightObject(missile);
       Sounds.missileStart();
-      this.engine.addFlightObject(new Missile(this.engine, target.getFlightObject() as Enemy));
     }
+  }
+
+  public resetMissile(channelId: number) {
+    this.missileChannels[channelId]?.resetMissile();
   }
 
   public selectTarget(targetId: string) {
     const radarObject = this.radarObjects.filter(ro => ro instanceof DetectedRadarObject).find(dro => dro.id === targetId) as DetectedRadarObject;
- 
-    if (radarObject && !this.selectedObjects.has(targetId) && this.selectedObjects.size < SAM_PARAMS.RADAR_MAX_SELECTED_COUNT) {
-      this.selectedObjects.set(targetId, new SelectedTargetObject(radarObject));
+
+    if (radarObject && !this.selectedObjectIds.some(id => id === targetId) && this.selectedObjectIds.length < SAM_PARAMS.RADAR_MAX_SELECTED_COUNT) {
+      this.selectedObjectIds.push(radarObject.id)
     }
   }
 
   public unselectTarget(targetId: string) {
-    if (this.selectedObjects.has(targetId)) {
-      // TODO destroy missiles
-      this.selectedObjects.delete(targetId)
+    if (this.selectedObjectIds.some(id => id === targetId)) {
+      Object.values(this.missileChannels).forEach(missileChannel => {
+        if (missileChannel.target && missileChannel.target.id === targetId) {
+          missileChannel.reset();
+        }
+      })
+      this.selectedObjectIds = this.selectedObjectIds.filter(id => id !== targetId)
     }
   }
 
   public resetTargets() {
-    this.selectedObjects.clear();
-    // TODO destroy missiles
+    this.selectedObjectIds = [];
+    Object.values(this.missileChannels).forEach(missileChannel => missileChannel.reset())
   }
 }

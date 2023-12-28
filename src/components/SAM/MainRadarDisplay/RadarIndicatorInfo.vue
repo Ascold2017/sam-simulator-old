@@ -40,7 +40,7 @@ const indicatorTarget = computed(() => {
             `| V: ${props.target.velocity} m/s     | P: ${(props.target.param / 1000).toFixed(1)} km`
         ],
         isCurrent: mainStore.currentTargetIndex === props.index,
-        isSelected: !!sam?.getSelectedObjects().find(so => so.target.id === props.target.id)
+        isSelected: !!sam?.getSelectedObjects().find(so => so.id === props.target.id)
     }
 });
 </script>

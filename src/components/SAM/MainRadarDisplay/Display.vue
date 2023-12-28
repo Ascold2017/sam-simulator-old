@@ -14,7 +14,7 @@
         <vk-group v-if="mainStore.isEnabled">
             <RadarIndicatorTarget v-for="radarObject in radarObjects" :scale="scale" :target="radarObject" />
             <RadarIndicatorInfo 
-                v-for="(targetObject, i) in radarObjectjSyncronized.filter(fo => fo instanceof DetectedRadarObject)"
+                v-for="(targetObject, i) in radarObjectjSyncronized.filter(fo => fo instanceof DetectedRadarObject && !fo.isMissile)"
                 :index="i"
                 :config="{ x: 622, y: 0 }" :target="targetObject"
             />
