@@ -19,8 +19,8 @@
         verticalAlign: 'middle',
         text: 'POWER',
         fill: '#181818',
-        fontFamily: 'Russo One, sans-serif',
-        fontSize: 12
+        fontFamily: 'DS-DigitalB, sans-serif',
+        fontSize: 14
       }" />
       <vk-circle :config="{
         name: 'powerIndicator',
@@ -39,11 +39,11 @@
 
     <vk-line :config="{ points: [20, 90, 275, 90], stroke: '#181818', strokeWidth: 2, shadowBlur: 5 }" />
     <vk-text :config="{
-      x: 100, y: 100, 
+      x: 100, y: 98, 
       text: 'SELECT TARGET', 
       fill: '#181818',
-      fontFamily: 'Russo One, sans-serif',
-      fontSize: 12,
+      fontFamily: 'DS-DigitalB',
+      fontSize: 14,
       textAlign: 'center',
       width: 100
       }"

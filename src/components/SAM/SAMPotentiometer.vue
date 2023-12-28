@@ -25,7 +25,7 @@
       height: 10,
       verticalAlign: 'middle',
       text: '-',
-      fontFamily: 'Russo One, sans-serif',
+      fontFamily: 'DS-Digital, sans-serif',
       fontSize: 12,
       fill: '#181818'
     }" />
@@ -35,7 +35,7 @@
       text: '+',
       verticalAlign: 'middle',
       height: 10,
-      fontFamily: 'Russo One, sans-serif',
+      fontFamily: 'DS-Digital, sans-serif',
       fontSize: 12,
       fill: '#181818'
     }" />

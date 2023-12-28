@@ -20,8 +20,8 @@
     fill: props.value ? 'rgb(150, 249, 123)' : 'white',
     align: 'center',
     verticalAlign: 'middle',
-    fontSize: props.small ? 11 : 13,
-    fontFamily: 'Russo One, sans-serif'
+    fontSize: props.small ? 11 : 14,
+    fontFamily: 'DS-DigitalB, sans-serif',
   }" @click="click" />
 </template>
 
