@@ -34,7 +34,7 @@ export class SAM {
   private missilesLeft = SAM_PARAMS.MISSILES_COUNT;
   constructor(engine: Engine) {
     this.engine = engine;
-    this.engine.addFPSLoop("updateRadar", () => this.updateRadar());
+    this.engine.addFPSLoop("updateRadar", () => this.updateRadar(), 40);
     for (let i = 0; i < SAM_PARAMS.MISSILES_CHANNEL_COUNT; i++) {
       this.missileChannels[i] = new MissileChannel(i);
     }

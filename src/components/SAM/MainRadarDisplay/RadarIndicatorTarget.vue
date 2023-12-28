@@ -28,6 +28,16 @@
       angle: 360,
       stroke: 'red'
     }" />
+    <vk-arc v-if="indicatorTarget.isDetected && indicatorTarget.isEnemy" :config="{
+      angle: 30,
+      rotation: indicatorTarget.direction - 15,
+      innerRadius: 15,
+      outerRadius: 15,
+      x: indicatorTarget.x + 310,
+      y: indicatorTarget.y + 310,
+      stroke: 'white',
+      strokeWidth: 1
+    }" />
   </vk-group>
 </template>
 
@@ -52,6 +62,7 @@ interface IRadarIndicatorTarget {
   isEnemy: boolean;
   isSelected: boolean;
   isCurrent: boolean;
+  direction: number;
 }
 
 const props = defineProps<{ target: BaseRadarObject; scale: number }>();
@@ -60,20 +71,21 @@ const mainStore = useMainStore();
 
 const indicatorTarget = computed<IRadarIndicatorTarget>(() => {
   const canvasTargetArcAngle = (props.target.size * 1000 * 180) / (props.target.distance * Math.PI) + SAM_PARAMS.RADAR_AZIMUT_DETECT_ACCURACY * 2;
-      const targetSpotDistance = SAM_PARAMS.RADAR_DISTANCE_DETECT_ACCURACY / (props.scale * 2);
-      return {
-        x:  props.target.x / (props.scale * 2),
-        y:  props.target.y / (props.scale * 2),
-        radius: props.target.distance / (props.scale * 2),
-        rotation: props.target.azimuth * (180 / Math.PI) - canvasTargetArcAngle / 2,
-        angle: canvasTargetArcAngle,
-        strokeWidth: targetSpotDistance,
-        alpha: props.target.visibilityK * 1,
-        isDetected: props.target instanceof DetectedRadarObject,
-        isEnemy: props.target instanceof DetectedRadarObject && !props.target.isMissile,
-        isSelected: !!sam?.getSelectedObjects().find(so => so.id === props.target.id),
-        isCurrent: sam!.getRadarObjects().filter(fo => fo instanceof DetectedRadarObject).findIndex(fo => fo.id === props.target.id) === mainStore.currentTargetIndex
-      }
+  const targetSpotDistance = SAM_PARAMS.RADAR_DISTANCE_DETECT_ACCURACY / (props.scale * 2);
+  return {
+    x: props.target.x / (props.scale * 2),
+    y: props.target.y / (props.scale * 2),
+    radius: props.target.distance / (props.scale * 2),
+    rotation: props.target.azimuth * (180 / Math.PI) - canvasTargetArcAngle / 2,
+    angle: canvasTargetArcAngle,
+    strokeWidth: targetSpotDistance,
+    alpha: props.target.visibilityK * 1,
+    isDetected: props.target instanceof DetectedRadarObject,
+    isEnemy: props.target instanceof DetectedRadarObject && !props.target.isMissile,
+    isSelected: !!sam?.getSelectedObjects().find(so => so.id === props.target.id),
+    isCurrent: sam!.getRadarObjects().filter(fo => fo instanceof DetectedRadarObject && !fo.isMissile).findIndex(fo => fo.id === props.target.id) === mainStore.currentTargetIndex,
+    direction: props.target.rotation * (190 / Math.PI)
+  }
 });
 
 </script>

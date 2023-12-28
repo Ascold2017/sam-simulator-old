@@ -28,7 +28,7 @@ export const useMainStore = defineStore('mainStore', {
     seekTarget() {
       this.currentTargetIndex++;
       // @ts-ignore
-      if (this.currentTargetIndex >= this.sam!.getRadarObjects().filter(fo => fo instanceof DetectedRadarObject).length) {
+      if (this.currentTargetIndex >= this.sam!.getRadarObjects().filter(fo => fo instanceof DetectedRadarObject && !fo.isMissile).length) {
         this.currentTargetIndex = 0;
       }
     },

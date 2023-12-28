@@ -2,7 +2,7 @@
     <vk-group :config="{ x: 20, y: 205 }">
         <vk-line :config="{ points: [0, 0, 255, 0], stroke: '#181818', strokeWidth: 2, shadowBlur: 5 }" />
         <vk-text :config="{
-            x: 80, y: 10,
+            x: 100, y: 10,
             text: 'MISSILES',
             fill: '#181818',
             fontFamily: 'DS-DigitalB',
@@ -45,7 +45,7 @@ onMounted(() => {
     engine?.addFPSLoop("missileChannelsUpdate", () => {
         missileChannels.value = [...(sam?.getMissileChannels() || [])];
         missilesLeft.value = sam?.getMissilesCount() || 0;
-    });
+    }, 40);
 })
 
 onUnmounted(() => {

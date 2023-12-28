@@ -27,7 +27,7 @@
                     align: 'center',
                     width: 80
                 }" />
-                <SAMButton label="3-P" :x="40" :y="20" name="3P" :value="false" small />
+                <SAMButton label="3-P" :x="40" :y="20" name="3P" :value="true" small />
                 <SAMButton label="1/2" :x="85" :y="20" name="3P" :value="false" small />
             </vk-group>
             <SAMButton label="LNCH" :x="130" :y="0" name="launchMissile" @click="launchMissile" :value="false"

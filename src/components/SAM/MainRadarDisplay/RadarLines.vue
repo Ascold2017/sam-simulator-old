@@ -5,7 +5,7 @@
         <vk-circle :config="{ x: 310, y: 310, width: i * (scale / 4), stroke: 'rgb(150, 249, 123)', strokeWidth: 0.1 }"
           v-for="i in countCircles" />
         <!-- Killzone circle -->
-        <vk-circle :config="{ x: 310, y: 310, width: 70000 / scale, stroke: 'rgb(150, 249, 123)', strokeWidth: 0.5 }" />
+        <vk-circle :config="{ x: 310, y: 310, width: SAM_PARAMS.MISSILE_MAX_DISTANCE / scale, stroke: 'rgb(150, 249, 123)', strokeWidth: 0.5 }" />
         <!-- Azimut lines -->
         <vk-line :config="{
           points: [azimutLine.x0, azimutLine.y0, azimutLine.x1, azimutLine.y1,],

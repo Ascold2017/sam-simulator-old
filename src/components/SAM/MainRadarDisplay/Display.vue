@@ -47,7 +47,7 @@ const radarObjectjSyncronized = ref<BaseRadarObject[]>([]);
 onMounted(() => {
     engine?.addFPSLoop("mainRadarLoopSync", () => {
         radarObjectjSyncronized.value = mainStore.isEnabled ? sam!.getRadarObjects() : []
-    });
+    }, 40);
     engine?.addFixedLoop("mainRadarLoop", () => {
         radarObjects.value = mainStore.isEnabled ? sam!.getRadarObjects() : []
     }, SAM_PARAMS.RADAR_UPDATE_INTERVAL);
