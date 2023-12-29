@@ -39,7 +39,7 @@ const engine = inject<Engine>("engine");
 const sam = inject<SAM>("sam");
 const mainStore = useMainStore();
 
-const scale = 200;
+const scale = 140;
 
 const radarObjects = ref<BaseRadarObject[]>([]);
 const radarObjectjSyncronized = ref<BaseRadarObject[]>([]);

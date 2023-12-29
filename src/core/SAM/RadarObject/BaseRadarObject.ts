@@ -25,7 +25,7 @@ export default class BaseRadarObject {
 
     constructor(payload: BaseRadarObjectConstructor) {
         this.id = payload.id;
-        const distance = this.getDistance(payload.currentPoint);
+        const distance = BaseRadarObject.getDistance(payload.currentPoint);
         this.distance = distance;
         const azimuth = this.getAzimuth(payload.currentPoint);
         this.azimuth = azimuth < 0 ? 2 * Math.PI + azimuth : azimuth;
@@ -49,7 +49,7 @@ export default class BaseRadarObject {
         return Math.sqrt(2 * 6371009 * SAM_PARAMS.RADAR_HEIGHT) + Math.sqrt(2 * 6371009 * height) > distance;
     }
 
-    protected getDistance(currentPoint: IPoint) {
+    public static getDistance(currentPoint: IPoint) {
         return Math.hypot(currentPoint.x, currentPoint.y);
     }
 

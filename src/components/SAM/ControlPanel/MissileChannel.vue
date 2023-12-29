@@ -27,8 +27,8 @@
                     align: 'center',
                     width: 80
                 }" />
-                <SAMButton label="3-P" :x="40" :y="20" name="3P" :value="true" small />
-                <SAMButton label="1/2" :x="85" :y="20" name="3P" :value="false" small />
+                <SAMButton label="3-P" :x="40" :y="20" name="3P" :value="guidanceMethod === '3P'" @click="selectMethod('3P')" small />
+                <SAMButton label="1/2" :x="85" :y="20" name="1/2" :value="guidanceMethod === '1/2'" @click="selectMethod('1/2')" small />
             </vk-group>
             <SAMButton label="LNCH" :x="130" :y="0" name="launchMissile" @click="launchMissile" :value="false"
                 color="red" />
@@ -42,16 +42,24 @@ import SAMButton from '../SAMButton.vue';
 import type { MissileChannel, SAM } from '@/core/SAM/SAM';
 import DetectedRadarObject from '@/core/SAM/RadarObject/DetectedRadarObject';
 import { useMainStore } from '@/store/main';
+import { ref } from 'vue';
 const props = defineProps<{ index: number; missileChannel: MissileChannel }>();
 const sam = inject<SAM>("sam");
 const mainStore = useMainStore();
+const guidanceMethod = ref<'3P' | '1/2'>('3P');
 function launchMissile() {
     const target = sam!.getRadarObjects().filter(fo => fo instanceof DetectedRadarObject)[mainStore.currentTargetIndex];
-    sam?.launchMissile(target.id, props.index);
+    sam?.launchMissile(target.id, props.index, guidanceMethod.value);
 }
 
 function resetMissile() {
     sam?.resetMissile(props.index);
+}
+
+function selectMethod(method: '3P' | '1/2') {
+    if (!props.missileChannel.missile) {
+        guidanceMethod.value = method;
+    }
 }
 
 </script>

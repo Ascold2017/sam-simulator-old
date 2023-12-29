@@ -28,16 +28,13 @@
       angle: 360,
       stroke: 'red'
     }" />
-    <vk-arc v-if="indicatorTarget.isDetected && indicatorTarget.isEnemy" :config="{
-      angle: 30,
-      rotation: indicatorTarget.direction - 15,
-      innerRadius: 15,
-      outerRadius: 15,
+
+    <vk-group v-if="indicatorTarget.isDetected && indicatorTarget.isEnemy" :config="{
       x: indicatorTarget.x + 310,
-      y: indicatorTarget.y + 310,
-      stroke: 'white',
-      strokeWidth: 1
-    }" />
+      y: indicatorTarget.y + 310, rotation: indicatorTarget.direction
+    }">
+      <vk-line :config="{ points: [10, 0, 30, 0], stroke: 'white', strokeWidth: 1 }" />
+    </vk-group>
   </vk-group>
 </template>
 

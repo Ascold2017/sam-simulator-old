@@ -3,7 +3,7 @@ import type Engine from "../Engine/Engine";
 import Enemy from "../Engine/FlightObject/Enemy";
 import Missile from "../Engine/FlightObject/Missile";
 import Sounds from "../Sounds";
-import type BaseRadarObject from "./RadarObject/BaseRadarObject";
+import BaseRadarObject from "./RadarObject/BaseRadarObject";
 import DetectedRadarObject from "./RadarObject/DetectedRadarObject";
 import SnowRadarObject from "./RadarObject/SnowRadarObject";
 import UndetectedRadarObject from "./RadarObject/UndetectedRadarObject";
@@ -41,11 +41,19 @@ export class SAM {
   }
 
   private updateRadar() {
+
     const enemys = this.engine.getFlightObjects()
-      .filter(fo => fo instanceof Enemy)
+      .filter(fo => fo instanceof Enemy && BaseRadarObject.getDistance(fo.getCurrentPoint()) < SAM_PARAMS.MAX_DISTANCE)
       .sort(DetectedRadarObject.sortByVisibilityComparator);
-    const detectedEnemys = enemys.slice(0, SAM_PARAMS.RADAR_MAX_DETECT_COUNT - 1);
-    const undetectedEnemys = enemys.slice(SAM_PARAMS.RADAR_MAX_DETECT_COUNT);
+    
+    const detectedEnemys = enemys
+      .filter(e => {
+        const distance = BaseRadarObject.getDistance(e.getCurrentPoint());
+        return distance < SAM_PARAMS.MAX_CAPTURE_RANGE && distance > SAM_PARAMS.MIN_CAPTURE_RANGE
+      })
+      .slice(0, SAM_PARAMS.RADAR_MAX_DETECT_COUNT - 1);
+
+    const undetectedEnemys = enemys.filter(e => !detectedEnemys.some(de => de.id === e.id));
 
     const missiles = this.engine.getFlightObjects().filter(fo => fo instanceof Missile);
     const detectedRadarObjects = detectedEnemys.map(fo => new DetectedRadarObject(fo)).filter(fo => fo.isVisible);
@@ -88,11 +96,11 @@ export class SAM {
     return this.missilesLeft;
   }
 
-  public launchMissile(targetId: string, channelId: number) {
+  public launchMissile(targetId: string, channelId: number, method: '3P' | '1/2') {
     const target = this.radarObjects.find(dfo => dfo.id === targetId && dfo instanceof DetectedRadarObject && !dfo.isMissile) as DetectedRadarObject;
     const channel = this.missileChannels[channelId];
     if (target && this.selectedObjectIds.includes(targetId) && this.missilesLeft > 0 && channel && !channel.missile) {
-      const missile = new Missile(this.engine, target.getFlightObject() as Enemy);
+      const missile = new Missile(this.engine, target.getFlightObject() as Enemy, method);
       this.missilesLeft--;
 
       channel.set(target, missile);

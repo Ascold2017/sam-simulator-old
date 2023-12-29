@@ -4,6 +4,7 @@ import Vector3D from "../../Vector3D";
 import BaseFlightObject from "./BaseFlightObject";
 import type Enemy from "./Enemy";
 
+type GuidanceMethod = '3P' | '1/2'
 
 export default class Missile extends BaseFlightObject {
   private readonly target: Enemy;
@@ -11,9 +12,11 @@ export default class Missile extends BaseFlightObject {
   private readonly maxDistance;
   private readonly killRadius;
   private traveledDistance = 0;
+  private method: GuidanceMethod;
   constructor(
     engine: Engine,
     target: Enemy,
+    method: GuidanceMethod
   ) {
     const name = `Missile-${+new Date()}`
     super(engine, name, 1);
@@ -21,6 +24,7 @@ export default class Missile extends BaseFlightObject {
     this.maxDistance = SAM_PARAMS.MISSILE_MAX_DISTANCE;
     this.killRadius = SAM_PARAMS.MISSILE_KILL_RADIUS;
     this.velocity = SAM_PARAMS.MISSILE_VELOCITY;
+    this.method = method;
   }
 
   update(time: number): void {
@@ -33,7 +37,7 @@ export default class Missile extends BaseFlightObject {
     const targetVector = new Vector3D(this.target.getCurrentPoint());
     const prevMissileVector = new Vector3D({ ...this.currentPoint })
     const targetDistance = targetVector.sub(prevMissileVector).r() as number;
-    const currentPosition = this.calcMissilePosition(targetVector, prevMissileVector, targetDistance, dFlightDistance);;
+    const currentPosition = this.calcMissilePosition3P(targetVector, prevMissileVector, targetDistance, dFlightDistance);;
     this.currentPoint = {
       x: currentPosition.x() as number,
       y: currentPosition.y() as number,
@@ -54,7 +58,7 @@ export default class Missile extends BaseFlightObject {
     }
   }
 
-  private calcMissilePosition(targetVector: Vector3D, prevMissileVector: Vector3D, targetDistance: number, dFlightDistance: number) {
+  private calcMissilePosition3P(targetVector: Vector3D, prevMissileVector: Vector3D, targetDistance: number, dFlightDistance: number) {
     const distance = dFlightDistance < targetDistance
       ? dFlightDistance
       : targetDistance;
@@ -67,5 +71,13 @@ export default class Missile extends BaseFlightObject {
     const t1 = (-b - sqrt) / (2 * a);
     const t2 = (-b + sqrt) / (2 * a);
     return targetVector.scale(t1 > t2 ? t1 : t2);
+  }
+
+  private calcMissilePosition12(targetVector: Vector3D, prevMissileVector: Vector3D, targetDistance: number, dFlightDistance: number) {
+    const distance = dFlightDistance < targetDistance
+      ? dFlightDistance
+      : targetDistance;
+    
+    return new Vector3D({ x: 0, y: 0, z: 0})
   }
 }
