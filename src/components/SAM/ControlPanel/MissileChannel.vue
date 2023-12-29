@@ -43,7 +43,7 @@ import type { MissileChannel, SAM } from '@/core/SAM/SAM';
 import DetectedRadarObject from '@/core/SAM/RadarObject/DetectedRadarObject';
 import { useMainStore } from '@/store/main';
 import { ref } from 'vue';
-const props = defineProps<{ index: number; missileChannel: MissileChannel }>();
+const props = defineProps<{ index: number; missileChannel: any }>();
 const sam = inject<SAM>("sam");
 const mainStore = useMainStore();
 const guidanceMethod = ref<'3P' | '1/2'>('3P');

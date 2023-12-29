@@ -1,26 +1,26 @@
 <template>
   <v-container class="mb-6">
-    <v-row justify="center">
-      <v-col class="d-flex justify-center">
-        <canvas ref="editorRef" width="800" height="800" class="border mx-auto"
+    <v-row justify="center" align="start">
+      <v-col class="d-flex justify-center" cols="6">
+        <canvas ref="editorRef" width="600" height="600" class="border mx-auto"
           style="background-size: 100%; background-position: center;" @click="exportCoordinates"></canvas>
       </v-col>
-      <v-col class="d-flex justify-center">
+      <v-col class="d-flex justify-center" cols="6">
         <v-card width="800">
           <v-card-text>
-            <h3 class="mb-3">Нанесите точки полета и задайте параметры цели</h3>
-            <v-select label="Тип обьекта" :items="FLIGHT_OBJECT_TYPES" item-title="name" item-value="id"
+            <h3 class="mb-3">Put flight point and set target params</h3>
+            <v-select label="Flight object type" :items="FLIGHT_OBJECT_TYPES" item-title="name" item-value="id"
               :model-value="flightObjectType" @update:model-value="setFlightObjectType" />
-            <v-text-field label="Запустить через, сек" :model-value="timeOffset" @update:model-value="setTimeOffset" />
-            <h4>Машрут | Дальность полета: {{ flightParams.range }} км | Полетное время: {{ flightParams.time }} мин
+            <v-text-field label="Starting for, s" :model-value="timeOffset" @update:model-value="setTimeOffset" />
+            <h4>Way | Flight distance: {{ flightParams.range }} km | Flight time: {{ flightParams.time }} min
             </h4>
             <v-table density="compact" class="mb-3">
               <thead>
                 <tr>
                   <td>X</td>
                   <td>Y</td>
-                  <td>Высота, км</td>
-                  <td>Скорость, м/с</td>
+                  <td>Altitude, m</td>
+                  <td>Velocity, m/s</td>
                 </tr>
               </thead>
               <tbody>
@@ -40,17 +40,17 @@
               </tbody>
             </v-table>
             <div class="mb-3 d-flex justify-space-between">
-              <v-btn @click="addFlightMission" :disabled="points.length < 2" color="success">Добавить полетное задание
+              <v-btn @click="addFlightMission" :disabled="points.length < 2" color="success">Add flight mission
               </v-btn>
-              <v-btn @click="resetFlightMission" color="warning">Сбросить</v-btn>
+              <v-btn @click="resetFlightMission" color="warning">Reset</v-btn>
             </div>
             <v-divider class="mb-3" />
-            <h4>Полетные задания</h4>
+            <h4>Flight missions</h4>
             <v-table density="compact" class="mb-3">
               <thead>
                 <tr>
-                  <td>Тип обьекта</td>
-                  <td>Старт через, сек</td>
+                  <td>Flight object type</td>
+                  <td>Starting for, s</td>
                 </tr>
               </thead>
               <tbody>
@@ -65,15 +65,15 @@
             <v-divider class="mb-6" />
 
             <div class="mb-3 d-flex justify-space-between">
-              <v-btn @click="clear" color="error">Очистить все</v-btn>
-              <v-btn @click="exportFlightMissions">Скачать <v-icon>mdi-download</v-icon>
+              <v-btn @click="clear" color="error">Reset all</v-btn>
+              <v-btn @click="exportFlightMissions">Download <v-icon>mdi-download</v-icon>
               </v-btn>
             </div>
 
-            <v-file-input label="Файл миссии" class="mb-3" hide-details append-icon="mdi-upload"
+            <v-file-input label="Mission file" class="mb-3" hide-details append-icon="mdi-upload"
               @change="importFlightMissions"></v-file-input>
 
-            <v-btn @click="startFlightMissions" block color="error">Старт!</v-btn>
+            <v-btn @click="startFlightMissions" block color="error">LAUNCH!</v-btn>
           </v-card-text>
 
 
@@ -87,7 +87,7 @@
 import FLIGHT_OBJECT_TYPES from '@/const/FLIGHT_OBJECT_TYPES';
 import Editor from '@/components/Editor/Editor';
 import { onMounted, ref, inject, computed } from 'vue';
-import type Engine from '@/SAM/Engine';
+import type Engine from '@/core/Engine/Engine';
 
 const engine = inject<Engine>('engine')
 const editorRef = ref<HTMLCanvasElement | null>(null);
@@ -97,9 +97,9 @@ onMounted(() => {
   editor.value = new Editor(editorRef.value!);
 })
 
-
 const flightObjectType = ref<number | null>(null);
 const flightObjectMaxVelocity = ref<number>(100);
+
 const setFlightObjectType = (value: number) => {
   const foType = FLIGHT_OBJECT_TYPES.find(fo => fo.id === value)!
   flightObjectType.value = value;
@@ -107,16 +107,17 @@ const setFlightObjectType = (value: number) => {
   flightObjectMaxVelocity.value = foType.maxVelocity;
 }
 
-const timeOffset = computed(() => editor.value?.timeOffset);
-const setTimeOffset = (v: string) => editor.value!.timeOffset = v as unknown as number
+const timeOffset = computed(() => editor.value?.getTimeOffset());
+const setTimeOffset = (v: string) => editor.value!.setTimeOffset(+v);
 
 const exportCoordinates = (e: MouseEvent) => {
   if (!flightObjectType.value) return;
   editor.value?.addPoint(e)
 }
-const setPointParam = (index: number, paramName: string, paramValue: number) => editor.value?.setParamAtPoint(index, paramName, paramValue);
-const points = computed(() => editor.value?.points || []);
-const flightParams = computed(() => editor.value?.flightParams || { time: 0, range: 0 })
+
+const setPointParam = (index: number, paramName: string, paramValue: string) => editor.value?.setParamAtPoint(index, paramName, Number(paramValue));
+const points = computed(() => editor.value?.getPoints() || []);
+const flightParams = computed(() => editor.value?.getFlightParams() || { time: 0, range: 0 })
 
 const resetFlightMission = () => {
   editor.value?.reset()
@@ -124,7 +125,7 @@ const resetFlightMission = () => {
   flightObjectType.value = null;
 }
 
-const flightObjectMissions = computed(() => (editor.value?.flightObjectMissions || []).map(fm => ({ ...fm, flightObjectType: Editor.flightObjectTypes.find(ft => ft.id === fm.flightObjectTypeId)?.name })))
+const flightObjectMissions = computed(() => (editor.value?.getFlightObjectMissions() || []).map(fm => ({ ...fm, flightObjectType: Editor.flightObjectTypes.find(ft => ft.id === fm.flightObjectTypeId)?.name })))
 const clear = () => editor.value?.clear()
 const exportFlightMissions = () => editor.value?.exportFlightMissions();
 
@@ -140,11 +141,4 @@ function addFlightMission() {
   editor.value!.addFlightMission();
   resetFlightMission();
 }
-
-defineExpose({
-  loadMission(missionString: string) {
-    editor.value?.importFlightMissionsString(missionString);
-    startFlightMissions();
-  }
-})
 </script>
