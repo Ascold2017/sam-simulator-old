@@ -15,6 +15,4 @@ https://t.me/sam_simulator
 
 ![image](/public/Screenshot_1.png)
 ![image](/public/Screenshot_2.png)
-![image](/public/Screenshot_3.png)
-![image](/public/Screenshot_4.png)
 
