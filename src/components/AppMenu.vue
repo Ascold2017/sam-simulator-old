@@ -25,10 +25,6 @@
 <script setup lang="ts">
 import { ref, defineEmits, defineProps } from 'vue';
 import MISSIONS from '@/const/MISSIONS';
-import { inject } from 'vue';
-import type Engine from '@/core/Engine/Engine';
-import type { IMission } from '@/core/Engine/Engine';
-const engine = inject<Engine>("engine")
 const emit = defineEmits<{
   (e: 'openScreen', screen: string): void;
 }>();
@@ -41,7 +37,6 @@ const openScreen = (screen: string) => {
 }
 
 const loadMission = (missionId: number) => {
-  engine?.startMission(JSON.parse(MISSIONS.find(m => m.id === missionId)!.data) as IMission[])
   isActive.value = false;
 }
 /*

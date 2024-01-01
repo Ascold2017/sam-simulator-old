@@ -30,26 +30,25 @@
 import { onMounted, ref } from 'vue';
 import MissileChannel from './MissileChannel.vue'
 import SAM_PARAMS from '@/const/SAM_PARAMS';
-import { inject } from 'vue';
-import type { SAM, MissileChannel as MChannel } from '@/core/SAM/SAM';
-import type Engine from '@/core/Engine/Engine';
 import { onUnmounted } from 'vue';
+interface MissileChannel {
 
+}
 const missilesCount = SAM_PARAMS.MISSILES_COUNT;
 const missilesLeft = ref<number>(SAM_PARAMS.MISSILES_COUNT);
-const missileChannels = ref<MChannel[]>([]);
-const sam = inject<SAM>("sam");
-const engine = inject<Engine>("engine");
+const missileChannels = ref<MissileChannel[]>([]);
 
 onMounted(() => {
+    /*
     engine?.addFPSLoop("missileChannelsUpdate", () => {
         missileChannels.value = [...(sam?.getMissileChannels() || [])] as MChannel[];
         missilesLeft.value = sam?.getMissilesCount() || 0;
     }, 40);
+    */
 });
 
 onUnmounted(() => {
-    engine?.removeLoop("missileChannelsUpdate");
+   //  engine?.removeLoop("missileChannelsUpdate");
 })
 </script>
 

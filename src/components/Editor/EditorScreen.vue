@@ -87,9 +87,7 @@
 import FLIGHT_OBJECT_TYPES from '@/const/FLIGHT_OBJECT_TYPES';
 import Editor from '@/components/Editor/Editor';
 import { onMounted, ref, inject, computed } from 'vue';
-import type Engine from '@/core/Engine/Engine';
 
-const engine = inject<Engine>('engine')
 const editorRef = ref<HTMLCanvasElement | null>(null);
 
 const editor = ref<Editor | null>(null);
@@ -134,7 +132,7 @@ const importFlightMissions = (e: Event) => {
   editor.value?.importFlightMissions(file);
 }
 const startFlightMissions = () => {
-  engine?.startMission(editor.value!.getFlightMissions())
+  // engine?.startMission(editor.value!.getFlightMissions())
 }
 function addFlightMission() {
   if (points.value.length < 2) return

@@ -23,14 +23,11 @@
 
 <script setup lang="ts">
 import type DetectedRadarObject from '@/core/SAM/RadarObject/DetectedRadarObject';
-import type { SAM } from '@/core/SAM/SAM';
 import { useMainStore } from '@/store/main';
-import { inject } from 'vue';
 import { computed } from 'vue';
 
 const props = defineProps<{ target: Partial<DetectedRadarObject>; index: number; config: { x: number; y: number; } }>();
 const mainStore = useMainStore();
-const sam = inject<SAM>("sam");
 const indicatorTarget = computed(() => {
     return {
         rows: [
@@ -40,7 +37,7 @@ const indicatorTarget = computed(() => {
             `| V: ${props.target.velocity} m/s     | P: ${(props.target.param! / 1000).toFixed(1)} km`
         ],
         isCurrent: mainStore.currentTargetIndex === props.index,
-        isSelected: !!sam?.getSelectedObjects().find(so => so.id === props.target.id)
+        isSelected: false //!!sam?.getSelectedObjects().find(so => so.id === props.target.id)
     }
 });
 </script>

@@ -37,23 +37,20 @@
 </template>
 
 <script setup lang="ts">
-import { inject } from 'vue';
 import SAMButton from '../SAMButton.vue';
-import type { MissileChannel, SAM } from '@/core/SAM/SAM';
-import DetectedRadarObject from '@/core/SAM/RadarObject/DetectedRadarObject';
 import { useMainStore } from '@/store/main';
 import { ref } from 'vue';
 const props = defineProps<{ index: number; missileChannel: any }>();
-const sam = inject<SAM>("sam");
+
 const mainStore = useMainStore();
 const guidanceMethod = ref<'3P' | '1/2'>('3P');
 function launchMissile() {
-    const target = sam!.getRadarObjects().filter(fo => fo instanceof DetectedRadarObject)[mainStore.currentTargetIndex];
-    sam?.launchMissile(target.id, props.index, guidanceMethod.value);
+    // const target = sam!.getRadarObjects().filter(fo => fo instanceof DetectedRadarObject)[mainStore.currentTargetIndex];
+    // sam?.launchMissile(target.id, props.index, guidanceMethod.value);
 }
 
 function resetMissile() {
-    sam?.resetMissile(props.index);
+    // sam?.resetMissile(props.index);
 }
 
 function selectMethod(method: '3P' | '1/2') {

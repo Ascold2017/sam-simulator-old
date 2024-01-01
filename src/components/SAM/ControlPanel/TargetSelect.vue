@@ -19,25 +19,21 @@
 
 <script setup lang="ts">
 import SAMButton from '../SAMButton.vue';
-import DetectedRadarObject from "@/core/SAM/RadarObject/DetectedRadarObject";
-import type { SAM } from "@/core/SAM/SAM";
 import { useMainStore } from "@/store/main";
-import { inject } from "vue";
 const mainStore = useMainStore();
-const sam = inject<SAM>("sam");
 function selectTarget() {
-    const target = sam!.getRadarObjects().filter(fo => fo instanceof DetectedRadarObject)[mainStore.currentTargetIndex];
-    target && sam?.selectTarget(target.id);
+    //const target = sam!.getRadarObjects().filter(fo => fo instanceof DetectedRadarObject)[mainStore.currentTargetIndex];
+    //target && sam?.selectTarget(target.id);
 }
 
 function unselectTarget() {
-    const target = sam!.getRadarObjects().filter(fo => fo instanceof DetectedRadarObject)[mainStore.currentTargetIndex];
-    target && sam?.unselectTarget(target.id);
+    //const target = sam!.getRadarObjects().filter(fo => fo instanceof DetectedRadarObject)[mainStore.currentTargetIndex];
+    //target && sam?.unselectTarget(target.id);
 }
 
 function resetTargets() {
     mainStore.resetCurrentTarget();
-    sam?.resetTargets();
+    //sam?.resetTargets();
 }
 
 </script>

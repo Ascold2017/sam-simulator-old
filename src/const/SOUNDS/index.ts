@@ -1,4 +1,4 @@
-import SOUNDS from '@/const/SOUNDS';
+import SOUNDS from '@/const/SOUNDS/SOUNDS';
 const startSound = new Audio(SOUNDS.START);
 const idleSound = new Audio(SOUNDS.IDLE);
 const stopSound = new Audio(SOUNDS.STOP);

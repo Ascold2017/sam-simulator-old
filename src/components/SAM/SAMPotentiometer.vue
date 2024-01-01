@@ -43,7 +43,7 @@
 </template>
 
 <script setup lang="ts">
-import Sounds from '@/core/Sounds'
+import Sounds from '@/const/SOUNDS/index';
 import { ref } from 'vue';
 const emit = defineEmits<{ (e: 'change', v: number): void }>()
 const props = defineProps<{ x: number; y: number; small?: boolean; big?: boolean; deltaValue?: number }>();
@@ -54,4 +54,4 @@ const onWheel = ({ evt }: { evt: WheelEvent }) => {
   rotation.value += delta*2;
   emit('change', delta * (props.deltaValue || 1))
 }
-</script>@/core/Sounds
+</script>
