@@ -28,16 +28,16 @@ import { useMainStore } from '@/store/main';
 import { inject } from 'vue';
 import { computed } from 'vue';
 
-const props = defineProps<{ target: DetectedRadarObject; index: number; config: { x: number; y: number; } }>();
+const props = defineProps<{ target: Partial<DetectedRadarObject>; index: number; config: { x: number; y: number; } }>();
 const mainStore = useMainStore();
 const sam = inject<SAM>("sam");
 const indicatorTarget = computed(() => {
     return {
         rows: [
             `|${props.target.id}`,
-            `| Azimuth: ${(props.target.azimuth * (180 / Math.PI)).toFixed(1)}°     | Elevation: ${(props.target.elevation * (180 / Math.PI)).toFixed(1)}°`,
-            `| D: ${(props.target.distance / 1000).toFixed(1)} km      | H: ${props.target.height.toFixed(0)} m`,
-            `| V: ${props.target.velocity} m/s     | P: ${(props.target.param / 1000).toFixed(1)} km`
+            `| Azimuth: ${(props.target.azimuth! * (180 / Math.PI)).toFixed(1)}°     | Elevation: ${(props.target.elevation! * (180 / Math.PI)).toFixed(1)}°`,
+            `| D: ${(props.target.distance! / 1000).toFixed(1)} km      | H: ${props.target.height!.toFixed(0)} m`,
+            `| V: ${props.target.velocity} m/s     | P: ${(props.target.param! / 1000).toFixed(1)} km`
         ],
         isCurrent: mainStore.currentTargetIndex === props.index,
         isSelected: !!sam?.getSelectedObjects().find(so => so.id === props.target.id)

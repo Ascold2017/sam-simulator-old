@@ -2,25 +2,18 @@
   <v-layout full-height>
     <v-main dark>
       <SAMScreen v-show="activeScreen === 'SAM'" />
-      <!--
-<EditorScreen ref="editorRef" v-show="activeScreen === 'Editor'" />
-      -->
-
-      <AppMenu :missions="MISSIONS" @open-screen="openScreen" @load-mission="selectMission" />
+      <EditorScreen v-show="activeScreen === 'Editor'" />
+      <AppMenu :missions="MISSIONS" @open-screen="openScreen" />
     </v-main>
   </v-layout>
 </template>
 
 <script setup lang="ts">
-import { inject, onMounted, ref } from 'vue'
+import { ref } from 'vue'
 import AppMenu from '@/components/AppMenu.vue'
 import SAMScreen from '@/components/SAM/SAM.vue';
 import EditorScreen from '@/components/Editor/EditorScreen.vue'
 import MISSIONS from './const/MISSIONS';
-import type Engine from './core/Engine/Engine';
-import type { IMission } from './core/Engine/Engine';
-const editorRef = ref()
-const engine = inject<Engine>('engine');
 
 enum ScreensEnum {
   SAM = 'SAM',
@@ -29,10 +22,6 @@ enum ScreensEnum {
 
 const activeScreen = ref(ScreensEnum.SAM);
 const openScreen = (screen: string) => activeScreen.value = screen as ScreensEnum;
-const selectMission = (missionId: number) => {
-    engine?.startMission(JSON.parse(MISSIONS.find(m => m.id === missionId)!.data) as IMission[])
-}
-
 </script>
 
 <style>

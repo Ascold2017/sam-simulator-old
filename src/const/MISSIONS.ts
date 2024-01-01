@@ -1,7 +1,7 @@
 export default [
     {
         id: 1,
-        name: 'Тестовая миссия',
+        name: 'Test mission',
         data: `[
           {
             "flightObjectTypeId":1,

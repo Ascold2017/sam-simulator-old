@@ -43,10 +43,10 @@ const engine = inject<Engine>("engine");
 
 onMounted(() => {
     engine?.addFPSLoop("missileChannelsUpdate", () => {
-        missileChannels.value = [...(sam?.getMissileChannels() || [])];
+        missileChannels.value = [...(sam?.getMissileChannels() || [])] as MChannel[];
         missilesLeft.value = sam?.getMissilesCount() || 0;
     }, 40);
-})
+});
 
 onUnmounted(() => {
     engine?.removeLoop("missileChannelsUpdate");
