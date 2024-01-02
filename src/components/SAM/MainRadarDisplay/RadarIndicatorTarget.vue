@@ -40,8 +40,7 @@
 
 <script setup lang="ts">
 import SAM_PARAMS from '@/const/SAM_PARAMS';
-import type BaseRadarObject from '@/core/SAM/RadarObject/BaseRadarObject';
-import { useMainStore } from '@/store/main';
+import { useMainStore, type IRadarObject } from '@/store/main';
 import { computed } from 'vue';
 
 interface IRadarIndicatorTarget {
@@ -59,7 +58,7 @@ interface IRadarIndicatorTarget {
   direction: number;
 }
 
-const props = defineProps<{ target: Partial<BaseRadarObject>; scale: number }>();
+const props = defineProps<{ target: Partial<IRadarObject>; scale: number }>();
 
 const mainStore = useMainStore();
 
@@ -74,10 +73,10 @@ const indicatorTarget = computed<IRadarIndicatorTarget>(() => {
     angle: canvasTargetArcAngle,
     strokeWidth: targetSpotDistance,
     alpha: props.target.visibilityK! * 1,
-    isDetected: false, //props.target instanceof DetectedRadarObject,
-    isEnemy: false, //props.target instanceof DetectedRadarObject && !props.target.isMissile,
-    isSelected: false, //!!sam?.getSelectedObjects().find(so => so.id === props.target.id),
-    isCurrent: false, //sam!.getRadarObjects().filter(fo => fo instanceof DetectedRadarObject && !fo.isMissile).findIndex(fo => fo.id === props.target.id) === mainStore.currentTargetIndex,
+    isDetected: props.target.type === 'DETECTED_RADAR_OBJECT',
+    isEnemy: props.target.type === 'DETECTED_RADAR_OBJECT' && !props.target.isMissile,
+    isSelected: mainStore.selectedTargetIds.includes(props.target.id!),
+    isCurrent: mainStore.currentTargetId === props.target.id,
     direction: props.target.rotation! * (190 / Math.PI)
   }
 });

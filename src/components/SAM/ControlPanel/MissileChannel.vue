@@ -14,7 +14,7 @@
                 y: 40,
                 width: 20,
                 height: 20,
-                fill: (!missileChannel.missile) ? 'rgb(150, 249, 123)' : 'red',
+                fill: (!missileChannel.isBusy) ? 'rgb(150, 249, 123)' : 'red',
                 shadowBlur: 5
             }" />
             <vk-group>

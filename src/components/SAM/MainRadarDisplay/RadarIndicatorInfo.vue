@@ -22,11 +22,10 @@
 </template>
 
 <script setup lang="ts">
-import type DetectedRadarObject from '@/core/SAM/RadarObject/DetectedRadarObject';
-import { useMainStore } from '@/store/main';
+import { useMainStore, type IRadarObject } from '@/store/main';
 import { computed } from 'vue';
 
-const props = defineProps<{ target: Partial<DetectedRadarObject>; index: number; config: { x: number; y: number; } }>();
+const props = defineProps<{ target: Partial<IRadarObject>; index: number; config: { x: number; y: number; } }>();
 const mainStore = useMainStore();
 const indicatorTarget = computed(() => {
     return {
@@ -36,8 +35,8 @@ const indicatorTarget = computed(() => {
             `| D: ${(props.target.distance! / 1000).toFixed(1)} km      | H: ${props.target.height!.toFixed(0)} m`,
             `| V: ${props.target.velocity} m/s     | P: ${(props.target.param! / 1000).toFixed(1)} km`
         ],
-        isCurrent: mainStore.currentTargetIndex === props.index,
-        isSelected: false //!!sam?.getSelectedObjects().find(so => so.id === props.target.id)
+        isCurrent: mainStore.currentTargetId === props.target.id,
+        isSelected: mainStore.selectedTargetIds.includes(props.target.id!)
     }
 });
 </script>

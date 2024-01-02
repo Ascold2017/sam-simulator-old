@@ -12,43 +12,25 @@
         }" />
 
         <vk-group :config="{ x: 0, y: 35 }">
-            <vk-circle v-for="i in missilesCount" :config="{
+            <vk-circle v-for="i in mainStore.samParams.MISSILES_COUNT" :config="{
                 x: 42 * i - 20,
                 y: 10,
                 width: 20,
                 height: 20,
-                fill: missilesLeft >= i ? 'rgb(150, 249, 123)' : 'red',
+                fill: mainStore.missilesLeft >= i ? 'rgb(150, 249, 123)' : 'red',
                 shadowBlur: 5
             }" />
         </vk-group>
 
-        <MissileChannel v-for="(missileChannel, i) in missileChannels" :index="i" :missileChannel="missileChannel" />
+        <MissileChannel v-for="(missileChannel, i) in mainStore.missileChannels" :index="i" :missileChannel="missileChannel" />
     </vk-group>
 </template>
 
 <script setup lang="ts">
-import { onMounted, ref } from 'vue';
 import MissileChannel from './MissileChannel.vue'
-import SAM_PARAMS from '@/const/SAM_PARAMS';
-import { onUnmounted } from 'vue';
-interface MissileChannel {
+import { useMainStore } from '@/store/main';
 
-}
-const missilesCount = SAM_PARAMS.MISSILES_COUNT;
-const missilesLeft = ref<number>(SAM_PARAMS.MISSILES_COUNT);
-const missileChannels = ref<MissileChannel[]>([]);
+const mainStore = useMainStore();
 
-onMounted(() => {
-    /*
-    engine?.addFPSLoop("missileChannelsUpdate", () => {
-        missileChannels.value = [...(sam?.getMissileChannels() || [])] as MChannel[];
-        missilesLeft.value = sam?.getMissilesCount() || 0;
-    }, 40);
-    */
-});
-
-onUnmounted(() => {
-   //  engine?.removeLoop("missileChannelsUpdate");
-})
 </script>
 

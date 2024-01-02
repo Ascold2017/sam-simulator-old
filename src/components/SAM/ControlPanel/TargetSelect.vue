@@ -10,10 +10,10 @@
             textAlign: 'center',
             width: 100
         }" />
-        <SAMButton label="SEEK" :x="0" :y="30" name="seekTarget" @click="mainStore.seekTarget()" :value="false" />
-        <SAMButton label="SLCT" :x="65" :y="30" name="selectTarget" @click="selectTarget" :value="false" />
-        <SAMButton label="UNSLCT" :x="130" :y="30" name="uselectTarget" @click="unselectTarget" :value="false" />
-        <SAMButton label="RST" :x="195" :y="30" name="resetTargets" @click="resetTargets" :value="false" />
+        <SAMButton label="SEEK" :x="0" :y="30" name="seekTarget" @click="mainStore.seekTarget" :value="false" />
+        <SAMButton label="SLCT" :x="65" :y="30" name="selectTarget" @click="mainStore.selectTarget" :value="false" />
+        <SAMButton label="UNSLCT" :x="130" :y="30" name="uselectTarget" @click="mainStore.unselectTarget" :value="false" />
+        <SAMButton label="RST" :x="195" :y="30" name="resetTargets" @click="mainStore.resetTargets" :value="false" />
     </vk-group>
 </template>
 
@@ -21,19 +21,4 @@
 import SAMButton from '../SAMButton.vue';
 import { useMainStore } from "@/store/main";
 const mainStore = useMainStore();
-function selectTarget() {
-    //const target = sam!.getRadarObjects().filter(fo => fo instanceof DetectedRadarObject)[mainStore.currentTargetIndex];
-    //target && sam?.selectTarget(target.id);
-}
-
-function unselectTarget() {
-    //const target = sam!.getRadarObjects().filter(fo => fo instanceof DetectedRadarObject)[mainStore.currentTargetIndex];
-    //target && sam?.unselectTarget(target.id);
-}
-
-function resetTargets() {
-    mainStore.resetCurrentTarget();
-    //sam?.resetTargets();
-}
-
 </script>

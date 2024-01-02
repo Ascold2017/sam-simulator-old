@@ -14,14 +14,21 @@ import AppMenu from '@/components/AppMenu.vue'
 import SAMScreen from '@/components/SAM/SAM.vue';
 import EditorScreen from '@/components/Editor/EditorScreen.vue'
 import MISSIONS from './const/MISSIONS';
+import { useMainStore } from './store/main';
+import { onMounted } from 'vue';
 
 enum ScreensEnum {
   SAM = 'SAM',
   Editor = 'Editor'
 }
 
+const mainStore = useMainStore();
 const activeScreen = ref(ScreensEnum.SAM);
 const openScreen = (screen: string) => activeScreen.value = screen as ScreensEnum;
+
+onMounted(() => {
+  mainStore.init();
+});
 </script>
 
 <style>
